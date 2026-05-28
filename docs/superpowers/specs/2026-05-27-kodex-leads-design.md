@@ -449,7 +449,7 @@ Per the claude-security skill and Vibe Coder Checklist:
 
 ## 9. Landing Page Design System
 
-Built using the design methodology proven on Neuridion — applied fresh to Kodex Leads with its own identity and voice.
+Built using a proven design methodology — applied fresh to Kodex Leads with its own identity and voice.
 
 ### 9.1 Design Methodology
 
