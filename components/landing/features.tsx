@@ -51,12 +51,17 @@ const features = [
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+const cardVariant = {
+  hidden: { opacity: 0, y: 40, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring" as const, stiffness: 80, damping: 18 },
+  },
 };
 
 export function FeaturesSection() {
@@ -65,10 +70,10 @@ export function FeaturesSection() {
       <div className="max-w-[1200px] mx-auto w-full">
         <motion.div
           className="text-center mb-16"
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ type: "spring", stiffness: 80, damping: 20 }}
         >
           <p className="text-xs font-mono uppercase tracking-widest text-teal mb-4">
             Features
@@ -92,14 +97,18 @@ export function FeaturesSection() {
           {features.map((f) => (
             <motion.div
               key={f.title}
-              variants={fadeUp}
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="p-6 rounded-xl border border-border bg-white hover:border-purple/40 hover:shadow-lg transition-shadow"
+              variants={cardVariant}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="p-6 rounded-xl border border-border bg-white hover:border-purple/40 hover:shadow-xl transition-shadow group"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple/10 mb-4">
-                <f.icon className="w-5 h-5 text-purple" />
-              </div>
+              <motion.div
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple/10 mb-4"
+                whileHover={{ rotate: -10, scale: 1.2 }}
+                transition={{ type: "spring", stiffness: 400, damping: 12 }}
+              >
+                <f.icon className="w-5 h-5 text-purple group-hover:text-[#9333EA] transition-colors" />
+              </motion.div>
               <h3 className="text-lg font-bold text-navy mb-2">{f.title}</h3>
               <p className="text-sm text-text-muted leading-relaxed">
                 {f.description}

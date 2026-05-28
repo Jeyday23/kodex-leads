@@ -36,12 +36,17 @@ const tools = [
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.15 } },
 };
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+const cardVariant = {
+  hidden: { opacity: 0, y: 40, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring" as const, stiffness: 80, damping: 18 },
+  },
 };
 
 export function ToolsSection() {
@@ -50,10 +55,10 @@ export function ToolsSection() {
       <div className="max-w-[1200px] mx-auto w-full">
         <motion.div
           className="text-center mb-16"
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ type: "spring", stiffness: 80, damping: 20 }}
         >
           <p className="text-xs font-mono uppercase tracking-widest text-teal mb-4">
             Free Tools
@@ -75,24 +80,39 @@ export function ToolsSection() {
           viewport={{ once: true, margin: "-80px" }}
         >
           {tools.map((tool) => (
-            <motion.div key={tool.href} variants={fadeUp}>
+            <motion.div
+              key={tool.href}
+              variants={cardVariant}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
               <Link
                 href={tool.href}
-                className="group flex flex-col rounded-xl border border-border p-6 hover:border-purple/40 hover:shadow-lg transition-all h-full"
+                className="group flex flex-col rounded-xl border border-border p-6 hover:border-purple/40 hover:shadow-xl transition-shadow h-full bg-white"
               >
-                <div
+                <motion.div
                   className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${tool.accent} mb-4`}
+                  whileHover={{ rotate: 8, scale: 1.15 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 12 }}
                 >
                   <tool.icon className="w-5 h-5" />
-                </div>
+                </motion.div>
                 <h3 className="text-lg font-bold text-navy mb-2">
                   {tool.title}
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed flex-1 mb-4">
                   {tool.description}
                 </p>
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-purple group-hover:gap-2.5 transition-all">
-                  {tool.cta} <ArrowRight className="w-4 h-4" />
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-purple">
+                  {tool.cta}
+                  <motion.span
+                    className="inline-block"
+                    initial={{ x: 0 }}
+                    whileHover={{ x: 4 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  >
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </motion.span>
                 </span>
               </Link>
             </motion.div>

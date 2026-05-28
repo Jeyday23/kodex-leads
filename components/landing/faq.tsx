@@ -31,21 +31,29 @@ const faqs = [
   },
 ];
 
-function FaqItem({ q, a }: { q: string; a: string }) {
+function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-border">
+    <motion.div
+      className="border-b border-border"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ type: "spring", stiffness: 80, damping: 18, delay: index * 0.06 }}
+    >
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full py-5 text-left"
+        className="flex items-center justify-between w-full py-5 text-left group"
       >
-        <span className="text-base font-medium text-navy pr-4">{q}</span>
+        <span className="text-base font-medium text-navy pr-4 group-hover:text-purple transition-colors">
+          {q}
+        </span>
         <motion.div
           animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
-          <ChevronDown className="w-5 h-5 text-text-muted flex-shrink-0" />
+          <ChevronDown className="w-5 h-5 text-text-muted group-hover:text-purple transition-colors flex-shrink-0" />
         </motion.div>
       </button>
       <AnimatePresence>
@@ -54,7 +62,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
             className="overflow-hidden"
           >
             <p className="text-sm text-text-muted leading-relaxed pb-5">
@@ -63,7 +71,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 
@@ -73,10 +81,10 @@ export function FaqSection() {
       <div className="max-w-[800px] mx-auto w-full">
         <motion.div
           className="text-center mb-12"
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ type: "spring", stiffness: 80, damping: 20 }}
         >
           <p className="text-xs font-mono uppercase tracking-widest text-teal mb-4">
             FAQ
@@ -86,16 +94,11 @@ export function FaqSection() {
           </h2>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-        >
-          {faqs.map((faq) => (
-            <FaqItem key={faq.q} q={faq.q} a={faq.a} />
+        <div>
+          {faqs.map((faq, i) => (
+            <FaqItem key={faq.q} q={faq.q} a={faq.a} index={i} />
           ))}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
