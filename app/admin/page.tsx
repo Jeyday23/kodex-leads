@@ -37,13 +37,13 @@ export default async function AdminOverview() {
       : 0;
 
   const metrics = [
-    { label: "Total Leads", value: totalLeads ?? 0, icon: Users, color: "text-[#A855F7] bg-purple-50" },
+    { label: "Total Leads", value: totalLeads ?? 0, icon: Users, color: "text-purple bg-purple-50" },
     { label: "Qualified", value: qualifiedLeads ?? 0, icon: Target, color: "text-emerald-600 bg-emerald-50" },
     {
       label: "Conversion Rate",
       value: `${conversionRate.toFixed(1)}%`,
       icon: TrendingUp,
-      color: "text-[#0D9488] bg-teal-50",
+      color: "text-teal bg-teal-50",
     },
     {
       label: "Total MRR",
@@ -57,50 +57,50 @@ export default async function AdminOverview() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-[#0F1F3D] mb-1">
+        <h1 className="text-2xl font-bold text-navy mb-1">
           Admin Overview
         </h1>
-        <p className="text-sm text-[#7a8599]">System-wide metrics and activity</p>
+        <p className="text-sm text-text-muted">System-wide metrics and activity</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {metrics.map((m) => (
           <div
             key={m.label}
-            className="border border-[#dfe3ea] rounded-xl p-4 bg-white"
+            className="border border-border rounded-xl p-4 bg-white"
           >
             <div className="flex items-center gap-2 mb-2">
               <div className={cn("p-1.5 rounded-lg", m.color)}>
                 <m.icon className="w-3.5 h-3.5" />
               </div>
-              <span className="text-xs text-[#7a8599]">{m.label}</span>
+              <span className="text-xs text-text-muted">{m.label}</span>
             </div>
-            <p className="text-xl font-bold text-[#0F1F3D]">{m.value}</p>
+            <p className="text-xl font-bold text-navy">{m.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="border border-[#dfe3ea] rounded-xl bg-white">
-        <div className="px-6 py-4 border-b border-[#dfe3ea]">
-          <h2 className="font-bold text-[#0F1F3D]">Recent Activity</h2>
+      <div className="border border-border rounded-xl bg-white">
+        <div className="px-6 py-4 border-b border-border">
+          <h2 className="font-bold text-navy">Recent Activity</h2>
         </div>
-        <div className="divide-y divide-[#dfe3ea]">
+        <div className="divide-y divide-border">
           {recentEvents && recentEvents.length > 0 ? (
             recentEvents.map((e) => (
               <div
                 key={e.id}
                 className="flex items-center justify-between px-6 py-3"
               >
-                <span className="text-sm text-[#3d4a5c] capitalize">
+                <span className="text-sm text-navy capitalize">
                   {e.event_type.replace("_", " ")}
                 </span>
-                <span className="text-xs text-[#7a8599]">
+                <span className="text-xs text-text-muted">
                   {new Date(e.created_at).toLocaleString("de-DE")}
                 </span>
               </div>
             ))
           ) : (
-            <div className="px-6 py-8 text-center text-sm text-[#7a8599]">
+            <div className="px-6 py-8 text-center text-sm text-text-muted">
               No activity yet
             </div>
           )}

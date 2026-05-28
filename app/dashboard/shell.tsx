@@ -38,12 +38,12 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex h-screen bg-[#f6f7f9]">
-      <aside className="hidden md:flex w-60 flex-col bg-white border-r border-[#dfe3ea]">
-        <div className="p-5 border-b border-[#dfe3ea]">
+    <div className="flex h-screen bg-bg-muted">
+      <aside className="hidden md:flex w-60 flex-col bg-white border-r border-border">
+        <div className="p-5 border-b border-border">
           <Link href="/dashboard" className="flex items-center gap-1.5">
-            <span className="text-base font-bold text-[#0F1F3D]">Kodex</span>
-            <span className="text-base font-bold text-[#A855F7]">Leads</span>
+            <span className="text-base font-bold text-navy">Kodex</span>
+            <span className="text-base font-bold text-purple">Leads</span>
           </Link>
         </div>
 
@@ -57,8 +57,8 @@ export function DashboardShell({
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
                   active
-                    ? "bg-[#A855F7]/10 text-[#A855F7] font-medium"
-                    : "text-[#7a8599] hover:bg-[#f6f7f9] hover:text-[#3d4a5c]"
+                    ? "bg-purple/10 text-purple font-medium"
+                    : "text-text-muted hover:bg-bg-muted hover:text-navy"
                 )}
               >
                 <item.icon className="w-4 h-4" />
@@ -77,19 +77,19 @@ export function DashboardShell({
           )}
         </nav>
 
-        <div className="p-4 border-t border-[#dfe3ea]">
+        <div className="p-4 border-t border-border">
           <div className="flex items-center justify-between">
             <div className="truncate">
-              <p className="text-sm font-medium text-[#0F1F3D] truncate">
+              <p className="text-sm font-medium text-navy truncate">
                 {partnerName}
               </p>
-              <p className="text-xs text-[#7a8599] capitalize">
+              <p className="text-xs text-text-muted capitalize">
                 {partnerRole}
               </p>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 text-[#7a8599] hover:text-red-500 transition-colors"
+              className="p-2 text-text-muted hover:text-red-500 transition-colors"
               aria-label="Sign out"
             >
               <LogOut className="w-4 h-4" />

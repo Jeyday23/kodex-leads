@@ -190,9 +190,9 @@ export function EuAiActQuiz() {
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] flex flex-col">
-      <div className="h-1 bg-[#dfe3ea]">
+      <div className="h-1 bg-border">
         <div
-          className="h-full bg-[#A855F7] transition-all duration-500"
+          className="h-full bg-purple transition-all duration-500"
           style={{ width: `${((step + 1) / 7) * 100}%` }}
         />
       </div>
@@ -261,13 +261,13 @@ export function EuAiActQuiz() {
 function StepHook({ onNext }: { onNext: () => void }) {
   return (
     <div className="text-center">
-      <p className="text-xs font-mono uppercase tracking-widest text-[#0D9488] mb-6">
+      <p className="text-xs font-mono uppercase tracking-widest text-teal mb-6">
         EU AI Act Readiness Assessment
       </p>
-      <h1 className="text-3xl lg:text-4xl font-bold text-[#0F1F3D] mb-4">
-        Are you ready for <span className="text-[#A855F7]">August 2</span>?
+      <h1 className="text-3xl lg:text-4xl font-bold text-navy mb-4">
+        Are you ready for <span className="text-purple">August 2</span>?
       </h1>
-      <p className="text-[#7a8599] mb-8 max-w-md mx-auto">
+      <p className="text-text-muted mb-8 max-w-md mx-auto">
         Answer 5 quick questions. Get an instant risk classification and find
         out what the EU AI Act means for your company.
       </p>
@@ -276,11 +276,11 @@ function StepHook({ onNext }: { onNext: () => void }) {
       </div>
       <button
         onClick={onNext}
-        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#A855F7] text-white font-medium hover:bg-[#9333EA] transition-colors"
+        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-purple text-white font-medium hover:bg-purple transition-colors"
       >
         Start Assessment <ArrowRight className="w-4 h-4" />
       </button>
-      <p className="text-xs text-[#7a8599] mt-4">Takes about 2 minutes. No signup required.</p>
+      <p className="text-xs text-text-muted mt-4">Takes about 2 minutes. No signup required.</p>
     </div>
   );
 }
@@ -307,12 +307,12 @@ function StepTeamSize({
             className={cn(
               "flex flex-col items-center gap-1 p-5 rounded-xl border-2 transition-all",
               value === ts.value
-                ? "border-[#A855F7] bg-purple-50"
-                : "border-[#dfe3ea] hover:border-[#A855F7]/40"
+                ? "border-purple bg-purple-50"
+                : "border-border hover:border-purple/40"
             )}
           >
-            <span className="text-xl font-bold text-[#0F1F3D]">{ts.label}</span>
-            <span className="text-xs text-[#7a8599]">{ts.sub}</span>
+            <span className="text-xl font-bold text-navy">{ts.label}</span>
+            <span className="text-xs text-text-muted">{ts.sub}</span>
           </button>
         ))}
       </div>
@@ -351,8 +351,8 @@ function StepAiUsage({
             className={cn(
               "flex-1 py-3 rounded-xl border-2 font-medium transition-all",
               usesAi === v
-                ? "border-[#A855F7] bg-purple-50 text-[#0F1F3D]"
-                : "border-[#dfe3ea] text-[#7a8599] hover:border-[#A855F7]/40"
+                ? "border-purple bg-purple-50 text-navy"
+                : "border-border text-text-muted hover:border-purple/40"
             )}
           >
             {v ? "Yes" : "No"}
@@ -361,7 +361,7 @@ function StepAiUsage({
       </div>
       {usesAi && (
         <div className="mb-6">
-          <p className="text-sm text-[#3d4a5c] mb-3">
+          <p className="text-sm text-navy mb-3">
             Which types? (select all that apply)
           </p>
           <div className="flex flex-wrap gap-2">
@@ -372,8 +372,8 @@ function StepAiUsage({
                 className={cn(
                   "px-4 py-2 rounded-full text-sm border transition-all",
                   aiTypes.includes(type)
-                    ? "border-[#A855F7] bg-purple-50 text-[#0F1F3D]"
-                    : "border-[#dfe3ea] text-[#7a8599] hover:border-[#A855F7]/40"
+                    ? "border-purple bg-purple-50 text-navy"
+                    : "border-border text-text-muted hover:border-purple/40"
                 )}
               >
                 {type}
@@ -412,17 +412,17 @@ function StepCompliance({
             className={cn(
               "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
               selected.includes(m)
-                ? "border-[#A855F7] bg-purple-50"
-                : "border-[#dfe3ea] hover:border-[#A855F7]/40"
+                ? "border-purple bg-purple-50"
+                : "border-border hover:border-purple/40"
             )}
           >
             <input
               type="checkbox"
               checked={selected.includes(m)}
               onChange={() => onToggle(m)}
-              className="w-4 h-4 rounded border-[#dfe3ea] text-[#A855F7] focus:ring-[#A855F7]"
+              className="w-4 h-4 rounded border-border text-purple focus:ring-purple"
             />
-            <span className="text-sm text-[#3d4a5c]">{m}</span>
+            <span className="text-sm text-navy">{m}</span>
           </label>
         ))}
       </div>
@@ -457,8 +457,8 @@ function StepFrameworks({
             className={cn(
               "p-4 rounded-xl border-2 text-center font-medium transition-all",
               selected.includes(fw.value)
-                ? "border-[#A855F7] bg-purple-50 text-[#0F1F3D]"
-                : "border-[#dfe3ea] text-[#7a8599] hover:border-[#A855F7]/40"
+                ? "border-purple bg-purple-50 text-navy"
+                : "border-border text-text-muted hover:border-purple/40"
             )}
           >
             {fw.label}
@@ -484,18 +484,18 @@ function StepPreview({
       ? "#ef4444"
       : risk.level === "limited"
       ? "#f59e0b"
-      : "#0D9488";
+      : "var(--teal)";
 
   return (
     <div>
       <StepHeader num={5} total={5} question="Your risk preview" />
-      <div className="bg-[#f6f7f9] rounded-2xl p-8 mb-8 text-center">
+      <div className="bg-bg-muted rounded-2xl p-8 mb-8 text-center">
         <div className="relative w-40 h-20 mx-auto mb-6">
           <svg viewBox="0 0 200 100" className="w-full">
             <path
               d="M 10 90 A 80 80 0 0 1 190 90"
               fill="none"
-              stroke="#dfe3ea"
+              stroke="var(--border)"
               strokeWidth="12"
               strokeLinecap="round"
             />
@@ -520,11 +520,11 @@ function StepPreview({
         >
           {risk.classification}
         </div>
-        <p className="text-sm text-[#3d4a5c] max-w-sm mx-auto">
+        <p className="text-sm text-navy max-w-sm mx-auto">
           {risk.finding}
         </p>
       </div>
-      <p className="text-xs text-[#7a8599] text-center mb-6">
+      <p className="text-xs text-text-muted text-center mb-6">
         This is a preview. Get the full report with your 66-day action plan.
       </p>
       <NavButtons onBack={onBack} onNext={onNext} nextLabel="Get Full Report" />
@@ -554,20 +554,20 @@ function StepGate({
       ? "#ef4444"
       : risk.level === "limited"
       ? "#f59e0b"
-      : "#0D9488";
+      : "var(--teal)";
 
   return (
     <div>
-      <p className="text-xs font-mono uppercase tracking-widest text-[#0D9488] mb-2">
+      <p className="text-xs font-mono uppercase tracking-widest text-teal mb-2">
         Your full report is ready
       </p>
-      <h2 className="text-2xl font-bold text-[#0F1F3D] mb-6">
+      <h2 className="text-2xl font-bold text-navy mb-6">
         Enter your details to unlock it
       </h2>
 
       <div className="relative mb-8">
         <div className="absolute inset-0 backdrop-blur-sm bg-white/60 z-10 rounded-2xl" />
-        <div className="bg-[#f6f7f9] rounded-2xl p-6 space-y-3 text-sm text-[#7a8599]">
+        <div className="bg-bg-muted rounded-2xl p-6 space-y-3 text-sm text-text-muted">
           <div className="flex items-center gap-2">
             <div
               className="w-3 h-3 rounded-full"
@@ -575,14 +575,14 @@ function StepGate({
             />
             <span>Risk Classification: {risk.classification}</span>
           </div>
-          <div className="h-3 bg-[#dfe3ea] rounded w-4/5" />
-          <div className="h-3 bg-[#dfe3ea] rounded w-3/5" />
-          <div className="h-3 bg-[#dfe3ea] rounded w-full" />
-          <div className="h-3 bg-[#dfe3ea] rounded w-2/3" />
-          <p className="font-medium text-[#3d4a5c]">66-Day Action Plan</p>
-          <div className="h-3 bg-[#dfe3ea] rounded w-full" />
-          <div className="h-3 bg-[#dfe3ea] rounded w-4/5" />
-          <div className="h-3 bg-[#dfe3ea] rounded w-3/4" />
+          <div className="h-3 bg-border rounded w-4/5" />
+          <div className="h-3 bg-border rounded w-3/5" />
+          <div className="h-3 bg-border rounded w-full" />
+          <div className="h-3 bg-border rounded w-2/3" />
+          <p className="font-medium text-navy">66-Day Action Plan</p>
+          <div className="h-3 bg-border rounded w-full" />
+          <div className="h-3 bg-border rounded w-4/5" />
+          <div className="h-3 bg-border rounded w-3/4" />
         </div>
       </div>
 
@@ -610,7 +610,7 @@ function StepGate({
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 px-5 py-3 rounded-full border border-[#dfe3ea] text-sm text-[#7a8599] hover:bg-[#f6f7f9] transition-colors"
+            className="flex items-center gap-1.5 px-5 py-3 rounded-full border border-border text-sm text-text-muted hover:bg-bg-muted transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
@@ -620,7 +620,7 @@ function StepGate({
             className={cn(
               "flex-1 inline-flex items-center justify-center gap-2",
               "px-6 py-3 rounded-full text-white font-medium text-sm",
-              "bg-[#A855F7] hover:bg-[#9333EA] transition-colors",
+              "bg-purple hover:bg-purple transition-colors",
               "disabled:opacity-60 disabled:cursor-not-allowed"
             )}
           >
@@ -634,7 +634,7 @@ function StepGate({
           </button>
         </div>
 
-        <p className="text-xs text-[#7a8599] text-center">
+        <p className="text-xs text-text-muted text-center">
           Your data is processed by Kodex Compliance to deliver your report
           and may be used to contact you. See our{" "}
           <a href="/privacy" className="underline">privacy policy</a>.
@@ -656,7 +656,7 @@ function ResultsScreen({
       ? "#ef4444"
       : risk.level === "limited"
       ? "#f59e0b"
-      : "#0D9488";
+      : "var(--teal)";
 
   const actions =
     risk.level === "high"
@@ -686,27 +686,27 @@ function ResultsScreen({
     <div className="min-h-[calc(100vh-3.5rem)] py-12 px-6">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
-          <CheckCircle className="w-5 h-5 text-[#0D9488]" />
-          <p className="text-sm text-[#0D9488] font-medium">
+          <CheckCircle className="w-5 h-5 text-teal" />
+          <p className="text-sm text-teal font-medium">
             Report sent to {data.email}
           </p>
         </div>
 
-        <h1 className="text-3xl font-bold text-[#0F1F3D] mb-2">
+        <h1 className="text-3xl font-bold text-navy mb-2">
           Your EU AI Act Readiness Report
         </h1>
-        <p className="text-[#7a8599] mb-8">
+        <p className="text-text-muted mb-8">
           Based on your assessment for {data.company}
         </p>
 
-        <div className="bg-[#f6f7f9] rounded-2xl p-8 mb-8">
+        <div className="bg-bg-muted rounded-2xl p-8 mb-8">
           <div className="flex items-center gap-6">
             <div className="relative w-24 h-12 shrink-0">
               <svg viewBox="0 0 200 100" className="w-full">
                 <path
                   d="M 10 90 A 80 80 0 0 1 190 90"
                   fill="none"
-                  stroke="#dfe3ea"
+                  stroke="var(--border)"
                   strokeWidth="14"
                   strokeLinecap="round"
                 />
@@ -727,36 +727,36 @@ function ResultsScreen({
               >
                 {risk.classification}
               </div>
-              <p className="text-sm text-[#7a8599]">Risk score: {risk.riskScore}/100</p>
+              <p className="text-sm text-text-muted">Risk score: {risk.riskScore}/100</p>
             </div>
           </div>
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-[#0F1F3D] mb-1">Key Finding</h2>
-          <p className="text-[#3d4a5c]">{risk.finding}</p>
+          <h2 className="text-xl font-bold text-navy mb-1">Key Finding</h2>
+          <p className="text-navy">{risk.finding}</p>
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-[#0F1F3D] mb-4">
+          <h2 className="text-xl font-bold text-navy mb-4">
             66-Day Action Plan
           </h2>
           <div className="space-y-3">
             {actions.map((a) => (
               <div
                 key={a.week}
-                className="flex gap-4 p-4 rounded-xl border border-[#dfe3ea]"
+                className="flex gap-4 p-4 rounded-xl border border-border"
               >
-                <span className="text-sm font-mono font-bold text-[#0D9488] shrink-0 w-20">
+                <span className="text-sm font-mono font-bold text-teal shrink-0 w-20">
                   {a.week}
                 </span>
-                <span className="text-sm text-[#3d4a5c]">{a.task}</span>
+                <span className="text-sm text-navy">{a.task}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-[#0F1F3D] rounded-2xl p-8 text-center">
+        <div className="bg-navy rounded-2xl p-8 text-center">
           <h3 className="text-xl font-bold text-white mb-2">
             Need help executing this plan?
           </h3>
@@ -765,7 +765,7 @@ function ResultsScreen({
           </p>
           <a
             href="https://kodex-compliance.com"
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-[#A855F7] text-white font-medium hover:bg-[#9333EA] transition-colors"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-purple text-white font-medium hover:bg-purple transition-colors"
           >
             Talk to Kodex <ArrowRight className="w-4 h-4" />
           </a>
@@ -786,10 +786,10 @@ function StepHeader({
 }) {
   return (
     <div className="mb-6">
-      <p className="text-xs font-mono text-[#7a8599] mb-2">
+      <p className="text-xs font-mono text-text-muted mb-2">
         {num} of {total}
       </p>
-      <h2 className="text-2xl font-bold text-[#0F1F3D]">{question}</h2>
+      <h2 className="text-2xl font-bold text-navy">{question}</h2>
     </div>
   );
 }
@@ -809,7 +809,7 @@ function NavButtons({
     <div className="flex gap-3">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 px-5 py-3 rounded-full border border-[#dfe3ea] text-sm text-[#7a8599] hover:bg-[#f6f7f9] transition-colors"
+        className="flex items-center gap-1.5 px-5 py-3 rounded-full border border-border text-sm text-text-muted hover:bg-bg-muted transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
@@ -819,7 +819,7 @@ function NavButtons({
         className={cn(
           "flex-1 inline-flex items-center justify-center gap-2",
           "px-6 py-3 rounded-full text-white font-medium text-sm",
-          "bg-[#A855F7] hover:bg-[#9333EA] transition-colors",
+          "bg-purple hover:bg-purple transition-colors",
           "disabled:opacity-40 disabled:cursor-not-allowed"
         )}
       >
@@ -842,7 +842,7 @@ function GateField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[#3d4a5c] mb-1.5">
+      <label className="block text-sm font-medium text-navy mb-1.5">
         {label}
       </label>
       <input
@@ -851,8 +851,8 @@ function GateField({
         onChange={(e) => onChange(e.target.value)}
         className={cn(
           "w-full px-3 py-2.5 rounded-lg border text-sm",
-          "border-[#dfe3ea] bg-white text-[#3d4a5c]",
-          "focus:outline-none focus:ring-2 focus:ring-[#A855F7]/30 focus:border-[#A855F7]"
+          "border-border bg-white text-navy",
+          "focus:outline-none focus:ring-2 focus:ring-purple/30 focus:border-purple"
         )}
       />
     </div>

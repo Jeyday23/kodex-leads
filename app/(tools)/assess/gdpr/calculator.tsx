@@ -240,9 +240,9 @@ export function GdprCalculator() {
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)]">
-      <section className="bg-[#0F1F3D] text-white py-16">
+      <section className="bg-navy text-white py-16">
         <div className="max-w-[1080px] mx-auto px-6 lg:px-10 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-500/20 text-[#0D9488] mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-500/20 text-teal mb-4">
             <Scale className="w-6 h-6" />
           </div>
           <h1 className="text-3xl lg:text-4xl font-bold mb-3 text-white">
@@ -258,7 +258,7 @@ export function GdprCalculator() {
       <section className="max-w-3xl mx-auto px-6 py-12">
         <div className="space-y-8">
           <div>
-            <label className="block text-sm font-medium text-[#3d4a5c] mb-3">
+            <label className="block text-sm font-medium text-navy mb-3">
               Annual revenue (approximate)
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -269,8 +269,8 @@ export function GdprCalculator() {
                   className={cn(
                     "p-3 rounded-xl border-2 text-sm font-medium transition-all",
                     inputs.revenue_range === r.value
-                      ? "border-[#A855F7] bg-purple-50 text-[#0F1F3D]"
-                      : "border-[#dfe3ea] text-[#7a8599] hover:border-[#A855F7]/40"
+                      ? "border-purple bg-purple-50 text-navy"
+                      : "border-border text-text-muted hover:border-purple/40"
                   )}
                 >
                   {r.label}
@@ -280,7 +280,7 @@ export function GdprCalculator() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#3d4a5c] mb-3">
+            <label className="block text-sm font-medium text-navy mb-3">
               Number of data subjects
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -291,8 +291,8 @@ export function GdprCalculator() {
                   className={cn(
                     "p-3 rounded-xl border-2 text-sm font-medium transition-all",
                     inputs.data_subjects === o.value
-                      ? "border-[#A855F7] bg-purple-50 text-[#0F1F3D]"
-                      : "border-[#dfe3ea] text-[#7a8599] hover:border-[#A855F7]/40"
+                      ? "border-purple bg-purple-50 text-navy"
+                      : "border-border text-text-muted hover:border-purple/40"
                   )}
                 >
                   {o.label}
@@ -302,7 +302,7 @@ export function GdprCalculator() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#3d4a5c] mb-3">
+            <label className="block text-sm font-medium text-navy mb-3">
               Data categories processed (select all that apply)
             </label>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -312,46 +312,46 @@ export function GdprCalculator() {
                   className={cn(
                     "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
                     inputs.data_categories.includes(cat)
-                      ? "border-[#A855F7] bg-purple-50"
-                      : "border-[#dfe3ea] hover:border-[#A855F7]/40"
+                      ? "border-purple bg-purple-50"
+                      : "border-border hover:border-purple/40"
                   )}
                 >
                   <input
                     type="checkbox"
                     checked={inputs.data_categories.includes(cat)}
                     onChange={() => toggleCategory(cat)}
-                    className="w-4 h-4 rounded border-[#dfe3ea] text-[#A855F7] focus:ring-[#A855F7]"
+                    className="w-4 h-4 rounded border-border text-purple focus:ring-purple"
                   />
-                  <span className="text-sm text-[#3d4a5c]">{cat}</span>
+                  <span className="text-sm text-navy">{cat}</span>
                 </label>
               ))}
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <label className="flex items-center gap-3 flex-1 p-4 rounded-xl border-2 border-[#dfe3ea] cursor-pointer hover:border-[#A855F7]/40 transition-all">
+            <label className="flex items-center gap-3 flex-1 p-4 rounded-xl border-2 border-border cursor-pointer hover:border-purple/40 transition-all">
               <input
                 type="checkbox"
                 checked={inputs.cross_border}
                 onChange={(e) =>
                   setInputs({ ...inputs, cross_border: e.target.checked })
                 }
-                className="w-4 h-4 rounded border-[#dfe3ea] text-[#A855F7] focus:ring-[#A855F7]"
+                className="w-4 h-4 rounded border-border text-purple focus:ring-purple"
               />
-              <span className="text-sm text-[#3d4a5c]">
+              <span className="text-sm text-navy">
                 Cross-border data transfers
               </span>
             </label>
-            <label className="flex items-center gap-3 flex-1 p-4 rounded-xl border-2 border-[#dfe3ea] cursor-pointer hover:border-[#A855F7]/40 transition-all">
+            <label className="flex items-center gap-3 flex-1 p-4 rounded-xl border-2 border-border cursor-pointer hover:border-purple/40 transition-all">
               <input
                 type="checkbox"
                 checked={inputs.has_dpo}
                 onChange={(e) =>
                   setInputs({ ...inputs, has_dpo: e.target.checked })
                 }
-                className="w-4 h-4 rounded border-[#dfe3ea] text-[#A855F7] focus:ring-[#A855F7]"
+                className="w-4 h-4 rounded border-border text-purple focus:ring-purple"
               />
-              <span className="text-sm text-[#3d4a5c]">
+              <span className="text-sm text-navy">
                 Data Protection Officer appointed
               </span>
             </label>
@@ -364,7 +364,7 @@ export function GdprCalculator() {
               className={cn(
                 "w-full inline-flex items-center justify-center gap-2",
                 "px-6 py-3.5 rounded-full text-white font-medium",
-                "bg-[#A855F7] hover:bg-[#9333EA] transition-colors",
+                "bg-purple hover:bg-purple transition-colors",
                 "disabled:opacity-40 disabled:cursor-not-allowed"
               )}
             >
@@ -374,12 +374,12 @@ export function GdprCalculator() {
 
           {showResult && (
             <>
-              <div className="bg-[#f6f7f9] rounded-2xl p-8">
+              <div className="bg-bg-muted rounded-2xl p-8">
                 <div className="text-center mb-6">
-                  <p className="text-xs font-mono uppercase tracking-widest text-[#7a8599] mb-2">
+                  <p className="text-xs font-mono uppercase tracking-widest text-text-muted mb-2">
                     Estimated fine exposure
                   </p>
-                  <div className="text-3xl lg:text-4xl font-bold text-[#0F1F3D]">
+                  <div className="text-3xl lg:text-4xl font-bold text-navy">
                     {formatEuro(result.lowerFine)} –{" "}
                     {formatEuro(result.upperFine)}
                   </div>
@@ -402,28 +402,28 @@ export function GdprCalculator() {
                   {result.factors.map((f) => (
                     <div key={f} className="flex items-start gap-2">
                       <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                      <span className="text-sm text-[#3d4a5c]">{f}</span>
+                      <span className="text-sm text-navy">{f}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-[#0F1F3D] mb-4">
+                <h3 className="text-lg font-bold text-navy mb-4">
                   Comparable Enforcement Cases
                 </h3>
                 <div className="space-y-3">
                   {cases.map((c) => (
                     <div
                       key={c.company}
-                      className="flex items-center gap-4 p-4 rounded-xl border border-[#dfe3ea]"
+                      className="flex items-center gap-4 p-4 rounded-xl border border-border"
                     >
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-[#0F1F3D]">
+                        <p className="text-sm font-medium text-navy">
                           {c.company}{" "}
-                          <span className="text-[#7a8599]">({c.year})</span>
+                          <span className="text-text-muted">({c.year})</span>
                         </p>
-                        <p className="text-xs text-[#7a8599]">{c.reason}</p>
+                        <p className="text-xs text-text-muted">{c.reason}</p>
                       </div>
                       <span className="text-lg font-bold text-red-600 shrink-0">
                         {c.fine}
@@ -434,11 +434,11 @@ export function GdprCalculator() {
               </div>
 
               {!submitted ? (
-                <div className="bg-white rounded-2xl border-2 border-[#A855F7]/20 p-8">
-                  <h3 className="text-lg font-bold text-[#0F1F3D] mb-1">
+                <div className="bg-white rounded-2xl border-2 border-purple/20 p-8">
+                  <h3 className="text-lg font-bold text-navy mb-1">
                     Get your full risk breakdown
                   </h3>
-                  <p className="text-sm text-[#7a8599] mb-6">
+                  <p className="text-sm text-text-muted mb-6">
                     Detailed action plan, article-by-article obligations, and
                     mitigation strategies — delivered to your inbox.
                   </p>
@@ -468,7 +468,7 @@ export function GdprCalculator() {
                       className={cn(
                         "w-full inline-flex items-center justify-center gap-2",
                         "px-6 py-3 rounded-full text-white font-medium text-sm",
-                        "bg-[#A855F7] hover:bg-[#9333EA] transition-colors",
+                        "bg-purple hover:bg-purple transition-colors",
                         "disabled:opacity-60 disabled:cursor-not-allowed"
                       )}
                     >
@@ -480,7 +480,7 @@ export function GdprCalculator() {
                         </>
                       )}
                     </button>
-                    <p className="text-xs text-[#7a8599] text-center">
+                    <p className="text-xs text-text-muted text-center">
                       Your data is processed by Kodex Compliance to deliver
                       your report and may be used to contact you. See our{" "}
                       <a href="/privacy" className="underline">privacy policy</a>.
@@ -488,12 +488,12 @@ export function GdprCalculator() {
                   </form>
                 </div>
               ) : (
-                <div className="bg-[#0D9488]/10 rounded-2xl p-8 text-center">
-                  <CheckCircle className="w-10 h-10 text-[#0D9488] mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-[#0F1F3D] mb-1">
+                <div className="bg-teal/10 rounded-2xl p-8 text-center">
+                  <CheckCircle className="w-10 h-10 text-teal mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-navy mb-1">
                     Full report sent!
                   </h3>
-                  <p className="text-sm text-[#7a8599]">
+                  <p className="text-sm text-text-muted">
                     Check {gateData.email} for your detailed GDPR risk
                     breakdown.
                   </p>
@@ -520,7 +520,7 @@ function GateField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[#3d4a5c] mb-1.5">
+      <label className="block text-sm font-medium text-navy mb-1.5">
         {label}
       </label>
       <input
@@ -529,8 +529,8 @@ function GateField({
         onChange={(e) => onChange(e.target.value)}
         className={cn(
           "w-full px-3 py-2.5 rounded-lg border text-sm",
-          "border-[#dfe3ea] bg-white text-[#3d4a5c]",
-          "focus:outline-none focus:ring-2 focus:ring-[#A855F7]/30 focus:border-[#A855F7]"
+          "border-border bg-white text-navy",
+          "focus:outline-none focus:ring-2 focus:ring-purple/30 focus:border-purple"
         )}
       />
     </div>

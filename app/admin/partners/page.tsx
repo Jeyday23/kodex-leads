@@ -13,33 +13,33 @@ export default async function PartnersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F1F3D] mb-1">Partners</h1>
-          <p className="text-sm text-[#7a8599]">Manage your sales partners</p>
+          <h1 className="text-2xl font-bold text-navy mb-1">Partners</h1>
+          <p className="text-sm text-text-muted">Manage your sales partners</p>
         </div>
       </div>
 
       <AddPartnerForm />
 
-      <div className="border border-[#dfe3ea] rounded-xl overflow-hidden bg-white">
+      <div className="border border-border rounded-xl overflow-hidden bg-white">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#f6f7f9] border-b border-[#dfe3ea]">
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+            <tr className="bg-bg-muted border-b border-border">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Name
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Email
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Code
               </th>
-              <th className="text-center px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-center px-4 py-3 font-medium text-text-muted">
                 Rate
               </th>
-              <th className="text-center px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-center px-4 py-3 font-medium text-text-muted">
                 Status
               </th>
-              <th className="text-center px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-center px-4 py-3 font-medium text-text-muted">
                 Role
               </th>
             </tr>
@@ -49,18 +49,18 @@ export default async function PartnersPage() {
               partners.map((p) => (
                 <tr
                   key={p.id}
-                  className="border-b border-[#dfe3ea] last:border-0"
+                  className="border-b border-border last:border-0"
                 >
-                  <td className="px-4 py-3 font-medium text-[#0F1F3D]">
+                  <td className="px-4 py-3 font-medium text-navy">
                     {p.name}
                   </td>
-                  <td className="px-4 py-3 text-[#7a8599]">{p.email}</td>
+                  <td className="px-4 py-3 text-text-muted">{p.email}</td>
                   <td className="px-4 py-3">
-                    <code className="text-xs bg-[#f6f7f9] px-2 py-0.5 rounded font-mono">
+                    <code className="text-xs bg-bg-muted px-2 py-0.5 rounded font-mono">
                       {p.code}
                     </code>
                   </td>
-                  <td className="px-4 py-3 text-center text-[#3d4a5c]">
+                  <td className="px-4 py-3 text-center text-navy">
                     {(Number(p.commission_rate) * 100).toFixed(0)}%
                   </td>
                   <td className="px-4 py-3 text-center">
@@ -77,7 +77,7 @@ export default async function PartnersPage() {
                   <td className="px-4 py-3 text-center">
                     <span
                       className={`text-xs capitalize ${
-                        p.role === "admin" ? "text-red-500 font-medium" : "text-[#7a8599]"
+                        p.role === "admin" ? "text-red-500 font-medium" : "text-text-muted"
                       }`}
                     >
                       {p.role}
@@ -89,7 +89,7 @@ export default async function PartnersPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center text-[#7a8599]"
+                  className="px-4 py-8 text-center text-text-muted"
                 >
                   No partners yet. Add your first partner above.
                 </td>

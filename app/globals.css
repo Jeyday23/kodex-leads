@@ -1,25 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --navy: #0a0a0a;
-  --purple: #2563EB;
+  --navy: #171717;
+  --purple: #8B5E6F;
+  --purple-hover: #7A4F5E;
   --teal: #059669;
   --ivory: #ffffff;
   --text: #0a0a0a;
   --text-muted: #737373;
   --border: #e5e5e5;
   --bg-muted: #f5f5f5;
-  --violet: #7C3AED;
+  --destructive: #c74050;
+  --destructive-bg: #fef2f2;
 }
 
 @theme inline {
   --color-navy: var(--navy);
   --color-purple: var(--purple);
+  --color-purple-hover: var(--purple-hover);
   --color-teal: var(--teal);
   --color-ivory: var(--ivory);
   --color-border: var(--border);
   --color-bg-muted: var(--bg-muted);
-  --color-violet: var(--violet);
+  --color-destructive: var(--destructive);
+  --color-destructive-bg: var(--destructive-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

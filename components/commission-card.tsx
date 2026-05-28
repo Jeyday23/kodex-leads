@@ -37,13 +37,13 @@ export function CommissionCard({
       label: "Conversions",
       value: String(conversionCount),
       icon: Users,
-      color: "text-[#A855F7] bg-purple-50",
+      color: "text-purple bg-purple-50",
     },
     {
       label: "Close Rate",
       value: `${conversionRate.toFixed(1)}%`,
       icon: TrendingUp,
-      color: "text-[#0D9488] bg-teal-50",
+      color: "text-teal bg-teal-50",
     },
   ];
 
@@ -52,17 +52,17 @@ export function CommissionCard({
       {stats.map((s) => (
         <div
           key={s.label}
-          className="border border-[#dfe3ea] rounded-xl p-4 bg-white"
+          className="border border-border rounded-xl p-4 bg-white"
         >
           <div className="flex items-center gap-3 mb-2">
             <div className={cn("p-2 rounded-lg", s.color)}>
               <s.icon className="w-4 h-4" />
             </div>
-            <span className="text-xs text-[#7a8599] uppercase tracking-wide">
+            <span className="text-xs text-text-muted uppercase tracking-wide">
               {s.label}
             </span>
           </div>
-          <p className="text-xl font-bold text-[#0F1F3D]">{s.value}</p>
+          <p className="text-xl font-bold text-navy">{s.value}</p>
         </div>
       ))}
     </div>

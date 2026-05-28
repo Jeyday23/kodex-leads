@@ -54,33 +54,33 @@ export function PipelineView({ leads }: { leads: PipelineLead[] }) {
                 stage.color
               )}
             >
-              <span className="text-xs font-bold text-[#0F1F3D] uppercase tracking-wider">
+              <span className="text-xs font-bold text-navy uppercase tracking-wider">
                 {stage.label}
               </span>
-              <span className="text-xs font-mono text-[#7a8599] bg-[#f6f7f9] px-2 py-0.5 rounded-full">
+              <span className="text-xs font-mono text-text-muted bg-bg-muted px-2 py-0.5 rounded-full">
                 {stageLeads.length}
               </span>
             </div>
 
-            <div className="flex-1 bg-[#f6f7f9] rounded-b-xl p-2 space-y-2 overflow-y-auto">
+            <div className="flex-1 bg-bg-muted rounded-b-xl p-2 space-y-2 overflow-y-auto">
               {stageLeads.map((lead) => (
                 <div
                   key={lead.id}
-                  className="bg-white rounded-lg p-3 border border-[#dfe3ea] shadow-sm"
+                  className="bg-white rounded-lg p-3 border border-border shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-sm font-medium text-[#0F1F3D] truncate">
+                    <p className="text-sm font-medium text-navy truncate">
                       {lead.company}
                     </p>
                     <ScoreBadge score={lead.score} />
                   </div>
                   {lead.primary_contact && (
-                    <p className="text-xs text-[#7a8599] truncate mb-2">
+                    <p className="text-xs text-text-muted truncate mb-2">
                       {lead.primary_contact.name} · {lead.primary_contact.title}
                     </p>
                   )}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#7a8599]">
+                    <span className="text-xs text-text-muted">
                       {lead.days_in_stage}d
                     </span>
                     <div className="flex gap-1">
@@ -91,7 +91,7 @@ export function PipelineView({ leads }: { leads: PipelineLead[] }) {
                             <button
                               key={s.key}
                               onClick={() => moveToStage(lead.id, s.key)}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-[#f6f7f9] text-[#7a8599] hover:bg-[#A855F7]/10 hover:text-[#A855F7] transition-colors"
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-bg-muted text-text-muted hover:bg-purple/10 hover:text-purple transition-colors"
                               title={`Move to ${s.label}`}
                             >
                               → {s.label.split(" ")[0]}
@@ -103,7 +103,7 @@ export function PipelineView({ leads }: { leads: PipelineLead[] }) {
                 </div>
               ))}
               {stageLeads.length === 0 && (
-                <div className="text-center py-8 text-xs text-[#7a8599]">
+                <div className="text-center py-8 text-xs text-text-muted">
                   Empty
                 </div>
               )}

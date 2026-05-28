@@ -52,10 +52,10 @@ export function ProspectingFeed({ prospects, stats }: FeedProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#0F1F3D] mb-1">
+        <h1 className="text-2xl font-bold text-navy mb-1">
           Today&apos;s Prospects
         </h1>
-        <p className="text-sm text-[#7a8599]">
+        <p className="text-sm text-text-muted">
           Your top prospects sorted by score. Reach out to the right person.
         </p>
       </div>
@@ -65,22 +65,22 @@ export function ProspectingFeed({ prospects, stats }: FeedProps) {
           icon={Target}
           label="Prospects"
           value={stats.totalProspects}
-          color="text-[#A855F7]"
-          bgColor="bg-[#A855F7]/10"
+          color="text-purple"
+          bgColor="bg-purple/10"
         />
         <StatCard
           icon={Users}
           label="With Contacts"
           value={stats.withContacts}
-          color="text-[#0D9488]"
-          bgColor="bg-[#0D9488]/10"
+          color="text-teal"
+          bgColor="bg-teal/10"
         />
         <StatCard
           icon={Mail}
           label="Emailed"
           value={stats.emailed}
-          color="text-[#0F1F3D]"
-          bgColor="bg-[#0F1F3D]/10"
+          color="text-navy"
+          bgColor="bg-navy/10"
         />
       </div>
 
@@ -96,12 +96,12 @@ export function ProspectingFeed({ prospects, stats }: FeedProps) {
           ))}
         </div>
       ) : (
-        <div className="border border-[#dfe3ea] rounded-xl bg-white p-12 text-center">
-          <Target className="w-10 h-10 text-[#7a8599] mx-auto mb-3" />
-          <h3 className="font-bold text-[#0F1F3D] mb-1">
+        <div className="border border-border rounded-xl bg-white p-12 text-center">
+          <Target className="w-10 h-10 text-text-muted mx-auto mb-3" />
+          <h3 className="font-bold text-navy mb-1">
             No prospects waiting
           </h3>
-          <p className="text-sm text-[#7a8599]">
+          <p className="text-sm text-text-muted">
             New prospects appear here as scrapers find companies and enrichment
             identifies decision makers.
           </p>
@@ -136,7 +136,7 @@ function StatCard({
   bgColor: string;
 }) {
   return (
-    <div className="border border-[#dfe3ea] rounded-xl bg-white p-4">
+    <div className="border border-border rounded-xl bg-white p-4">
       <div className="flex items-center gap-3">
         <div
           className={`w-9 h-9 rounded-lg ${bgColor} flex items-center justify-center`}
@@ -144,8 +144,8 @@ function StatCard({
           <Icon className={`w-4 h-4 ${color}`} />
         </div>
         <div>
-          <p className="text-2xl font-bold text-[#0F1F3D]">{value}</p>
-          <p className="text-xs text-[#7a8599]">{label}</p>
+          <p className="text-2xl font-bold text-navy">{value}</p>
+          <p className="text-xs text-text-muted">{label}</p>
         </div>
       </div>
     </div>

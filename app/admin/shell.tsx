@@ -30,16 +30,16 @@ export function AdminShell({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen bg-[#f6f7f9]">
-      <aside className="hidden md:flex w-60 flex-col bg-white border-r border-[#dfe3ea]">
-        <div className="p-5 border-b border-[#dfe3ea]">
+    <div className="flex h-screen bg-bg-muted">
+      <aside className="hidden md:flex w-60 flex-col bg-white border-r border-border">
+        <div className="p-5 border-b border-border">
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-red-500" />
-            <span className="text-base font-bold text-[#0F1F3D]">
+            <span className="text-base font-bold text-navy">
               Admin Panel
             </span>
           </div>
-          <p className="text-xs text-[#7a8599] mt-1">{adminName}</p>
+          <p className="text-xs text-text-muted mt-1">{adminName}</p>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
@@ -56,7 +56,7 @@ export function AdminShell({
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
                   active
                     ? "bg-red-50 text-red-600 font-medium"
-                    : "text-[#7a8599] hover:bg-[#f6f7f9] hover:text-[#3d4a5c]"
+                    : "text-text-muted hover:bg-bg-muted hover:text-navy"
                 )}
               >
                 <item.icon className="w-4 h-4" />
@@ -66,10 +66,10 @@ export function AdminShell({
           })}
         </nav>
 
-        <div className="p-4 border-t border-[#dfe3ea]">
+        <div className="p-4 border-t border-border">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-sm text-[#7a8599] hover:text-[#3d4a5c] transition-colors"
+            className="flex items-center gap-2 text-sm text-text-muted hover:text-navy transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard

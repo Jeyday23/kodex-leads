@@ -103,11 +103,11 @@ export function ProspectCard({
   }
 
   return (
-    <div className="border border-[#dfe3ea] rounded-xl bg-white hover:border-[#A855F7]/30 transition-colors">
+    <div className="border border-border rounded-xl bg-white hover:border-purple/30 transition-colors">
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <h3 className="font-bold text-[#0F1F3D] text-lg">
+            <h3 className="font-bold text-navy text-lg">
               {prospect.company}
             </h3>
             <ScoreBadge score={prospect.score} />
@@ -115,7 +115,7 @@ export function ProspectCard({
           {prospect.contacts.length > 1 && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-[#7a8599] hover:text-[#3d4a5c] p-1"
+              className="text-text-muted hover:text-navy p-1"
             >
               {expanded ? (
                 <ChevronUp className="w-4 h-4" />
@@ -150,7 +150,7 @@ export function ProspectCard({
             onEmail={() => onOpenTemplate(prospect, primaryContact)}
           />
         ) : (
-          <div className="flex items-center gap-2 text-sm text-[#7a8599] py-2">
+          <div className="flex items-center gap-2 text-sm text-text-muted py-2">
             <User className="w-4 h-4" />
             No contacts enriched yet
           </div>
@@ -158,7 +158,7 @@ export function ProspectCard({
 
         {expanded &&
           otherContacts.map((c) => (
-            <div key={c.id} className="mt-3 pt-3 border-t border-[#dfe3ea]">
+            <div key={c.id} className="mt-3 pt-3 border-t border-border">
               <ContactRow
                 contact={c}
                 copied={copied}
@@ -171,7 +171,7 @@ export function ProspectCard({
         {!expanded && otherContacts.length > 0 && (
           <button
             onClick={() => setExpanded(true)}
-            className="mt-2 text-xs text-[#A855F7] hover:underline"
+            className="mt-2 text-xs text-purple hover:underline"
           >
             +{otherContacts.length} more contact
             {otherContacts.length > 1 ? "s" : ""}
@@ -179,14 +179,14 @@ export function ProspectCard({
         )}
       </div>
 
-      <div className="border-t border-[#dfe3ea] px-5 py-3 flex items-center gap-2">
+      <div className="border-t border-border px-5 py-3 flex items-center gap-2">
         <button
           onClick={() => onOutreachUpdate(prospect.id, "emailed")}
           className={cn(
             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
             prospect.outreach_status === "emailed"
               ? "bg-purple-100 text-purple-700"
-              : "bg-[#f6f7f9] text-[#3d4a5c] hover:bg-purple-50"
+              : "bg-bg-muted text-navy hover:bg-purple-50"
           )}
         >
           <Mail className="w-3.5 h-3.5" /> Mark Emailed
@@ -197,14 +197,14 @@ export function ProspectCard({
             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
             prospect.outreach_status === "meeting_booked"
               ? "bg-amber-100 text-amber-700"
-              : "bg-[#f6f7f9] text-[#3d4a5c] hover:bg-amber-50"
+              : "bg-bg-muted text-navy hover:bg-amber-50"
           )}
         >
           <Calendar className="w-3.5 h-3.5" /> Book Meeting
         </button>
         <button
           onClick={() => onOutreachUpdate(prospect.id, "not_interested")}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#f6f7f9] text-[#7a8599] hover:bg-gray-100 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-muted text-text-muted hover:bg-gray-100 transition-colors"
         >
           <SkipForward className="w-3.5 h-3.5" /> Skip
         </button>
@@ -227,10 +227,10 @@ function ContactRow({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-[#0F1F3D] truncate">
+        <p className="text-sm font-medium text-navy truncate">
           {contact.name}
         </p>
-        <p className="text-xs text-[#7a8599] truncate">{contact.title}</p>
+        <p className="text-xs text-text-muted truncate">{contact.title}</p>
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0">
@@ -238,7 +238,7 @@ function ContactRow({
           <>
             <button
               onClick={() => onCopy(contact.email!, `email-${contact.id}`)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-[#f6f7f9] text-[#3d4a5c] hover:bg-purple-50 hover:text-[#A855F7] transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-bg-muted text-navy hover:bg-purple-50 hover:text-purple transition-colors"
               title={contact.email}
             >
               {copied === `email-${contact.id}` ? (
@@ -250,7 +250,7 @@ function ContactRow({
             </button>
             <button
               onClick={onEmail}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-[#A855F7]/10 text-[#A855F7] hover:bg-[#A855F7]/20 transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-purple/10 text-purple hover:bg-purple/20 transition-colors"
             >
               <Mail className="w-3.5 h-3.5" />
               Template
@@ -271,7 +271,7 @@ function ContactRow({
         {contact.phone && (
           <button
             onClick={() => onCopy(contact.phone!, `phone-${contact.id}`)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-[#f6f7f9] text-[#3d4a5c] hover:bg-emerald-50 transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-bg-muted text-navy hover:bg-emerald-50 transition-colors"
             title={contact.phone}
           >
             {copied === `phone-${contact.id}` ? (

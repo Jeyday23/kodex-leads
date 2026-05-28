@@ -36,7 +36,7 @@ export function Nav() {
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-purple text-white text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-purple text-white text-sm font-medium hover:bg-purple-hover transition-colors"
             >
               Partner Login <ArrowRight className="w-4 h-4" />
             </Link>
@@ -93,7 +93,7 @@ function MobileNav({ onClose }: { onClose: () => void }) {
           <Link
             href="/login"
             onClick={onClose}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 mt-4 w-full rounded-full bg-purple text-white font-medium hover:bg-[#1d4ed8] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 mt-4 w-full rounded-full bg-purple text-white font-medium hover:bg-purple-hover transition-colors"
           >
             Partner Login <ArrowRight className="w-4 h-4" />
           </Link>

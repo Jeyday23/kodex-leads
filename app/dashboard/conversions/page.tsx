@@ -43,8 +43,8 @@ export default async function ConversionsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-[#0F1F3D] mb-1">Conversions</h1>
-        <p className="text-sm text-[#7a8599]">Track your deals and earnings</p>
+        <h1 className="text-2xl font-bold text-navy mb-1">Conversions</h1>
+        <p className="text-sm text-text-muted">Track your deals and earnings</p>
       </div>
 
       <CommissionCard
@@ -54,26 +54,26 @@ export default async function ConversionsPage() {
         conversionRate={rate}
       />
 
-      <div className="border border-[#dfe3ea] rounded-xl overflow-hidden bg-white">
+      <div className="border border-border rounded-xl overflow-hidden bg-white">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#f6f7f9] border-b border-[#dfe3ea]">
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+            <tr className="bg-bg-muted border-b border-border">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Company
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Plan
               </th>
-              <th className="text-right px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-right px-4 py-3 font-medium text-text-muted">
                 MRR
               </th>
-              <th className="text-right px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-right px-4 py-3 font-medium text-text-muted">
                 Commission
               </th>
-              <th className="text-center px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-center px-4 py-3 font-medium text-text-muted">
                 Paid
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Date
               </th>
             </tr>
@@ -83,15 +83,15 @@ export default async function ConversionsPage() {
               conversions.map((c) => (
                 <tr
                   key={c.id}
-                  className="border-b border-[#dfe3ea] last:border-0"
+                  className="border-b border-border last:border-0"
                 >
-                  <td className="px-4 py-3 font-medium text-[#0F1F3D]">
+                  <td className="px-4 py-3 font-medium text-navy">
                     {leadMap.get(c.lead_id) ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-[#3d4a5c] capitalize">
+                  <td className="px-4 py-3 text-navy capitalize">
                     {c.plan}
                   </td>
-                  <td className="px-4 py-3 text-right text-[#3d4a5c]">
+                  <td className="px-4 py-3 text-right text-navy">
                     {fmt(Number(c.mrr))}
                   </td>
                   <td className="px-4 py-3 text-right font-medium text-emerald-600">
@@ -108,7 +108,7 @@ export default async function ConversionsPage() {
                       {c.paid_out ? "Paid" : "Pending"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#7a8599]">
+                  <td className="px-4 py-3 text-text-muted">
                     {new Date(c.created_at).toLocaleDateString("de-DE")}
                   </td>
                 </tr>
@@ -117,7 +117,7 @@ export default async function ConversionsPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center text-[#7a8599]"
+                  className="px-4 py-8 text-center text-text-muted"
                 >
                   No conversions yet. Close deals to see them here.
                 </td>

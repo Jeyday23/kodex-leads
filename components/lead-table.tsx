@@ -77,11 +77,11 @@ export function LeadTable({
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <Filter className="w-4 h-4 text-[#7a8599]" />
+        <Filter className="w-4 h-4 text-text-muted" />
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="text-sm border border-[#dfe3ea] rounded-lg px-3 py-1.5 bg-white text-[#3d4a5c]"
+          className="text-sm border border-border rounded-lg px-3 py-1.5 bg-white text-navy"
         >
           <option value="all">All statuses</option>
           <option value="new">New</option>
@@ -92,22 +92,22 @@ export function LeadTable({
           <option value="converted">Converted</option>
           <option value="lost">Lost</option>
         </select>
-        <span className="text-xs text-[#7a8599]">
+        <span className="text-xs text-text-muted">
           {sorted.length} lead{sorted.length !== 1 ? "s" : ""}
         </span>
       </div>
 
-      <div className="border border-[#dfe3ea] rounded-xl overflow-hidden">
+      <div className="border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#f6f7f9] border-b border-[#dfe3ea]">
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+            <tr className="bg-bg-muted border-b border-border">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Company
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599] hidden lg:table-cell">
+              <th className="text-left px-4 py-3 font-medium text-text-muted hidden lg:table-cell">
                 Email
               </th>
-              <th className="px-4 py-3 font-medium text-[#7a8599]">
+              <th className="px-4 py-3 font-medium text-text-muted">
                 <button
                   className="inline-flex items-center gap-1"
                   onClick={() => toggleSort("score")}
@@ -115,14 +115,14 @@ export function LeadTable({
                   Score <ArrowUpDown className="w-3 h-3" />
                 </button>
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599] hidden md:table-cell">
+              <th className="text-left px-4 py-3 font-medium text-text-muted hidden md:table-cell">
                 Source
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Status
               </th>
               {showClaim && (
-                <th className="px-4 py-3 font-medium text-[#7a8599]">
+                <th className="px-4 py-3 font-medium text-text-muted">
                   Action
                 </th>
               )}
@@ -132,18 +132,18 @@ export function LeadTable({
             {sorted.map((lead) => (
               <tr
                 key={lead.id}
-                className="border-b border-[#dfe3ea] last:border-0 hover:bg-[#f6f7f9]/50"
+                className="border-b border-border last:border-0 hover:bg-bg-muted/50"
               >
-                <td className="px-4 py-3 font-medium text-[#0F1F3D]">
+                <td className="px-4 py-3 font-medium text-navy">
                   {lead.company}
                 </td>
-                <td className="px-4 py-3 text-[#7a8599] hidden lg:table-cell">
+                <td className="px-4 py-3 text-text-muted hidden lg:table-cell">
                   {lead.email}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <ScoreBadge score={lead.score} />
                 </td>
-                <td className="px-4 py-3 text-[#7a8599] hidden md:table-cell">
+                <td className="px-4 py-3 text-text-muted hidden md:table-cell">
                   {SOURCE_LABELS[lead.source] ?? lead.source}
                 </td>
                 <td className="px-4 py-3">
@@ -161,7 +161,7 @@ export function LeadTable({
                     {lead.status === "qualified" && !lead.partner_id && (
                       <button
                         onClick={() => onClaimLead?.(lead.id)}
-                        className="text-xs px-3 py-1 rounded-full bg-[#A855F7] text-white hover:bg-[#9333EA] transition-colors"
+                        className="text-xs px-3 py-1 rounded-full bg-purple text-white hover:bg-purple transition-colors"
                       >
                         Claim
                       </button>
@@ -174,7 +174,7 @@ export function LeadTable({
               <tr>
                 <td
                   colSpan={showClaim ? 6 : 5}
-                  className="px-4 py-8 text-center text-[#7a8599]"
+                  className="px-4 py-8 text-center text-text-muted"
                 >
                   No leads found
                 </td>

@@ -34,7 +34,7 @@ export function Countdown({ compact = false }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <span className="inline-flex items-center gap-1 font-mono text-[#0D9488] font-bold">
+      <span className="inline-flex items-center gap-1 font-mono text-teal font-bold">
         {time.days}d {time.hours}h {time.minutes}m
       </span>
     );
@@ -47,10 +47,10 @@ export function Countdown({ compact = false }: { compact?: boolean }) {
           key={unit}
           className={cn(
             "flex flex-col items-center justify-center",
-            "bg-[#0F1F3D] rounded-lg px-4 py-3 min-w-[72px]"
+            "bg-navy rounded-lg px-4 py-3 min-w-[72px]"
           )}
         >
-          <span className="text-2xl lg:text-3xl font-mono font-bold text-[#0D9488]">
+          <span className="text-2xl lg:text-3xl font-mono font-bold text-teal">
             {String(time[unit]).padStart(2, "0")}
           </span>
           <span className="text-[10px] uppercase tracking-widest text-white/60 mt-1">

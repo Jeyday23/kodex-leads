@@ -55,8 +55,8 @@ export function AddPartnerForm() {
         onClick={() => setOpen(true)}
         className={cn(
           "inline-flex items-center gap-2 px-4 py-2 rounded-lg",
-          "border border-[#dfe3ea] text-sm text-[#3d4a5c]",
-          "hover:border-[#A855F7] hover:text-[#A855F7] transition-colors"
+          "border border-border text-sm text-navy",
+          "hover:border-purple hover:text-purple transition-colors"
         )}
       >
         <Plus className="w-4 h-4" /> Add Partner
@@ -74,15 +74,15 @@ export function AddPartnerForm() {
   }
 
   return (
-    <div className="border border-[#dfe3ea] rounded-xl p-6 bg-white">
-      <h3 className="font-bold text-[#0F1F3D] mb-4">Add New Partner</h3>
+    <div className="border border-border rounded-xl p-6 bg-white">
+      <h3 className="font-bold text-navy mb-4">Add New Partner</h3>
       <form onSubmit={handleSubmit} className="grid sm:grid-cols-2 gap-4">
         <input
           placeholder="Name"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
-          className="px-3 py-2 rounded-lg border border-[#dfe3ea] text-sm"
+          className="px-3 py-2 rounded-lg border border-border text-sm"
         />
         <input
           type="email"
@@ -90,14 +90,14 @@ export function AddPartnerForm() {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
-          className="px-3 py-2 rounded-lg border border-[#dfe3ea] text-sm"
+          className="px-3 py-2 rounded-lg border border-border text-sm"
         />
         <input
           placeholder="Referral code (e.g. ALEX25)"
           value={form.code}
           onChange={(e) => setForm({ ...form, code: e.target.value })}
           required
-          className="px-3 py-2 rounded-lg border border-[#dfe3ea] text-sm font-mono uppercase"
+          className="px-3 py-2 rounded-lg border border-border text-sm font-mono uppercase"
         />
         <input
           type="number"
@@ -110,7 +110,7 @@ export function AddPartnerForm() {
             setForm({ ...form, commission_rate: e.target.value })
           }
           required
-          className="px-3 py-2 rounded-lg border border-[#dfe3ea] text-sm"
+          className="px-3 py-2 rounded-lg border border-border text-sm"
         />
         <div className="sm:col-span-2 flex items-center gap-3">
           <button
@@ -118,8 +118,8 @@ export function AddPartnerForm() {
             disabled={state === "loading"}
             className={cn(
               "inline-flex items-center gap-2 px-5 py-2 rounded-full",
-              "bg-[#A855F7] text-white text-sm font-medium",
-              "hover:bg-[#9333EA] transition-colors disabled:opacity-60"
+              "bg-purple text-white text-sm font-medium",
+              "hover:bg-purple transition-colors disabled:opacity-60"
             )}
           >
             {state === "loading" ? (
@@ -131,7 +131,7 @@ export function AddPartnerForm() {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="text-sm text-[#7a8599] hover:text-[#3d4a5c]"
+            className="text-sm text-text-muted hover:text-navy"
           >
             Cancel
           </button>

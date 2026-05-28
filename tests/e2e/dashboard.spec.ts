@@ -128,7 +128,7 @@ test.describe("Pipeline Page", () => {
   test("shows lead count per column", async ({ page }) => {
     await page.goto("/dashboard/pipeline");
     // Each column has a count badge — at least one should be > 0
-    const badges = page.locator(".font-mono.bg-\\[\\#f6f7f9\\]");
+    const badges = page.locator(".font-mono.bg-bg-muted");
     const count = await badges.count();
     expect(count).toBeGreaterThan(0);
   });

@@ -12,34 +12,34 @@ export default async function ScrapersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#0F1F3D] mb-1">Scrapers</h1>
-        <p className="text-sm text-[#7a8599]">
+        <h1 className="text-2xl font-bold text-navy mb-1">Scrapers</h1>
+        <p className="text-sm text-text-muted">
           Monitor and trigger scraper runs
         </p>
       </div>
 
       <ScraperActions />
 
-      <div className="border border-[#dfe3ea] rounded-xl overflow-hidden bg-white">
+      <div className="border border-border rounded-xl overflow-hidden bg-white">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#f6f7f9] border-b border-[#dfe3ea]">
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+            <tr className="bg-bg-muted border-b border-border">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Type
               </th>
-              <th className="text-center px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-center px-4 py-3 font-medium text-text-muted">
                 Status
               </th>
-              <th className="text-right px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-right px-4 py-3 font-medium text-text-muted">
                 Found
               </th>
-              <th className="text-right px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-right px-4 py-3 font-medium text-text-muted">
                 Qualified
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Started
               </th>
-              <th className="text-left px-4 py-3 font-medium text-[#7a8599]">
+              <th className="text-left px-4 py-3 font-medium text-text-muted">
                 Duration
               </th>
             </tr>
@@ -59,9 +59,9 @@ export default async function ScrapersPage() {
                 return (
                   <tr
                     key={r.id}
-                    className="border-b border-[#dfe3ea] last:border-0"
+                    className="border-b border-border last:border-0"
                   >
-                    <td className="px-4 py-3 font-medium text-[#0F1F3D] capitalize">
+                    <td className="px-4 py-3 font-medium text-navy capitalize">
                       {r.scraper_type}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -77,16 +77,16 @@ export default async function ScrapersPage() {
                         {r.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-[#3d4a5c]">
+                    <td className="px-4 py-3 text-right text-navy">
                       {r.leads_found}
                     </td>
-                    <td className="px-4 py-3 text-right text-[#3d4a5c]">
+                    <td className="px-4 py-3 text-right text-navy">
                       {r.leads_qualified}
                     </td>
-                    <td className="px-4 py-3 text-[#7a8599]">
+                    <td className="px-4 py-3 text-text-muted">
                       {new Date(r.started_at).toLocaleString("de-DE")}
                     </td>
-                    <td className="px-4 py-3 text-[#7a8599]">
+                    <td className="px-4 py-3 text-text-muted">
                       {duration !== null ? `${duration}s` : "—"}
                     </td>
                   </tr>
@@ -96,7 +96,7 @@ export default async function ScrapersPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center text-[#7a8599]"
+                  className="px-4 py-8 text-center text-text-muted"
                 >
                   No scraper runs yet. Click &quot;Run Now&quot; to start.
                 </td>

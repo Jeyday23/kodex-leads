@@ -31,22 +31,22 @@ export function TemplateModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#dfe3ea]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Mail className="w-5 h-5 text-[#A855F7]" />
-            <h2 className="font-bold text-[#0F1F3D]">
+            <Mail className="w-5 h-5 text-purple" />
+            <h2 className="font-bold text-navy">
               Email {vars.contact_name}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-[#7a8599] hover:text-[#3d4a5c] rounded-lg hover:bg-[#f6f7f9] transition-colors"
+            className="p-1.5 text-text-muted hover:text-navy rounded-lg hover:bg-bg-muted transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex gap-2 px-6 py-3 border-b border-[#dfe3ea]">
+        <div className="flex gap-2 px-6 py-3 border-b border-border">
           {EMAIL_TEMPLATES.map((t) => (
             <button
               key={t.id}
@@ -54,8 +54,8 @@ export function TemplateModal({
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
                 activeId === t.id
-                  ? "bg-[#A855F7] text-white"
-                  : "bg-[#f6f7f9] text-[#3d4a5c] hover:bg-[#A855F7]/10"
+                  ? "bg-purple text-white"
+                  : "bg-bg-muted text-navy hover:bg-purple/10"
               )}
             >
               {t.name}
@@ -66,12 +66,12 @@ export function TemplateModal({
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-[#7a8599] uppercase tracking-wider">
+              <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
                 Subject
               </label>
               <button
                 onClick={() => copy(rendered.subject, "subject")}
-                className="inline-flex items-center gap-1 text-xs text-[#A855F7] hover:underline"
+                className="inline-flex items-center gap-1 text-xs text-purple hover:underline"
               >
                 {copiedField === "subject" ? (
                   <Check className="w-3 h-3" />
@@ -81,19 +81,19 @@ export function TemplateModal({
                 Copy
               </button>
             </div>
-            <div className="p-3 rounded-lg bg-[#f6f7f9] text-sm text-[#0F1F3D] font-medium">
+            <div className="p-3 rounded-lg bg-bg-muted text-sm text-navy font-medium">
               {rendered.subject}
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-[#7a8599] uppercase tracking-wider">
+              <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
                 Body
               </label>
               <button
                 onClick={() => copy(rendered.body, "body")}
-                className="inline-flex items-center gap-1 text-xs text-[#A855F7] hover:underline"
+                className="inline-flex items-center gap-1 text-xs text-purple hover:underline"
               >
                 {copiedField === "body" ? (
                   <Check className="w-3 h-3" />
@@ -103,20 +103,20 @@ export function TemplateModal({
                 Copy
               </button>
             </div>
-            <div className="p-4 rounded-lg bg-[#f6f7f9] text-sm text-[#3d4a5c] whitespace-pre-wrap leading-relaxed">
+            <div className="p-4 rounded-lg bg-bg-muted text-sm text-navy whitespace-pre-wrap leading-relaxed">
               {rendered.body}
             </div>
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-[#dfe3ea] flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
           <button
             onClick={() =>
               copy(`${rendered.subject}\n\n${rendered.body}`, "all")
             }
             className={cn(
               "inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors",
-              "bg-[#A855F7] text-white hover:bg-[#9333EA]"
+              "bg-purple text-white hover:bg-purple"
             )}
           >
             {copiedField === "all" ? (
