@@ -1,10 +1,10 @@
 import { test as setup, expect } from "@playwright/test";
 
-const SUPABASE_URL = "http://127.0.0.1:54321";
-const ANON_KEY = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-const SERVICE_ROLE_KEY = "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
-const TEST_EMAIL = "test@kodex.dev";
-const TEST_PASSWORD = "testpass123456";
+const SUPABASE_URL = process.env.SUPABASE_URL ?? "http://127.0.0.1:54321";
+const ANON_KEY = process.env.SUPABASE_ANON_KEY ?? "";
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const TEST_EMAIL = process.env.TEST_EMAIL ?? "test@kodex.dev";
+const TEST_PASSWORD = process.env.TEST_PASSWORD ?? "testpass123456";
 
 async function adminFetch(path: string, init?: RequestInit) {
   return fetch(`${SUPABASE_URL}${path}`, {

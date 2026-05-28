@@ -15,7 +15,11 @@ const AssessmentSchema = z.object({
     "assessment_gdpr",
     "assessment_frameworks",
   ]),
-  assessment_data: z.record(z.string(), z.unknown()),
+  assessment_data: z
+    .record(z.string().max(100), z.unknown())
+    .refine((obj) => JSON.stringify(obj).length < 10_000, {
+      message: "Assessment data too large",
+    }),
 });
 
 export async function POST(request: Request) {

@@ -8,7 +8,6 @@ export function safeCompare(a: string, b: string): boolean {
 export function validateOrigin(request: Request): boolean {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (!siteUrl) {
-    // In production, deny if SITE_URL is not configured
     return process.env.NODE_ENV !== "production";
   }
 
@@ -20,4 +19,9 @@ export function validateOrigin(request: Request): boolean {
   if (referer) return referer.startsWith(allowed);
 
   return false;
+}
+
+export function requireJsonContent(request: Request): boolean {
+  const ct = request.headers.get("content-type") ?? "";
+  return ct.includes("application/json");
 }
