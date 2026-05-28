@@ -2,42 +2,45 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/assess/eu-ai-act", label: "EU AI Act Assessment" },
-  { href: "/assess/gdpr", label: "GDPR Calculator" },
-  { href: "/assess/frameworks", label: "Stack Audit" },
+  { href: "#how-it-works", label: "How It Works" },
+  { href: "#tools", label: "Free Tools" },
+  { href: "#features", label: "Features" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 export function Nav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-[#dfe3ea]">
-      <div className="max-w-[1080px] mx-auto px-6 lg:px-10 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-1.5">
-          <span className="text-lg font-bold text-[#0F1F3D]">Kodex</span>
-          <span className="text-lg font-bold text-[#A855F7]">Tools</span>
+    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-border">
+      <div className="max-w-[1200px] mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="text-xl font-bold text-navy">Kodex</span>
+          <span className="text-xl font-bold text-purple">Leads</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
-            <Link
+            <a
               key={l.href}
               href={l.href}
-              className="text-sm text-[#3d4a5c] hover:text-[#0F1F3D] transition-colors"
+              className="text-sm text-text hover:text-navy transition-colors"
             >
               {l.label}
-            </Link>
+            </a>
           ))}
-          <Link
-            href="/assess/eu-ai-act"
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#A855F7] text-white text-sm font-medium hover:bg-[#9333EA] transition-colors"
-          >
-            Start Assessment <ArrowRight className="w-4 h-4" />
-          </Link>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-purple text-white text-sm font-medium hover:bg-[#9333EA] transition-colors"
+            >
+              Partner Login <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
         </div>
 
         <button
@@ -49,36 +52,53 @@ export function Nav() {
         </button>
       </div>
 
-      {open && <MobileNav onClose={() => setOpen(false)} />}
+      <AnimatePresence>
+        {open && <MobileNav onClose={() => setOpen(false)} />}
+      </AnimatePresence>
     </nav>
   );
 }
 
 function MobileNav({ onClose }: { onClose: () => void }) {
   return (
-    <div className="md:hidden fixed inset-0 top-14 z-40 bg-white">
+    <motion.div
+      className="md:hidden fixed inset-0 top-16 z-40 bg-white"
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="flex flex-col p-6 gap-4">
-        {links.map((l) => (
-          <Link
+        {links.map((l, i) => (
+          <motion.div
             key={l.href}
-            href={l.href}
-            onClick={onClose}
-            className="text-lg text-[#3d4a5c] hover:text-[#0F1F3D] py-2 border-b border-[#dfe3ea]"
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05, duration: 0.3 }}
           >
-            {l.label}
-          </Link>
+            <a
+              href={l.href}
+              onClick={onClose}
+              className="block text-lg text-text hover:text-navy py-2 border-b border-border"
+            >
+              {l.label}
+            </a>
+          </motion.div>
         ))}
-        <Link
-          href="/assess/eu-ai-act"
-          onClick={onClose}
-          className={cn(
-            "inline-flex items-center justify-center gap-2 px-5 py-3 mt-4",
-            "rounded-full bg-[#A855F7] text-white font-medium hover:bg-[#9333EA]"
-          )}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          Start Assessment <ArrowRight className="w-4 h-4" />
-        </Link>
+          <Link
+            href="/login"
+            onClick={onClose}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 mt-4 w-full rounded-full bg-purple text-white font-medium hover:bg-[#9333EA] transition-colors"
+          >
+            Partner Login <ArrowRight className="w-4 h-4" />
+          </Link>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

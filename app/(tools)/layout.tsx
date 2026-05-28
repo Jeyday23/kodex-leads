@@ -9,7 +9,7 @@ export default function ToolsLayout({
   return (
     <>
       <Nav />
-      <main className="flex-1">{children}</main>
+      <div className="flex-1">{children}</div>
       <Footer />
     </>
   );

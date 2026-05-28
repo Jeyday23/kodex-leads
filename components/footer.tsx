@@ -20,10 +20,10 @@ export function Footer() {
           <div className="max-w-xs">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-lg font-bold text-[#0F1F3D]">Kodex</span>
-              <span className="text-lg font-bold text-[#A855F7]">Tools</span>
+              <span className="text-lg font-bold text-[#A855F7]">Leads</span>
             </div>
             <p className="text-sm text-[#7a8599] leading-relaxed">
-              Free compliance tools for EU startups. Built by Kodex Compliance.
+              Outbound prospecting for EU compliance sales partners. Built by Kodex Compliance.
             </p>
             <p className="text-sm text-[#7a8599] mt-4">
               © {new Date().getFullYear()} Kodex Compliance. All rights
