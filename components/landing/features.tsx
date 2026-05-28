@@ -107,7 +107,7 @@ export function FeaturesSection() {
                 whileHover={{ rotate: -10, scale: 1.2 }}
                 transition={{ type: "spring", stiffness: 400, damping: 12 }}
               >
-                <f.icon className="w-5 h-5 text-purple group-hover:text-[#9333EA] transition-colors" />
+                <f.icon className="w-5 h-5 text-purple group-hover:text-[#1d4ed8] transition-colors" />
               </motion.div>
               <h3 className="text-lg font-bold text-navy mb-2">{f.title}</h3>
               <p className="text-sm text-text-muted leading-relaxed">

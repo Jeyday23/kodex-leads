@@ -99,7 +99,7 @@ export function HeroSection() {
             >
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-purple text-white font-medium hover:bg-[#9333EA] transition-colors"
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-purple text-white font-medium hover:bg-[#1d4ed8] transition-colors"
               >
                 Become a Partner <ArrowRight className="w-4 h-4" />
               </Link>
