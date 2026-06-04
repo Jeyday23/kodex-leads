@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kodex Leads — Partner Training Manual</title>
+<style>
+  @page { size: A4; margin: 2.5cm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1B2A4A;
+    line-height: 1.6;
+    font-size: 14px;
+    background: #fff;
+  }
+  .page-break { page-break-before: always; }
+
+  /* Title Page */
+  .title-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    text-align: center;
+    page-break-after: always;
+  }
+  .title-page .logo {
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .title-page .logo span { color: #7C3AED; }
+  .title-page h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 24px 0 8px;
+    color: #1B2A4A;
+  }
+  .title-page .subtitle {
+    font-size: 16px;
+    color: #6B7280;
+    margin-bottom: 40px;
+  }
+  .title-page .meta {
+    font-size: 13px;
+    color: #9CA3AF;
+  }
+  .title-page .line {
+    width: 80px;
+    height: 4px;
+    background: #7C3AED;
+    border-radius: 2px;
+    margin: 24px auto;
+  }
+
+  /* TOC */
+  .toc { page-break-after: always; }
+  .toc h2 { font-size: 22px; margin-bottom: 20px; }
+  .toc-list { list-style: none; }
+  .toc-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #E5E7EB;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .toc-list a {
+    color: #1B2A4A;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .toc-list a:hover { color: #7C3AED; }
+  .toc-list .num { color: #7C3AED; font-weight: 700; margin-right: 12px; }
+  .toc-list .dots {
+    flex: 1;
+    border-bottom: 1px dotted #D1D5DB;
+    margin: 0 8px;
+    min-width: 40px;
+  }
+
+  /* Section headers */
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1B2A4A;
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid #7C3AED;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1B2A4A;
+    margin: 20px 0 8px;
+  }
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #7C3AED;
+    margin: 16px 0 6px;
+  }
+
+  p { margin-bottom: 10px; }
+
+  /* Cards */
+  .card {
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    background: #F9FAFB;
+  }
+  .card-purple {
+    border-color: #DDD6FE;
+    background: #F5F3FF;
+  }
+  .card-navy {
+    background: #1B2A4A;
+    color: #fff;
+    border-color: #1B2A4A;
+  }
+  .card-navy p, .card-navy li { color: rgba(255,255,255,0.85); }
+  .card-navy h3 { color: #fff; }
+  .card-amber {
+    border-color: #FDE68A;
+    background: #FFFBEB;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #E5E7EB;
+  }
+  th {
+    background: #F3F4F6;
+    font-weight: 600;
+    color: #6B7280;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Lists */
+  ul, ol { margin: 8px 0 12px 20px; }
+  li { margin-bottom: 6px; }
+
+  /* Step boxes */
+  .step {
+    display: flex;
+    gap: 16px;
+    margin: 14px 0;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #7C3AED;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .step-content { flex: 1; }
+  .step-content strong { display: block; margin-bottom: 2px; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-purple { background: #EDE9FE; color: #7C3AED; }
+  .badge-green { background: #D1FAE5; color: #059669; }
+  .badge-red { background: #FEE2E2; color: #DC2626; }
+  .badge-amber { background: #FEF3C7; color: #D97706; }
+
+  /* Key-value */
+  .kv { display: flex; gap: 8px; margin: 6px 0; }
+  .kv-label { font-weight: 600; min-width: 140px; color: #6B7280; font-size: 13px; }
+  .kv-value { font-size: 13px; }
+
+  /* Highlight box */
+  .highlight {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+  .highlight h3 { color: #fff; margin-top: 0; }
+  .highlight p { color: rgba(255,255,255,0.9); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  code {
+    background: #F3F4F6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+  }
+
+  .footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+    text-align: center;
+    color: #9CA3AF;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TITLE PAGE -->
+<div class="title-page">
+  <div class="logo">Kodex <span>Leads</span></div>
+  <div class="line"></div>
+  <h1>Partner Training Manual</h1>
+  <p class="subtitle">Your complete guide to the Kodex Leads prospecting dashboard</p>
+  <p class="meta">Version 1.0 &mdash; June 2026</p>
+  <p class="meta">Confidential &mdash; For Kodex Partners Only</p>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol class="toc-list">
+    <li><a href="#welcome"><span class="num">1</span>Welcome &amp; Overview</a><span class="dots"></span></li>
+    <li><a href="#getting-started"><span class="num">2</span>Getting Started</a><span class="dots"></span></li>
+    <li><a href="#lead-scoring"><span class="num">3</span>Understanding Lead Scoring</a><span class="dots"></span></li>
+    <li><a href="#daily-workflow"><span class="num">4</span>Daily Workflow</a><span class="dots"></span></li>
+    <li><a href="#resources"><span class="num">5</span>Using Sales Resources</a><span class="dots"></span></li>
+    <li><a href="#outreach"><span class="num">6</span>Outreach Best Practices</a><span class="dots"></span></li>
+    <li><a href="#pipeline"><span class="num">7</span>Pipeline Management</a><span class="dots"></span></li>
+    <li><a href="#commission"><span class="num">8</span>Commissions &amp; Payouts</a><span class="dots"></span></li>
+    <li><a href="#guidelines"><span class="num">9</span>Partner Guidelines</a><span class="dots"></span></li>
+    <li><a href="#reference"><span class="num">10</span>Quick Reference</a><span class="dots"></span></li>
+  </ol>
+</div>
+
+<!-- 1. WELCOME -->
+<div class="page-break" id="welcome"></div>
+<h2>1. Welcome &amp; Overview</h2>
+
+<div class="card-navy card">
+  <h3>What is Kodex Leads?</h3>
+  <p>Kodex Leads is an outbound compliance prospecting dashboard built for Kodex partners. It automatically finds, scores, and enriches companies that need EU compliance help &mdash; so you can focus on outreach and closing deals.</p>
+</div>
+
+<h3>The Compliance Opportunity</h3>
+<p>Two major regulatory forces are creating massive demand for compliance services:</p>
+
+<div class="grid-2">
+  <div class="card">
+    <h4>EU AI Act</h4>
+    <p>Regulation 2024/1689. Full enforcement began <strong>August 2, 2025</strong>. Every company deploying AI in the EU needs risk assessments, technical documentation, and human oversight procedures. Fines up to <strong>&euro;35M or 7% of global turnover</strong>.</p>
+  </div>
+  <div class="card">
+    <h4>GDPR</h4>
+    <p>Regulation 2016/679. Ongoing enforcement with increasing activity. Standard tier fines up to <strong>&euro;10M or 2% of turnover</strong>. Serious tier up to <strong>&euro;20M or 4% of turnover</strong>. Over &euro;4 billion in fines issued since 2018.</p>
+  </div>
+</div>
+
+<h3>How You Earn</h3>
+<div class="highlight">
+  <h3>15% Commission on Every Conversion</h3>
+  <p>When a prospect you source signs up for Kodex Compliance, you earn 15% commission. Conversions are tracked automatically via Stripe and paid Net 30. You can monitor everything in the Conversions tab of your dashboard.</p>
+</div>
+
+<!-- 2. GETTING STARTED -->
+<div class="page-break" id="getting-started"></div>
+<h2>2. Getting Started</h2>
+
+<h3>Logging In</h3>
+<p>Navigate to <code>kodex-leads.onrender.com/login</code> and enter your email and password. After signing in, you will be redirected to the Prospects page &mdash; your primary workspace.</p>
+
+<h3>Dashboard Navigation</h3>
+<p>The left sidebar contains five main sections. Here is what each one does:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tab</th>
+      <th>What It Does</th>
+      <th>When to Use</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Prospects</strong></td>
+      <td>Score-ranked list of unclaimed, qualified leads. Leads with a score of 40+ appear here, sorted highest first.</td>
+      <td>Start here every day. This is where you find new leads to claim.</td>
+    </tr>
+    <tr>
+      <td><strong>All Leads</strong></td>
+      <td>Full searchable and filterable table of all leads you can access. Includes both claimed and unclaimed leads.</td>
+      <td>When you want to search for a specific company, filter by source, or browse the full database.</td>
+    </tr>
+    <tr>
+      <td><strong>Pipeline</strong></td>
+      <td>Kanban board showing YOUR claimed leads organised by outreach stage: Not Contacted, Emailed, Replied, Meeting Booked, Converted.</td>
+      <td>To track your active deals and update outreach progress.</td>
+    </tr>
+    <tr>
+      <td><strong>Resources</strong></td>
+      <td>Sales materials: EU AI Act battle card, GDPR objection handling, ROI calculator, sales playbook, and prospecting sources with active links.</td>
+      <td>Before prospect calls, during objection handling, or when you need to share assessment tools.</td>
+    </tr>
+    <tr>
+      <td><strong>Conversions</strong></td>
+      <td>Your commission tracking dashboard. Shows total earned, pending payouts, conversion rate, and individual deal details.</td>
+      <td>To check your earnings and payout status.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 3. LEAD SCORING -->
+<div class="page-break" id="lead-scoring"></div>
+<h2>3. Understanding Lead Scoring</h2>
+
+<p>Every lead in the system receives a score based on signals that indicate compliance need. Higher scores mean stronger prospects. Leads scoring <strong>40 or above</strong> are classified as <span class="badge badge-green">Qualified</span> and appear in the Prospects tab.</p>
+
+<h3>Scoring Breakdown</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Signal</th>
+      <th>Points</th>
+      <th>Why It Matters</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Uses AI in production</td>
+      <td><span class="badge badge-red">+25</span></td>
+      <td>EU AI Act applies directly. Highest-value signal.</td>
+    </tr>
+    <tr>
+      <td>Team size 11&ndash;50</td>
+      <td><span class="badge badge-amber">+20</span></td>
+      <td>Large enough for compliance obligations, small enough to need external help.</td>
+    </tr>
+    <tr>
+      <td>Team size 51&ndash;200</td>
+      <td><span class="badge badge-amber">+15</span></td>
+      <td>Scale-ups with growing compliance complexity.</td>
+    </tr>
+    <tr>
+      <td>Recently funded (Seed&ndash;Series B)</td>
+      <td><span class="badge badge-amber">+15</span></td>
+      <td>Investors require compliance. Budget available.</td>
+    </tr>
+    <tr>
+      <td>Completed a Kodex assessment</td>
+      <td><span class="badge badge-purple">+10</span></td>
+      <td>Already aware of compliance gaps. High intent.</td>
+    </tr>
+    <tr>
+      <td>From job scraper or AI scraper</td>
+      <td><span class="badge badge-purple">+10</span></td>
+      <td>Actively hiring compliance roles or building AI products.</td>
+    </tr>
+    <tr>
+      <td>Business email domain</td>
+      <td><span class="badge badge-green">+5</span></td>
+      <td>Real company, not a personal enquiry.</td>
+    </tr>
+    <tr>
+      <td>Assessment + AI + zero compliance</td>
+      <td><span class="badge badge-red">+15 bonus</span></td>
+      <td>Uses AI, took assessment, has zero measures. Maximum urgency.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card card-purple">
+  <h4>How to Read Scores</h4>
+  <p><strong>Score 60+:</strong> Hot lead. Matches multiple high-value signals. Prioritise immediately.</p>
+  <p><strong>Score 40&ndash;59:</strong> Qualified. Worth outreach. Look for the specific signals to personalise your message.</p>
+  <p><strong>Score below 40:</strong> Not yet qualified. May become qualified as more signals are detected.</p>
+</div>
+
+<!-- 4. DAILY WORKFLOW -->
+<div class="page-break" id="daily-workflow"></div>
+<h2>4. Daily Workflow</h2>
+
+<p>Follow this 8-step process to efficiently work through your leads each day.</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <strong>Check the Prospects Tab</strong>
+    Start each session by opening the Prospects tab. New leads appear automatically as scrapers run. Leads are ranked by score &mdash; highest first.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <strong>Review Lead Details</strong>
+    For each prospect, check the company name, score, signals (AI usage, team size, funding stage), and any available contact information. Expand the card to see decision-maker contacts.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <strong>Claim the Lead</strong>
+    Click <strong>&ldquo;Claim&rdquo;</strong> on leads you want to work. Claimed leads move to your Pipeline and are no longer visible to other partners. Only claim leads you intend to contact within 48 hours.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <strong>Research the Company</strong>
+    Before reaching out, spend 5 minutes researching. Check their website, LinkedIn, and any recent news. Identify their specific compliance gaps. Use the Prospecting Sources page for research links.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">5</div>
+  <div class="step-content">
+    <strong>Personalised Outreach</strong>
+    Use the enriched contact data (names, titles, emails) to reach out. Reference their specific compliance gaps from the lead signals. Never send generic messages.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">6</div>
+  <div class="step-content">
+    <strong>Share Assessment Tools</strong>
+    Send prospects to the free assessment tools to generate urgency:
+    <ul>
+      <li><code>/assess/eu-ai-act</code> &mdash; EU AI Act Readiness Assessment (shows their risk classification)</li>
+      <li><code>/assess/gdpr</code> &mdash; GDPR Fine Risk Calculator (shows their fine exposure)</li>
+    </ul>
+    These tools create a concrete, personal urgency that generic sales pitches cannot.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">7</div>
+  <div class="step-content">
+    <strong>Update Your Pipeline</strong>
+    As you progress with each lead, update their stage in the Pipeline tab: <strong>Not Contacted &rarr; Emailed &rarr; Replied &rarr; Meeting Booked &rarr; Converted</strong>. Accurate pipeline data helps you forecast and prioritise.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">8</div>
+  <div class="step-content">
+    <strong>Close and Earn</strong>
+    When a prospect signs up for Kodex Compliance, the conversion is tracked automatically via Stripe. Your 15% commission appears in the Conversions tab. Payment is Net 30.
+  </div>
+</div>
+
+<!-- 5. RESOURCES -->
+<div class="page-break" id="resources"></div>
+<h2>5. Using Sales Resources</h2>
+
+<p>The Resources tab contains five tools designed to help you sell more effectively. Here is when and how to use each one.</p>
+
+<div class="card">
+  <h4>EU AI Act Battle Card</h4>
+  <p><strong>When:</strong> Before any call about AI compliance. During objection handling.</p>
+  <p><strong>What it covers:</strong> August 2 enforcement deadline, risk classifications (High/Limited/Minimal), compliance requirements, penalty framework (up to &euro;35M), and quick objection responses for &ldquo;We don&rsquo;t use AI&rdquo;, &ldquo;We&rsquo;re too small&rdquo;, &ldquo;We already have GDPR&rdquo;, and &ldquo;The deadline is far away&rdquo;.</p>
+</div>
+
+<div class="card">
+  <h4>GDPR Objection Handling Guide</h4>
+  <p><strong>When:</strong> When prospects push back on GDPR compliance need.</p>
+  <p><strong>What it covers:</strong> Article 83 penalty framework (two tiers), 6 real enforcement cases you can cite (Meta &euro;1.2B, WhatsApp &euro;225M, H&amp;M &euro;35.3M, British Airways &euro;22M, Marriott &euro;20.4M, Clearview AI &euro;20M), and 7 common objections with fact-based responses.</p>
+</div>
+
+<div class="card">
+  <h4>ROI Calculator</h4>
+  <p><strong>When:</strong> During or after a call, to put concrete numbers in front of the prospect.</p>
+  <p><strong>How to use:</strong> Select the prospect&rsquo;s team size, required frameworks, current approach, and data sensitivity. The calculator shows manual compliance cost vs. Kodex cost, fine exposure, annual savings, ROI multiplier, and break-even time. Use the &ldquo;How to present these numbers&rdquo; section for ready-made talking points.</p>
+</div>
+
+<div class="card">
+  <h4>Partner Sales Playbook</h4>
+  <p><strong>When:</strong> As a reference for your overall sales approach.</p>
+  <p><strong>What it covers:</strong> The Kodex value proposition, ideal customer profile, discovery questions mapped to compliance gaps, the complete dashboard workflow, commission structure, and partner guidelines.</p>
+</div>
+
+<div class="card">
+  <h4>Prospecting Sources</h4>
+  <p><strong>When:</strong> When you want to find leads beyond what the scrapers provide.</p>
+  <p><strong>What it covers:</strong> Links to automated sources (Arbeitnow, EU-Startups, Product Hunt, GitHub), manual prospecting channels (LinkedIn Sales Navigator, Crunchbase, GDPR Enforcement Tracker, Indeed/StepStone), search terms you can copy, and signal stacking criteria for manual qualification.</p>
+</div>
+
+<!-- 6. OUTREACH -->
+<div class="page-break" id="outreach"></div>
+<h2>6. Outreach Best Practices</h2>
+
+<div class="card card-navy">
+  <h3>The Golden Rule</h3>
+  <p>Lead with risk, not features. &ldquo;Your fine exposure is &euro;15M&rdquo; is 10x more effective than &ldquo;We have great compliance software.&rdquo;</p>
+</div>
+
+<h3>Email Outreach</h3>
+<ol>
+  <li><strong>Personalise every message.</strong> Reference the company&rsquo;s specific compliance signals: &ldquo;I noticed you&rsquo;re hiring a Data Protection Officer &mdash; that suggests you&rsquo;re building out compliance capability.&rdquo;</li>
+  <li><strong>Use the assessment tools as conversation starters.</strong> &ldquo;I put together a quick EU AI Act risk assessment for companies like yours &mdash; takes 2 minutes: [link to /assess/eu-ai-act]&rdquo;</li>
+  <li><strong>Follow up within 48 hours.</strong> First follow-up gets 3x the response rate of no follow-up.</li>
+  <li><strong>Keep it short.</strong> 3&ndash;5 sentences maximum for cold outreach. Link to an assessment tool for depth.</li>
+  <li><strong>Use real enforcement data.</strong> &ldquo;Meta was fined &euro;1.2B for data transfer violations last year. The same rules apply to companies of every size.&rdquo;</li>
+</ol>
+
+<h3>Call/Meeting Tips</h3>
+<ol>
+  <li><strong>Open with a question, not a pitch.</strong> &ldquo;What AI or ML systems do you use in production?&rdquo; &mdash; this maps directly to EU AI Act risk classification.</li>
+  <li><strong>Use the ROI Calculator live.</strong> Share your screen, input their details, and show them the numbers in real time.</li>
+  <li><strong>Address objections with data.</strong> Open the Objection Handling guide and reference specific enforcement cases and Article numbers.</li>
+  <li><strong>Close with a concrete next step.</strong> &ldquo;Let me send you the assessment link. Once you complete it, I&rsquo;ll put together a compliance roadmap specific to your company.&rdquo;</li>
+</ol>
+
+<h3>What NOT to Do</h3>
+<div class="card card-amber">
+  <ul>
+    <li>Do not send bulk, impersonal messages. Every outreach should reference the company specifically.</li>
+    <li>Do not make claims beyond Kodex&rsquo;s documented capabilities.</li>
+    <li>Do not contact prospects who have explicitly opted out.</li>
+    <li>Do not use lead data for any purpose other than direct compliance outreach.</li>
+  </ul>
+</div>
+
+<!-- 7. PIPELINE -->
+<div class="page-break" id="pipeline"></div>
+<h2>7. Pipeline Management</h2>
+
+<p>The Pipeline tab shows your claimed leads in a Kanban board with five stages. Move leads through stages as your outreach progresses.</p>
+
+<h3>Pipeline Stages</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Definition</th>
+      <th>Action Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-purple">Not Contacted</span></td>
+      <td>Lead claimed but no outreach sent yet.</td>
+      <td>Send first outreach within 48 hours of claiming.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-amber">Emailed</span></td>
+      <td>First outreach sent. Waiting for response.</td>
+      <td>Follow up after 48 hours if no reply. Send a maximum of 3 follow-ups.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-green">Replied</span></td>
+      <td>Prospect has responded to your outreach.</td>
+      <td>Engage in conversation. Share assessment tools. Schedule a call.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-green">Meeting Booked</span></td>
+      <td>A call or meeting has been scheduled.</td>
+      <td>Prepare with Battle Card and ROI Calculator. Run the assessment beforehand if possible.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-green">Converted</span></td>
+      <td>Prospect signed up for Kodex Compliance.</td>
+      <td>Conversion tracked automatically. Commission appears in Conversions tab.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Pipeline Best Practices</h3>
+<ul>
+  <li><strong>Update stages daily.</strong> An accurate pipeline lets you prioritise and forecast.</li>
+  <li><strong>Don&rsquo;t hoard leads.</strong> If you haven&rsquo;t contacted a lead within one week, consider releasing it so another partner can work it.</li>
+  <li><strong>Watch the &ldquo;days in stage&rdquo; indicator.</strong> Leads stuck in one stage for more than 7 days need attention or should be moved on.</li>
+  <li><strong>Focus on &ldquo;Replied&rdquo; and &ldquo;Meeting Booked&rdquo; stages.</strong> These are closest to conversion and deserve the most attention.</li>
+</ul>
+
+<!-- 8. COMMISSION -->
+<div class="page-break" id="commission"></div>
+<h2>8. Commissions &amp; Payouts</h2>
+
+<div class="grid-2">
+  <div class="card" style="text-align:center;">
+    <h3 style="font-size:28px; color:#7C3AED; margin:0;">15%</h3>
+    <p>Default commission rate on every conversion</p>
+  </div>
+  <div class="card" style="text-align:center;">
+    <h3 style="font-size:28px; margin:0;">Net 30</h3>
+    <p>Commission paid 30 days after confirmed conversion</p>
+  </div>
+</div>
+
+<h3>How It Works</h3>
+<ol>
+  <li>You claim a lead and work it through your pipeline.</li>
+  <li>When the prospect signs up for Kodex Compliance, Stripe automatically records the conversion and attributes it to your partner account.</li>
+  <li>The conversion appears in your <strong>Conversions</strong> tab with the plan, MRR, and your commission amount.</li>
+  <li>Commission is paid out 30 days after the confirmed conversion date.</li>
+  <li>Payout status is visible in the Conversions table: <span class="badge badge-green">Paid</span> or <span class="badge badge-amber">Pending</span>.</li>
+</ol>
+
+<h3>Conversions Tab Overview</h3>
+<p>The Conversions page shows four key metrics at the top:</p>
+<ul>
+  <li><strong>Total Earned:</strong> Lifetime commission earned across all conversions.</li>
+  <li><strong>Pending Payout:</strong> Commission confirmed but not yet paid (within Net 30 window).</li>
+  <li><strong>Conversions:</strong> Total number of successful conversions.</li>
+  <li><strong>Conversion Rate:</strong> Percentage of your claimed leads that converted.</li>
+</ul>
+
+<!-- 9. GUIDELINES -->
+<div class="page-break" id="guidelines"></div>
+<h2>9. Partner Guidelines</h2>
+
+<p>As a Kodex partner, you are representing the Kodex brand. These guidelines ensure professional, compliant, and effective partnerships.</p>
+
+<div class="card">
+  <h4>1. Accurate Representation</h4>
+  <p>Represent Kodex Compliance services accurately. Do not make claims beyond documented capabilities. If a prospect asks about a feature you are unsure of, say so and direct them to <code>info@kodex-compliance.com</code>.</p>
+</div>
+
+<div class="card">
+  <h4>2. Data Usage</h4>
+  <p>Lead data provided through the dashboard is for direct, compliance-related outreach only. Do not resell, share, or use lead data for unrelated purposes.</p>
+</div>
+
+<div class="card">
+  <h4>3. GDPR-Compliant Outreach</h4>
+  <p>You must comply with GDPR when contacting leads. You must have a lawful basis for outreach (legitimate interest for B2B compliance-related contact). Respect opt-out requests immediately.</p>
+</div>
+
+<div class="card">
+  <h4>4. No Bulk Extraction</h4>
+  <p>Do not use automated tools for bulk extraction of lead data from the dashboard. The system is designed for manual, targeted prospecting.</p>
+</div>
+
+<div class="card">
+  <h4>5. Direct Contact Only</h4>
+  <p>Contact prospects directly. Do not delegate outreach to unlicensed third parties or subcontractors without written approval from Kodex.</p>
+</div>
+
+<p>Full terms are available at <code>/terms</code> on the Kodex website.</p>
+
+<!-- 10. QUICK REFERENCE -->
+<div class="page-break" id="reference"></div>
+<h2>10. Quick Reference</h2>
+
+<h3>Key URLs</h3>
+<table>
+  <tbody>
+    <tr><td><strong>Dashboard</strong></td><td><code>kodex-leads.onrender.com/dashboard</code></td></tr>
+    <tr><td><strong>EU AI Act Assessment</strong></td><td><code>kodex-leads.onrender.com/assess/eu-ai-act</code></td></tr>
+    <tr><td><strong>GDPR Fine Calculator</strong></td><td><code>kodex-leads.onrender.com/assess/gdpr</code></td></tr>
+    <tr><td><strong>Resources</strong></td><td><code>kodex-leads.onrender.com/dashboard/resources</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Lead Score Thresholds</h3>
+<table>
+  <tbody>
+    <tr><td><span class="badge badge-red">60+</span></td><td>Hot lead &mdash; prioritise immediately</td></tr>
+    <tr><td><span class="badge badge-amber">40&ndash;59</span></td><td>Qualified &mdash; appears in Prospects</td></tr>
+    <tr><td><span class="badge badge-purple">&lt;40</span></td><td>Not yet qualified &mdash; monitor for new signals</td></tr>
+  </tbody>
+</table>
+
+<h3>Pipeline Stages</h3>
+<table>
+  <tbody>
+    <tr><td>Not Contacted</td><td>&rarr;</td><td>Emailed</td><td>&rarr;</td><td>Replied</td><td>&rarr;</td><td>Meeting Booked</td><td>&rarr;</td><td>Converted</td></tr>
+  </tbody>
+</table>
+
+<h3>Key Contacts</h3>
+<div class="kv"><span class="kv-label">General enquiries</span><span class="kv-value">info@kodex-compliance.com</span></div>
+<div class="kv"><span class="kv-label">Partner support</span><span class="kv-value">info@kodex-compliance.com</span></div>
+
+<h3>Commission Summary</h3>
+<div class="kv"><span class="kv-label">Rate</span><span class="kv-value">15% of MRR</span></div>
+<div class="kv"><span class="kv-label">Payment terms</span><span class="kv-value">Net 30</span></div>
+<div class="kv"><span class="kv-label">Tracking</span><span class="kv-value">Automatic via Stripe (visible in Conversions tab)</span></div>
+
+<div class="footer">
+  <p>&copy; 2026 Kodex Compliance. All rights reserved.</p>
+  <p>This document is confidential and intended for Kodex partners only.</p>
+</div>
+
+</body>
+</html>

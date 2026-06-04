@@ -1,4 +1,4 @@
-import { FileText, Calculator, BookOpen, Download } from "lucide-react";
+import { FileText, Calculator, BookOpen, Download, Search } from "lucide-react";
 import Link from "next/link";
 
 const resources = [
@@ -29,6 +29,13 @@ const resources = [
     icon: Download,
     action: "View guide",
     href: "/dashboard/resources/playbook",
+  },
+  {
+    title: "Prospecting Sources",
+    desc: "Active links to job boards, startup directories, and databases where you can find leads.",
+    icon: Search,
+    action: "View sources",
+    href: "/dashboard/resources/lead-sources",
   },
 ];
 
