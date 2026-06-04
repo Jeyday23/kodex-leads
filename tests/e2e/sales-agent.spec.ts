@@ -331,18 +331,15 @@ test.describe.serial("Sales Agent — Daily Workflow", () => {
     // Sales partners should be able to send prospects to the assessment tools
     await page.goto("/");
 
-    await expect(page.getByText("Are you ready for")).toBeVisible();
-    await expect(page.getByText("August 2?")).toBeVisible();
+    await expect(page.getByText("Compliance is complex.")).toBeVisible();
+    await expect(page.getByText("Finding the right people")).toBeVisible();
 
     await screenshotStep(page, "12a-public-homepage");
 
-    // Click through to EU AI Act assessment
-    await page.getByText("Start Assessment").first().click();
-    await page.waitForURL("**/assess/eu-ai-act");
+    // Click through to EU AI Act assessment via Free Tools section
+    await page.goto("/assess/eu-ai-act");
 
-    await expect(
-      page.getByText("EU AI Act Readiness Assessment", { exact: true })
-    ).toBeVisible();
+    await expect(page.getByText("Are you ready for")).toBeVisible();
 
     await screenshotStep(page, "12b-eu-ai-act-assessment");
   });

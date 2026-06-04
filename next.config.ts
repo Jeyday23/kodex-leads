@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
+const connectSrc = isDev
+  ? "connect-src 'self' http://127.0.0.1:* http://localhost:* https://*.supabase.co https://eu.i.posthog.com"
+  : "connect-src 'self' https://*.supabase.co https://eu.i.posthog.com";
+
+const scriptSrc = isDev
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+  : "script-src 'self' 'unsafe-inline'";
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -22,8 +32,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://eu.i.posthog.com; frame-ancestors 'none';",
+            value: `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; ${connectSrc}; frame-ancestors 'none';`,
           },
           {
             key: "X-DNS-Prefetch-Control",
