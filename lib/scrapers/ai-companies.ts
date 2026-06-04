@@ -1,7 +1,33 @@
 import { type ScraperResult, delay } from "./types";
 
 const PH_RSS = "https://www.producthunt.com/categories/artificial-intelligence/rss";
-const GH_TRENDING = "https://api.github.com/search/repositories";
+const GH_API = "https://api.github.com";
+
+const EU_LOCATIONS = [
+  "germany", "deutschland", "france", "netherlands", "austria",
+  "berlin", "munich", "münchen", "hamburg", "frankfurt", "cologne", "köln",
+  "paris", "amsterdam", "vienna", "wien", "zurich", "zürich", "switzerland",
+  "brussels", "copenhagen", "stockholm", "helsinki", "oslo", "dublin",
+  "prague", "warsaw", "barcelona", "madrid", "milan", "lisbon",
+];
+
+function isEULocation(location: string): boolean {
+  const lower = location.toLowerCase();
+  return EU_LOCATIONS.some((term) => lower.includes(term));
+}
+
+async function fetchGitHubUser(login: string): Promise<Record<string, string> | null> {
+  try {
+    const res = await fetch(`${GH_API}/users/${login}`, {
+      headers: { Accept: "application/vnd.github.v3+json" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
 
 export async function scrapeAICompanies(): Promise<ScraperResult> {
   const leads: ScraperResult["leads"] = [];
@@ -51,14 +77,14 @@ export async function scrapeAICompanies(): Promise<ScraperResult> {
 
   await delay(1000);
 
-  // GitHub trending AI repos from EU
+  // GitHub: EU-based organizations working on AI
   try {
-    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0];
 
     const res = await fetch(
-      `${GH_TRENDING}?q=topic:ai+topic:machine-learning+created:>${since}&sort=stars&order=desc&per_page=20`,
+      `${GH_API}/search/repositories?q=topic:ai+topic:machine-learning+created:>${since}&sort=stars&order=desc&per_page=30`,
       {
         headers: { Accept: "application/vnd.github.v3+json" },
         signal: AbortSignal.timeout(15000),
@@ -67,29 +93,28 @@ export async function scrapeAICompanies(): Promise<ScraperResult> {
 
     if (res.ok) {
       const data = await res.json();
+      const checkedOwners = new Set<string>();
+
       for (const repo of data.items ?? []) {
-        const owner = repo.owner?.login;
-        const location = (repo.owner?.location ?? "").toLowerCase();
+        const login = repo.owner?.login;
+        if (!login || checkedOwners.has(login) || seen.has(login.toLowerCase())) continue;
+        checkedOwners.add(login);
 
-        const isEU =
-          location.includes("germany") ||
-          location.includes("france") ||
-          location.includes("netherlands") ||
-          location.includes("austria") ||
-          location.includes("berlin") ||
-          location.includes("paris") ||
-          location.includes("amsterdam");
+        await delay(300);
+        const profile = await fetchGitHubUser(login);
+        if (!profile) continue;
 
-        if (!isEU && location) continue;
+        const location = profile.location ?? "";
+        if (!location || !isEULocation(location)) continue;
 
-        const company = owner ?? repo.name;
+        const company = profile.company?.replace(/^@/, "") || profile.name || login;
         const normalized = company.toLowerCase();
         if (seen.has(normalized)) continue;
         seen.add(normalized);
 
         leads.push({
           company,
-          source_url: repo.html_url,
+          source_url: profile.blog || repo.html_url,
           source: "scraper_ai",
           uses_ai: true,
         });
