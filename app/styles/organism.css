@@ -1,0 +1,80 @@
+:root {
+  --organism-duration-slow: 4000ms;
+  --organism-duration-normal: 600ms;
+  --organism-duration-fast: 200ms;
+
+  --organism-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --organism-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --color-purple: #a855f7;
+  --color-navy: #0f1f3d;
+  --color-teal: #0d9488;
+  --color-ivory: #f7f4ef;
+}
+
+@keyframes organism-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes particle-glow {
+  0% {
+    box-shadow: 0 0 2px var(--color-purple), 0 0 8px rgba(168, 85, 247, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 4px var(--color-purple), 0 0 16px rgba(168, 85, 247, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 2px var(--color-purple), 0 0 8px rgba(168, 85, 247, 0.5);
+  }
+}
+
+@keyframes section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes burst-particle {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0);
+  }
+}
+
+@keyframes hover-lift {
+  from {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  to {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(168, 85, 247, 0.3);
+  }
+}
