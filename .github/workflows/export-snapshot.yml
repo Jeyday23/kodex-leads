@@ -1,0 +1,25 @@
+name: Export repository snapshot
+
+on:
+  push:
+    branches:
+      - automation/export-snapshot-20260731
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Remove Git metadata and export helper
+        run: |
+          rm -rf .git
+          rm -f .github/workflows/export-snapshot.yml
+      - name: Upload repository snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: kodex-leads-copy
+          path: .
+          include-hidden-files: true
+          retention-days: 1
