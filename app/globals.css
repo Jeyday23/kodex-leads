@@ -1,3 +1,15 @@
+/* Preload critical fonts */
+@font-face {
+  font-family: "system-ui";
+  font-display: swap;
+}
+
+/* Prevent layout shift */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
 :root {
   color-scheme: light;
   --bg: #f7f8f5;

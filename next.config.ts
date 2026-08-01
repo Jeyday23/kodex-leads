@@ -1,8 +1,10 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
-const nextConfig: NextConfig = {
-  typedRoutes: true,
-  devIndicators: false,
-};
+const config: NextConfig = {
+  images: {
+    remotePatterns: [],
+  },
+  compress: true,
+}
 
-export default nextConfig;
+export default config

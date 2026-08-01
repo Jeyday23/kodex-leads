@@ -78,3 +78,32 @@
     box-shadow: 0 12px 24px rgba(168, 85, 247, 0.3);
   }
 }
+
+@media (max-width: 768px) {
+  :root {
+    --organism-duration-slow: 3000ms;
+  }
+
+  /* Reduce animation complexity on mobile */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .section-container {
+    padding: 0 1rem;
+  }
+}
