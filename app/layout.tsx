@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import "./styles/organism.css"
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://kodex-compliance.com"),
   title: {
-    default: "Kodex SEO Engine",
-    template: "%s | Kodex SEO Engine",
+    default: "Kodex",
+    template: "%s | Kodex",
   },
-  description: "Automated SEO, LLM discovery, traffic capture and lead attribution for Kodex.",
+  description: "EU compliance assessments, deadline intelligence and source-backed readiness paths for growth teams.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -18,17 +19,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div className="site-shell">
           <header className="topbar">
             <Link className="brand" href="/">
-              Kodex SEO Engine
+              Kodex
             </Link>
             <nav className="nav" aria-label="Primary">
-              <Link href="/learn/seo/llm-discovery">Process</Link>
-              <Link href="/llms.txt">LLMs</Link>
-              <Link href="/api/seo/ai-sitemap">AI Sitemap</Link>
-              <a href="/admin/leads">Leads</a>
+              <Link href="/deadlines/eu-ai-act">Deadlines</Link>
+              <Link href="/compare/vanta-vs-kodex">Compare</Link>
+              <Link href="/assess/eu-ai-act">Assessment</Link>
             </nav>
           </header>
           {children}
-          <footer className="footer">SEO pages publish only after source, quality, indexing and attribution checks pass.</footer>
+          <footer className="footer">Source-backed compliance pages publish only after quality, indexing and attribution checks pass.</footer>
         </div>
       </body>
     </html>
