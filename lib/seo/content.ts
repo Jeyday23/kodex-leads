@@ -1,67 +1,68 @@
 import type { SeoContentBody, SeoContentPage, SeoInternalLink, SeoPageType, SeoSource } from "./types";
 import { getSeoSupabase } from "./db";
+import { listGeneratedContentPages } from "./local-store";
 
 const now = "2026-07-31T00:00:00.000Z";
 
 const seedSources: SeoSource[] = [
   {
-    authority: "Google Search Central",
-    title: "Search Essentials",
-    sourceUrl: "https://developers.google.com/search/docs/essentials",
-    publishedAt: "2024-01-01T00:00:00.000Z",
-    supportedClaim: "Indexable pages need crawlable URLs, useful content, accurate metadata and clear page purpose.",
+    authority: "European Union",
+    title: "Regulation (EU) 2024/1689 laying down harmonised rules on artificial intelligence",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    publishedAt: "2024-07-12T00:00:00.000Z",
+    supportedClaim: "EU AI Act obligations phase in by role, system risk category and application date.",
   },
   {
-    authority: "Answer Engine Optimization Operations",
-    title: "Machine-readable content inventory",
-    sourceUrl: "https://llmstxt.org/",
+    authority: "European Commission",
+    title: "AI Act implementation information",
+    sourceUrl: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
     publishedAt: "2024-08-01T00:00:00.000Z",
-    supportedClaim: "LLM discovery improves when canonical pages, summaries and source links are exposed in predictable machine-readable formats.",
+    supportedClaim: "Implementation timing and guidance should be checked against official EU sources.",
   },
 ];
 
 const baseBody: SeoContentBody = {
   summary:
-    "The SEO engine turns search demand into structured pages, LLM-readable context, attribution events and scored leads.",
+    "Kodex turns EU compliance pressure into a source-backed assessment path, prioritized remediation and measurable follow-up.",
   keyFacts: [
-    "Indexable pages require clear intent, crawlable URLs, source support and structured metadata.",
-    "LLM-ready pages need concise answer sections, canonical references and machine-readable discovery feeds.",
-    "Weak or duplicate pages remain noindex until remediated.",
+    "Source-backed scans separate factual obligations from interpretation-heavy review.",
+    "High-risk AI, privacy, cyber and resilience obligations can overlap across teams.",
+    "Every assessment preserves landing-page and framework attribution for lead quality measurement.",
   ],
   sections: [
     {
-      heading: "Search demand",
+      heading: "What to check first",
       body:
-        "The system tracks topic opportunities, ranks them by commercial value and publishes only pages with distinct search intent.",
+        "Start with the framework, system role, company context, timeline and existing evidence before selecting controls or tools.",
     },
     {
-      heading: "LLM discovery",
+      heading: "How Kodex verifies",
       body:
-        "Every indexable page can appear in sitemap XML, llms.txt and a JSON AI sitemap so retrieval systems can identify canonical URLs and summaries.",
+        "Claude synthesis, batch evaluation, a skeptic pass and counselor verification combine automation speed with human review where interpretation matters.",
     },
     {
-      heading: "Traffic conversion",
+      heading: "What happens next",
       body:
-        "High-intent visitors are routed into assessment forms where landing page, query cluster and content attribution are preserved for lead scoring.",
+        "The assessment produces a scored readiness signal, routes high-intent teams to follow-up and keeps weak or unsupported content out of the public index.",
     },
   ],
-  nextAction: { label: "Run the SEO traffic assessment", href: "/assess/seo" },
+  nextAction: { label: "Run the EU AI Act assessment", href: "/assess/eu-ai-act" },
 };
 
 const seedPages: SeoContentPage[] = [
   {
-    id: "seed-seo-llm-discovery",
-    slug: "llm-discovery",
+    id: "seed-eu-ai-act-high-risk",
+    slug: "high-risk-obligations",
     language: "en",
     pageType: "learn",
-    title: "LLM Discovery SEO Process",
-    description: "How to structure crawlable, citeable pages for Google, ChatGPT, Claude, Perplexity and other answer engines.",
+    title: "EU AI Act High-Risk Obligations",
+    description: "A source-backed entry point for teams deploying or operating high-risk AI systems before enforcement deadlines.",
     body: baseBody,
-    framework: "seo",
-    jurisdiction: "Global",
-    primaryKeyword: "llm seo process",
-    searchIntent: "answer-engine-optimization",
-    targetTool: "/assess/seo",
+    framework: "eu-ai-act",
+    jurisdiction: "EU",
+    primaryKeyword: "eu ai act high risk obligations",
+    searchIntent: "deadline-readiness",
+    targetTool: "/assess/eu-ai-act",
     qualityScore: 92,
     reviewStatus: "published",
     legalInterpretation: false,
@@ -71,27 +72,27 @@ const seedPages: SeoContentPage[] = [
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/assess/seo", label: "SEO traffic assessment", relationship: "conversion" },
-      { href: "/deadlines/seo", label: "SEO automation cadence", relationship: "cluster" },
-      { href: "/compare/google-vs-llm-search", label: "Google vs LLM search", relationship: "cluster" },
+      { href: "/assess/eu-ai-act", label: "EU AI Act assessment", relationship: "conversion" },
+      { href: "/deadlines/eu-ai-act", label: "EU AI Act deadlines", relationship: "cluster" },
+      { href: "/compare/vanta-vs-kodex", label: "Vanta vs Kodex", relationship: "cluster" },
     ],
   },
   {
-    id: "seed-seo-cadence",
-    slug: "seo",
+    id: "seed-eu-ai-act-deadline",
+    slug: "eu-ai-act",
     language: "en",
     pageType: "deadline",
-    title: "SEO Automation Cadence",
-    description: "A practical operating cadence for source checks, publishing, LLM discovery updates and traffic-to-lead measurement.",
+    title: "EU AI Act Enforcement Deadline",
+    description: "Deadline-focused guidance for high-risk AI Act readiness and assessment routing.",
     body: {
       ...baseBody,
-      nextAction: { label: "Check SEO automation readiness", href: "/assess/seo" },
+      nextAction: { label: "Check AI Act readiness", href: "/assess/eu-ai-act" },
     },
-    framework: "seo",
-    jurisdiction: "Global",
-    primaryKeyword: "seo automation cadence",
-    searchIntent: "operations",
-    targetTool: "/assess/seo",
+    framework: "eu-ai-act",
+    jurisdiction: "EU",
+    primaryKeyword: "eu ai act deadline august 2026",
+    searchIntent: "deadline",
+    targetTool: "/assess/eu-ai-act",
     qualityScore: 90,
     reviewStatus: "published",
     legalInterpretation: false,
@@ -101,27 +102,27 @@ const seedPages: SeoContentPage[] = [
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/learn/seo/llm-discovery", label: "LLM discovery SEO process", relationship: "parent" },
-      { href: "/assess/seo", label: "SEO traffic assessment", relationship: "conversion" },
-      { href: "/compare/google-vs-llm-search", label: "Google vs LLM search", relationship: "cluster" },
+      { href: "/learn/eu-ai-act/high-risk-obligations", label: "High-risk obligations", relationship: "parent" },
+      { href: "/assess/eu-ai-act", label: "EU AI Act assessment", relationship: "conversion" },
+      { href: "/compare/vanta-vs-kodex", label: "Vanta vs Kodex", relationship: "cluster" },
     ],
   },
   {
-    id: "seed-google-vs-llm-search",
-    slug: "google-vs-llm-search",
+    id: "seed-vanta-vs-kodex",
+    slug: "vanta-vs-kodex",
     language: "en",
     pageType: "compare",
-    title: "Google Search vs LLM Discovery",
-    description: "How SEO infrastructure can serve both traditional search crawlers and AI answer-engine retrieval systems.",
+    title: "Vanta vs Kodex for EU Compliance",
+    description: "A comparison of US-centric compliance tooling and EU-native compliance depth for AI Act, NIS2, DORA and GDPR teams.",
     body: {
       ...baseBody,
-      nextAction: { label: "Assess SEO traffic readiness", href: "/assess/seo" },
+      nextAction: { label: "Assess framework coverage", href: "/assess/gdpr" },
     },
-    framework: "seo",
-    jurisdiction: "Global",
-    primaryKeyword: "google search vs llm discovery",
+    framework: "gdpr",
+    jurisdiction: "EU",
+    primaryKeyword: "vanta vs kodex eu compliance",
     searchIntent: "comparison",
-    targetTool: "/assess/seo",
+    targetTool: "/assess/gdpr",
     qualityScore: 88,
     reviewStatus: "published",
     legalInterpretation: false,
@@ -131,36 +132,36 @@ const seedPages: SeoContentPage[] = [
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/learn/seo/llm-discovery", label: "LLM discovery SEO process", relationship: "cluster" },
-      { href: "/llms.txt", label: "LLM discovery file", relationship: "machine-readable" },
-      { href: "/api/seo/ai-sitemap", label: "AI sitemap", relationship: "machine-readable" },
+      { href: "/learn/eu-ai-act/high-risk-obligations", label: "AI Act high-risk obligations", relationship: "cluster" },
+      { href: "/assess/gdpr", label: "GDPR assessment", relationship: "conversion" },
+      { href: "/deadlines/eu-ai-act", label: "AI Act deadlines", relationship: "cluster" },
     ],
   },
   {
-    id: "seed-answer-engine-readiness",
-    slug: "readiness-signals",
+    id: "seed-nis2-saas-founders",
+    slug: "saas-founder-readiness",
     language: "en",
-    pageType: "enforcement",
-    title: "Answer Engine Readiness Signals",
-    description: "Review-gated guidance for evaluating whether pages are likely to be understood, cited and converted by AI search systems.",
+    pageType: "learn",
+    title: "NIS2 Readiness for SaaS Founders",
+    description: "A practical starting point for DACH SaaS founders evaluating cyber and compliance exposure.",
     body: baseBody,
-    framework: "seo",
-    jurisdiction: "Global",
-    primaryKeyword: "answer engine optimization readiness",
-    searchIntent: "llm-visibility",
-    targetTool: "/assess/seo",
+    framework: "nis2",
+    jurisdiction: "EU",
+    primaryKeyword: "nis2 readiness saas founders",
+    searchIntent: "self-serve-assessment",
+    targetTool: "/assess/nis2",
     qualityScore: 84,
-    reviewStatus: "review",
-    legalInterpretation: true,
+    reviewStatus: "published",
+    legalInterpretation: false,
     canonicalUrl: null,
-    noindex: true,
-    publishedAt: null,
+    noindex: false,
+    publishedAt: now,
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/learn/seo/llm-discovery", label: "LLM discovery SEO process", relationship: "parent" },
-      { href: "/deadlines/seo", label: "SEO automation cadence", relationship: "cluster" },
-      { href: "/assess/seo", label: "SEO traffic assessment", relationship: "conversion" },
+      { href: "/assess/nis2", label: "NIS2 assessment", relationship: "conversion" },
+      { href: "/compare/vanta-vs-kodex", label: "Vanta vs Kodex", relationship: "cluster" },
+      { href: "/deadlines/eu-ai-act", label: "AI Act deadlines", relationship: "cluster" },
     ],
   },
 ];
@@ -172,6 +173,7 @@ function parseBody(body: unknown): SeoContentBody {
     summary: candidate.summary ?? baseBody.summary,
     sections: Array.isArray(candidate.sections) && candidate.sections.length > 0 ? candidate.sections : baseBody.sections,
     keyFacts: candidate.keyFacts,
+    claimLedger: candidate.claimLedger,
     nextAction: candidate.nextAction,
   };
 }
@@ -254,7 +256,10 @@ export function isIndexablePage(page: SeoContentPage): boolean {
 
 export async function getIndexedContentPages(): Promise<SeoContentPage[]> {
   const supabase = getSeoSupabase();
-  if (!supabase) return seedPages.filter(isIndexablePage);
+  if (!supabase) {
+    const generated = await listGeneratedContentPages();
+    return [...generated, ...seedPages].filter(isIndexablePage);
+  }
 
   const { data, error } = await supabase
     .from("content_pages")
@@ -271,7 +276,8 @@ export async function getIndexedContentPages(): Promise<SeoContentPage[]> {
 export async function getSeoPageByRoute(pageType: SeoPageType, slug: string, framework?: string): Promise<SeoContentPage | null> {
   const supabase = getSeoSupabase();
   if (!supabase) {
-    return seedPages.find((page) => page.pageType === pageType && page.slug === slug && (!framework || page.framework === framework)) ?? null;
+    const generated = await listGeneratedContentPages();
+    return [...generated, ...seedPages].find((page) => page.pageType === pageType && page.slug === slug && (!framework || page.framework === framework)) ?? null;
   }
 
   let query = supabase.from("content_pages").select(contentSelect).eq("page_type", pageType).eq("slug", slug).limit(1);
@@ -291,7 +297,10 @@ export async function getSeoPagesForFramework(framework: string): Promise<SeoCon
 
 export async function getAllSeoPages(): Promise<SeoContentPage[]> {
   const supabase = getSeoSupabase();
-  if (!supabase) return seedPages;
+  if (!supabase) {
+    const generated = await listGeneratedContentPages();
+    return [...generated, ...seedPages];
+  }
 
   const { data, error } = await supabase
     .from("content_pages")
@@ -305,7 +314,10 @@ export async function getAllSeoPages(): Promise<SeoContentPage[]> {
 
 export async function getPendingSeoPages(): Promise<SeoContentPage[]> {
   const supabase = getSeoSupabase();
-  if (!supabase) return seedPages.filter((page) => page.reviewStatus === "review" || page.reviewStatus === "draft");
+  if (!supabase) {
+    const generated = await listGeneratedContentPages();
+    return [...generated, ...seedPages].filter((page) => page.reviewStatus === "review" || page.reviewStatus === "draft");
+  }
 
   const { data, error } = await supabase
     .from("content_pages")

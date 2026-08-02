@@ -6,17 +6,17 @@ export async function GET() {
   const base = getSiteUrl();
   const pages = await getIndexedContentPages();
   const body = [
-    "# Kodex SEO Engine",
+    "# Kodex",
     "",
-    "Kodex publishes source-backed SEO process pages, LLM discovery feeds, assessment workflows and traffic-to-lead attribution pages.",
+    "Kodex publishes source-backed EU compliance pages, deadline intelligence, comparison pages, assessment workflows and traffic-to-lead attribution paths.",
     "",
-    "## Canonical SEO Pages",
+    "## Canonical Compliance Pages",
     ...pages.map((page) => `- [${page.title}](${base}${pathForSeoPage(page)}): ${page.description}`),
     "",
     "## Primary Conversion Paths",
-    `- [SEO Traffic Assessment](${base}/assess/seo)`,
-    `- [SEO Queue](${base}/admin/seo)`,
-    `- [Lead Inbox](${base}/admin/leads)`,
+    `- [EU AI Act Assessment](${base}/assess/eu-ai-act)`,
+    `- [GDPR Assessment](${base}/assess/gdpr)`,
+    `- [NIS2 Assessment](${base}/assess/nis2)`,
     "",
     "## Content Policy",
     "Indexable pages require source support, canonical URLs, internal links, structured data and a conversion path. Weak, duplicate or unsupported pages stay noindex.",

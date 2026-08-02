@@ -10,9 +10,16 @@ export function normalizeFramework(framework: string): string {
 }
 
 export function displayFramework(framework?: string | null): string {
-  if (!framework) return "SEO";
+  if (!framework) return "Compliance";
   const labels: Record<string, string> = {
-    seo: "SEO",
+    "eu-ai-act": "EU AI Act",
+    gdpr: "GDPR",
+    nis2: "NIS2",
+    dora: "DORA",
+    "iso-27001": "ISO 27001",
+    soc2: "SOC 2",
+    cra: "Cyber Resilience Act",
+    "product-liability": "Product Liability",
   };
   return labels[framework] ?? framework.split("-").map((part) => part.toUpperCase()).join(" ");
 }

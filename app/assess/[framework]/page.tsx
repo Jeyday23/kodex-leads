@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: AssessmentPageProps): Promise
   const label = displayFramework(framework);
   return {
     title: `${label} Readiness Assessment`,
-    description: `Capture and score ${label} compliance readiness leads from SEO traffic.`,
+    description: `Capture and score ${label} compliance readiness leads from acquisition traffic.`,
     robots: { index: false, follow: true },
   };
 }
@@ -26,7 +26,7 @@ export default async function AssessmentPage({ params }: AssessmentPageProps) {
         <p className="eyebrow">Assessment</p>
         <h1>{label} Readiness Assessment</h1>
         <p className="summary">
-          Capture visitor context, score lead quality, attach SEO attribution and route the result toward nurture, sales review or demo booking.
+          Capture visitor context, score lead quality, attach acquisition attribution and route the result toward nurture, sales review or demo booking.
         </p>
       </section>
 
@@ -34,7 +34,7 @@ export default async function AssessmentPage({ params }: AssessmentPageProps) {
         <div>
           <h2>Qualification Logic</h2>
           <p>
-            The score weights company size, AI exposure, SEO maturity gaps, urgency and topic fit. High-intent leads are marked for sales review or demo follow-up.
+            The score weights company size, AI exposure, compliance maturity gaps, urgency and topic fit. High-intent leads are marked for sales review or demo follow-up.
           </p>
         </div>
         <LeadForm framework={framework} />

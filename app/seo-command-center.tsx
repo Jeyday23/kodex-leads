@@ -12,17 +12,23 @@ interface DiscoveryLead {
   suggestedLandingPage: string;
   confidence: number;
   source: string;
+  sourceUrl: string;
+  retrievedAt: string;
+  contactEmail?: string | null;
 }
 
 interface DiscoveryResponse {
   status: string;
   result: {
-    mode: "live" | "local-test";
+    mode: "live";
     searchedAt: string;
     query: string;
     leads: DiscoveryLead[];
+    errors: string[];
     nextActions: string[];
   };
+  errors?: string[];
+  error?: string;
 }
 
 const thinkingSteps = [
@@ -46,14 +52,16 @@ export function SeoCommandCenter() {
     const body = await response.json();
     setIsRunning(false);
     if (!response.ok) {
-      setError(body.error ?? "Lead discovery failed.");
+      const details = Array.isArray(body.errors) && body.errors.length > 0 ? ` ${body.errors.join(" ")}` : "";
+      setError(`${body.error ?? "Lead discovery returned no live leads."}${details}`);
+      if (body.result) setResult(body.result);
       return;
     }
     setResult(body.result);
   }
 
   return (
-    <main className="main command-center">
+    <section className="command-center">
       <section className="command-hero">
         <div>
           <p className="eyebrow">Autonomous SEO engine</p>
@@ -82,11 +90,12 @@ export function SeoCommandCenter() {
         <section className="discovery-results" aria-label="Discovered lead candidates">
           <div className="result-heading">
             <div>
-              <p className="eyebrow">{result.mode === "live" ? "Live discovery" : "Local test mode"}</p>
+              <p className="eyebrow">Live discovery</p>
               <h2>{result.leads.length} lead candidates found</h2>
             </div>
             <a className="secondary-link" href="/admin/leads">Open Lead Inbox</a>
           </div>
+          {result.errors.length > 0 ? <p className="notice">{result.errors.join(" ")}</p> : null}
           <div className="lead-cards">
             {result.leads.map((lead) => (
               <article className="lead-card" key={lead.id}>
@@ -103,6 +112,10 @@ export function SeoCommandCenter() {
                   <div>
                     <dt>Landing page</dt>
                     <dd>{lead.suggestedLandingPage}</dd>
+                  </div>
+                  <div>
+                    <dt>Source</dt>
+                    <dd><a href={lead.sourceUrl}>{lead.source}</a></dd>
                   </div>
                   <div>
                     <dt>Confidence</dt>
@@ -129,7 +142,7 @@ export function SeoCommandCenter() {
           <p>Discovery, scoring, local persistence, admin inbox and optional Slack/HubSpot routing.</p>
         </article>
       </section>
-    </main>
+    </section>
   );
 }
 

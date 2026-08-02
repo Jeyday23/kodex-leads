@@ -1,16 +1,19 @@
 import { revalidatePath } from "next/cache";
 import { getSeoSupabase } from "./db";
-import { getPendingSeoPages } from "./content";
+import { getAllSeoPages, getPendingSeoPages } from "./content";
+import { generateAndPersistDrafts } from "./content-generation";
 import { evaluateQuality } from "./quality-gate";
 import { pathForSeoPage } from "./urls";
 import type { SeoContentPage } from "./types";
 import { checkApprovedSources, searchConsoleStatus, type SourceCheckResult } from "./source-intelligence";
-import { storeAuditEventLocally } from "./local-store";
+import { storeAuditEventLocally, updateGeneratedContentDecision } from "./local-store";
+import { deriveTopicGraph } from "./topic-graph";
 
 export interface SeoCycleResult {
   checkedAt: string;
   mode: "database" | "seed";
   evaluatedPages: number;
+  generatedDrafts: number;
   published: string[];
   queuedForReview: string[];
   rejected: string[];
@@ -44,6 +47,12 @@ async function persistDecision(page: SeoContentPage, score: number, decision: "p
       contentId: page.id,
       payload: { score, noindex, route: pathForSeoPage(page), storage: "local" },
     });
+    await updateGeneratedContentDecision(page.id, {
+      qualityScore: score,
+      reviewStatus: decision === "publish" ? "published" : decision === "reject" ? "rejected" : "review",
+      noindex,
+      publishedAt: decision === "publish" ? new Date().toISOString() : page.publishedAt,
+    });
     return;
   }
 
@@ -67,12 +76,15 @@ async function persistDecision(page: SeoContentPage, score: number, decision: "p
 export async function runSeoIntelligenceCycle(): Promise<SeoCycleResult> {
   const checkedAt = new Date().toISOString();
   const sourceChecks = await checkApprovedSources();
+  const existingPages = await getAllSeoPages();
+  const generatedDrafts = await generateAndPersistDrafts(deriveTopicGraph(sourceChecks, existingPages), sourceChecks);
   const pages = await getPendingSeoPages();
   const mode = getSeoSupabase() ? "database" : "seed";
   const result: SeoCycleResult = {
     checkedAt,
     mode,
     evaluatedPages: pages.length,
+    generatedDrafts: generatedDrafts.length,
     published: [],
     queuedForReview: [],
     rejected: [],
@@ -91,7 +103,7 @@ export async function runSeoIntelligenceCycle(): Promise<SeoCycleResult> {
   }
 
   if (sourceChecks.some((check) => check.status === "configured")) {
-    result.nextActions.push("Set SEO_SOURCE_FETCH_ENABLED=true to fetch and hash approved SEO sources during cron.");
+    result.nextActions.push("Set SEO_SOURCE_FETCH_ENABLED=true to fetch and hash approved compliance sources during cron.");
   }
 
   for (const page of pages) {
@@ -116,6 +128,7 @@ export async function runSeoIntelligenceCycle(): Promise<SeoCycleResult> {
     payload: {
       mode,
       evaluatedPages: result.evaluatedPages,
+      generatedDrafts: result.generatedDrafts,
       published: result.published.length,
       queuedForReview: result.queuedForReview.length,
       rejected: result.rejected.length,

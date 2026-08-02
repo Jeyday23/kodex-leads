@@ -91,7 +91,7 @@ export function LeadForm({ framework }: LeadFormProps) {
           </select>
         </label>
         <label>
-          SEO maturity
+          Compliance maturity
           <select name="complianceMaturity" required defaultValue="starting">
             <option value="unknown">Unknown</option>
             <option value="starting">Starting now</option>

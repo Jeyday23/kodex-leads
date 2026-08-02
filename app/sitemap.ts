@@ -8,7 +8,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const contentPages = await getIndexedContentPages();
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/assess/seo`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/assess/eu-ai-act`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/assess/gdpr`, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${base}/assess/nis2`, changeFrequency: "monthly", priority: 0.85 },
     { url: `${base}/llms.txt`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/api/seo/ai-sitemap`, changeFrequency: "weekly", priority: 0.6 }
   ];

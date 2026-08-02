@@ -38,17 +38,17 @@ export function scoreLead(input: LeadCaptureInput): LeadScoreResult {
   if (companySizeScore[input.companySize] >= 20) reasons.push("Company size indicates meaningful compliance exposure.");
 
   score += aiUseScore[input.aiUse];
-  if (input.aiUse === "customer-facing" || input.aiUse === "high-risk") reasons.push("AI usage indicates strong answer-engine optimization relevance.");
+  if (input.aiUse === "customer-facing" || input.aiUse === "high-risk") reasons.push("AI usage indicates meaningful compliance exposure.");
 
   score += maturityScore[input.complianceMaturity];
-  if (input.complianceMaturity === "starting" || input.complianceMaturity === "unknown") reasons.push("SEO operating system may need structure and instrumentation.");
+  if (input.complianceMaturity === "starting" || input.complianceMaturity === "unknown") reasons.push("Compliance program may need structure and instrumentation.");
 
   score += urgencyScore[input.urgency];
   if (input.urgency === "this-month" || input.urgency === "immediate") reasons.push("Timeline suggests near-term buying intent.");
 
-  if (input.framework === "seo" || input.framework === "llm") {
+  if (["eu-ai-act", "gdpr", "nis2", "dora", "cra"].includes(input.framework)) {
     score += 6;
-    reasons.push("Topic aligns with SEO and LLM discovery routing.");
+    reasons.push("Framework aligns with Kodex assessment routing.");
   }
 
   score = Math.min(100, score);

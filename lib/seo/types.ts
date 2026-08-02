@@ -9,6 +9,8 @@ export interface SeoSource {
   publishedAt?: string | null;
   effectiveAt?: string | null;
   supportedClaim?: string;
+  retrievedAt?: string | null;
+  contentHash?: string | null;
 }
 
 export interface SeoInternalLink {
@@ -27,6 +29,7 @@ export interface SeoContentBody {
   summary: string;
   sections: SeoSection[];
   keyFacts?: string[];
+  claimLedger?: ClaimLedgerEntry[];
   nextAction?: {
     label: string;
     href: string;
@@ -55,6 +58,24 @@ export interface SeoContentPage {
   updatedAt: string;
   sources: SeoSource[];
   internalLinks: SeoInternalLink[];
+}
+
+export interface ClaimLedgerEntry {
+  claim: string;
+  sourceUrl: string;
+  sourceTitle: string;
+  retrievalHash: string;
+  retrievedAt: string;
+}
+
+export interface SeoRevisionTask {
+  id: string;
+  contentId: string;
+  source: "openai" | "anthropic" | "perplexity" | "source-monitor";
+  targetQuery: string;
+  recommendedChange: string;
+  status: "queued" | "applied";
+  createdAt: string;
 }
 
 export interface SeoMetricSnapshot {

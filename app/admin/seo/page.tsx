@@ -3,8 +3,9 @@ import { getAllSeoPages } from "@/lib/seo/content";
 import { displayFramework } from "@/lib/seo/config";
 import { evaluateQuality } from "@/lib/seo/quality-gate";
 import { pathForSeoPage } from "@/lib/seo/urls";
-import { listLocalAuditEvents } from "@/lib/seo/local-store";
+import { listLocalAuditEvents, listRevisionTasks } from "@/lib/seo/local-store";
 import { getAiProviderStatuses } from "@/lib/seo/llm-providers";
+import { SeoCommandCenter } from "@/app/seo-command-center";
 
 export const metadata: Metadata = {
   title: "SEO Automation Queue",
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 export default async function SeoAdminPage() {
   const pages = await getAllSeoPages();
   const auditEvents = await listLocalAuditEvents(8);
+  const revisionTasks = await listRevisionTasks(8);
   const aiProviders = getAiProviderStatuses();
   const evaluated = pages.map((page) => {
     const quality = evaluateQuality({
@@ -75,10 +77,29 @@ export default async function SeoAdminPage() {
           <p className="eyebrow">Answer-engine automation</p>
           <h2>ChatGPT, Claude and Perplexity checks run from one protected endpoint.</h2>
           <p>
-            Configure provider keys and model names, then call `/api/seo/llm-sync` with the cron bearer token to generate provider-specific visibility recommendations.
+            Configure provider keys and model names, then call `/api/seo/llm-sync` with the cron bearer token to queue provider-specific page revision tasks and citation checks.
           </p>
         </div>
         <a className="cta" href="/api/seo/ai-sitemap">Open AI Sitemap</a>
+      </section>
+
+      <section className="admin-command-panel" aria-label="Internal SEO command center">
+        <SeoCommandCenter />
+      </section>
+
+      <section className="article audit-list" aria-label="Answer-engine revision tasks">
+        <h2>Queued Revision Tasks</h2>
+        {revisionTasks.length === 0 ? (
+          <p>No answer-engine revision tasks queued yet.</p>
+        ) : (
+          revisionTasks.map((task) => (
+            <article className="section" key={task.id}>
+              <p className="eyebrow">{task.source} / {task.status}</p>
+              <h2>{task.targetQuery}</h2>
+              <p>{task.recommendedChange}</p>
+            </article>
+          ))
+        )}
       </section>
 
       <section className="queue-table" aria-label="SEO page queue">

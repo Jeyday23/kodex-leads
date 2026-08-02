@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { getSourceSnapshot, storeSourceSnapshot } from "./local-store";
 
 export interface SourceCheckResult {
   name: string;
@@ -10,12 +11,12 @@ export interface SourceCheckResult {
 
 const approvedSources = [
   {
-    name: "Google Search Essentials",
-    url: "https://developers.google.com/search/docs/essentials",
+    name: "EU Artificial Intelligence Act",
+    url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
   },
   {
-    name: "LLM discovery file convention",
-    url: "https://llmstxt.org/",
+    name: "European Commission AI Act policy",
+    url: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
   },
 ];
 
@@ -28,24 +29,28 @@ export async function checkApprovedSources(): Promise<SourceCheckResult[]> {
     return approvedSources.map((source) => ({
       ...source,
       status: "configured",
-      note: "Set SEO_SOURCE_FETCH_ENABLED=true to fetch and hash approved SEO source pages during cron.",
+      note: "Set SEO_SOURCE_FETCH_ENABLED=true to fetch and hash approved compliance source pages during cron.",
     }));
   }
 
   const checks: SourceCheckResult[] = [];
   for (const source of approvedSources) {
     try {
-      const response = await fetch(source.url, { headers: { "user-agent": "Kodex SEO monitor" } });
+      const response = await fetch(source.url, { headers: { "user-agent": "Kodex compliance monitor" } });
       if (!response.ok) {
         checks.push({ ...source, status: "unavailable", note: `HTTP ${response.status}` });
         continue;
       }
 
       const text = await response.text();
+      const contentHash = createHash("sha256").update(text).digest("hex");
+      const previous = await getSourceSnapshot(source.url);
+      await storeSourceSnapshot(source.url, contentHash, new Date().toISOString());
       checks.push({
         ...source,
-        status: "unchanged",
-        contentHash: createHash("sha256").update(text).digest("hex"),
+        status: previous && previous.contentHash !== contentHash ? "changed" : "unchanged",
+        contentHash,
+        note: previous ? undefined : "Initial retrieval hash stored for future change detection.",
       });
     } catch (error) {
       checks.push({
