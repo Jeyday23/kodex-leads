@@ -3,6 +3,7 @@
 import { Box, Container, Grid, Stack, Typography, Card, CardContent } from "@mui/material";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Users, TrendingUp, CheckCircle, AlertCircle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const mockMetrics = [
   { name: "Jan", leads: 120, completed: 45 },
@@ -13,7 +14,7 @@ const mockMetrics = [
   { name: "Jun", leads: 420, completed: 267 },
 ];
 
-const StatCard = ({ icon: Icon, title, value, change }: any) => (
+const StatCard = ({ icon: Icon, title, value, change }: { icon: LucideIcon; title: string; value: string; change: number }) => (
   <Card sx={{ border: "1px solid #e2e8f0" }}>
     <CardContent sx={{ p: 3 }}>
       <Stack spacing={2}>
