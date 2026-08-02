@@ -1,17 +1,19 @@
-import { OrganismHero } from "./components/OrganismHero"
-import { HowItWorks } from "./components/HowItWorks"
-import { LiveResults } from "./components/LiveResults"
-import { Features } from "./components/Features"
-import { CTASection } from "./components/CTASection"
+"use client";
+
+import { Box, Container, Typography, Button, Grid, Card, CardContent, Chip } from "@mui/material";
+import { ArrowRight, CheckCircle, Zap, BarChart3, Shield, Layers } from "lucide-react";
+import HeroSection from "./components/landing/HeroSection";
+import FeaturesSection from "./components/landing/FeaturesSection";
+import PricingSection from "./components/landing/PricingSection";
+import CTASection from "./components/landing/CTASection";
 
 export default function Home() {
   return (
-    <main className="organism-page">
-      <OrganismHero />
-      <HowItWorks />
-      <LiveResults />
-      <Features />
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
+      <HeroSection />
+      <FeaturesSection />
+      <PricingSection />
       <CTASection />
-    </main>
-  )
+    </Box>
+  );
 }
