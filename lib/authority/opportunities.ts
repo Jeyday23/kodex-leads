@@ -5,6 +5,7 @@ import { getAllSeoPages } from "@/lib/seo/content";
 import { checkApprovedSources, searchConsoleStatus } from "@/lib/seo/source-intelligence";
 import { calculateOpportunityScore, demandLabel, normalizeQuery, recommendedDecision } from "./opportunity-scoring";
 import { getProviderStatuses } from "./providers";
+import { contentGapScore, isSemanticDuplicate } from "./opportunity-scoring";
 
 export interface AuthorityOpportunity {
   id: string;
@@ -37,6 +38,8 @@ export interface OpportunityFilters {
   status?: string | null;
   source?: string | null;
   sort?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
   limit?: number;
   offset?: number;
 }
@@ -64,6 +67,8 @@ export async function listOpportunities(filters: OpportunityFilters = {}) {
   if (filters.language) query = query.eq("language", filters.language);
   if (filters.status) query = query.eq("status", filters.status);
   if (filters.source) query = query.eq("source", filters.source);
+  if (filters.dateFrom) query = query.gte("last_seen_at", filters.dateFrom);
+  if (filters.dateTo) query = query.lte("last_seen_at", filters.dateTo);
 
   const ascending = filters.sort === "priority-low";
   query = query
@@ -86,6 +91,17 @@ export async function getOpportunity(id: string) {
   if (!supabase) return null;
   const { data } = await supabase.from("authority_opportunities").select("*").eq("id", id).maybeSingle();
   return data ? mapOpportunity(data) : null;
+}
+
+export async function listDiscoveryRuns(limit = 25) {
+  const supabase = getSeoSupabase();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("authority_discovery_runs")
+    .select("id,idempotency_key,run_type,trigger_type,actual_start_at,completed_at,status,items_processed,items_created,items_updated,items_skipped,duplicate_count,failures,duration_ms")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return data ?? [];
 }
 
 export async function createOpportunity(input: { query: string; framework?: string; topicCluster?: string; intent?: string; country?: string; language?: string; actor?: string }) {
@@ -175,12 +191,16 @@ export async function runOpportunityDiscovery(options: { actor?: string; runType
   let itemsCreated = 0;
   let itemsUpdated = 0;
   let itemsSkipped = 0;
+  let duplicateCount = 0;
 
   for (const candidate of candidates) {
     const result = await upsertOpportunity({ ...candidate, projectId });
     if (result.action === "created") itemsCreated += 1;
     else if (result.action === "updated") itemsUpdated += 1;
-    else itemsSkipped += 1;
+    else {
+      itemsSkipped += 1;
+      if (result.action === "duplicate") duplicateCount += 1;
+    }
 
     if (run?.id) {
       await supabase.from("authority_discovery_run_items").insert({
@@ -202,7 +222,10 @@ export async function runOpportunityDiscovery(options: { actor?: string; runType
       items_created: itemsCreated,
       items_updated: itemsUpdated,
       items_skipped: itemsSkipped,
+      duplicate_count: duplicateCount,
       provider_failures: providerFailures,
+      failures: providerFailures,
+      trigger_type: options.runType ?? "manual",
       duration_ms: durationMs,
       error_summary: providerFailures.join("\n") || null,
     }).eq("id", run.id);
@@ -220,7 +243,7 @@ export async function runOpportunityDiscovery(options: { actor?: string; runType
     await notify("discovery", "info", "Discovery run completed", `${itemsCreated} new opportunities discovered.`);
   }
 
-  return { status: providerFailures.length > 0 ? "partial" : "completed", itemsProcessed: candidates.length, itemsCreated, itemsUpdated, itemsSkipped, providerFailures, durationMs };
+  return { status: providerFailures.length > 0 ? "partial" : "completed", itemsProcessed: candidates.length, itemsCreated, itemsUpdated, itemsSkipped, duplicateCount, providerFailures, durationMs };
 }
 
 export async function applyOpportunityDecision(id: string, decision: string, actor?: string, payload: Record<string, unknown> = {}) {
@@ -237,9 +260,37 @@ export async function applyOpportunityDecision(id: string, decision: string, act
   if (decision === "Research") await createKnowledgeTask(opportunity, actor);
   if (decision === "Expand") await createEditorialFromOpportunity(opportunity, actor, "Expand existing content");
   if (decision === "Ignore") await notify("opportunity", "info", "Opportunity ignored", opportunity.query);
+  if (decision === "Archive") await supabase.from("authority_opportunities").update({ status: "archived" }).eq("id", id);
 
   await audit(actor, "decision", "authority_opportunity", id, { decision, ...payload });
   return { ok: true };
+}
+
+export async function recalculateOpportunity(id: string, actor?: string) {
+  const supabase = getSeoSupabase();
+  if (!supabase) return { ok: false, error: "Supabase is not configured." };
+  const opportunity = await getOpportunity(id);
+  if (!opportunity) return { ok: false, error: "Opportunity not found." };
+  const gap = contentGapScore(Boolean(opportunity.status === "in_progress"), opportunity.priorityScore);
+  const candidate = scoreCandidate({
+    query: opportunity.query,
+    framework: opportunity.framework ?? "EU AI Act",
+    topicCluster: opportunity.topicCluster,
+    intent: opportunity.intent,
+    buyerStage: opportunity.buyerStage,
+    country: opportunity.country,
+    language: opportunity.language,
+    source: "manual_recalculation",
+    sourceReference: id,
+  });
+  await supabase.from("authority_opportunities").update({
+    content_feasibility_score: 100 - gap,
+    priority_score: candidate.priorityScore,
+    recommended_decision: candidate.recommendedDecision,
+    updated_at: new Date().toISOString(),
+  }).eq("id", id);
+  await audit(actor, "recalculate", "authority_opportunity", id, { priorityScore: candidate.priorityScore, contentGapScore: gap });
+  return { ok: true, priorityScore: candidate.priorityScore, contentGapScore: gap };
 }
 
 export async function mergeOpportunity(id: string, canonicalId: string, actor?: string) {
@@ -326,11 +377,32 @@ async function upsertOpportunity(candidate: ReturnType<typeof scoreCandidate>) {
     .eq("language", candidate.language)
     .maybeSingle();
 
+  if (!existing?.id) {
+    const { data: possibleDuplicates } = await supabase
+      .from("authority_opportunities")
+      .select("id,query")
+      .eq("project_id", projectId)
+      .eq("country", candidate.country)
+      .eq("language", candidate.language)
+      .limit(100);
+    const duplicate = possibleDuplicates?.find((item) => isSemanticDuplicate(item.query, candidate.query));
+    if (duplicate) {
+      await supabase.from("authority_opportunity_duplicates").upsert({
+        canonical_opportunity_id: duplicate.id,
+        duplicate_opportunity_id: duplicate.id,
+        similarity_score: 0.82,
+        reason: `Semantic duplicate candidate skipped: ${candidate.query}`,
+      }, { onConflict: "canonical_opportunity_id,duplicate_opportunity_id" });
+      return { id: duplicate.id, action: "duplicate" as const };
+    }
+  }
+
   const row = {
     project_id: projectId,
     query: candidate.query,
     normalized_query: candidate.normalizedQuery,
     description: candidate.description,
+    summary: candidate.description,
     framework: candidate.framework,
     topic_cluster: candidate.topicCluster,
     intent: candidate.intent,
@@ -338,11 +410,15 @@ async function upsertOpportunity(candidate: ReturnType<typeof scoreCandidate>) {
     country: candidate.country,
     language: candidate.language,
     source: candidate.source,
+    source_type: candidate.source,
     source_reference: candidate.sourceReference,
     search_demand_value: candidate.searchDemandValue,
+    demand_value: candidate.searchDemandValue,
     search_demand_label: candidate.searchDemandLabel,
+    demand_label: candidate.searchDemandLabel,
     demand_source: candidate.demandSource,
     demand_integrity: candidate.demandIntegrity,
+    demand_measurement_type: candidate.demandIntegrity,
     competition_score: candidate.competitionScore,
     regulatory_urgency_score: candidate.regulatoryUrgencyScore,
     product_relevance_score: candidate.productRelevanceScore,
@@ -450,6 +526,7 @@ interface OpportunityRow {
   source: string;
   search_demand_value?: number | null;
   search_demand_label: string;
+  demand_label?: string;
   demand_source: string;
   demand_integrity: string;
   priority_score: number;
@@ -472,7 +549,7 @@ function mapOpportunity(row: OpportunityRow): AuthorityOpportunity {
     language: row.language,
     source: row.source,
     searchDemandValue: row.search_demand_value,
-    searchDemandLabel: row.search_demand_label,
+    searchDemandLabel: row.search_demand_label ?? row.demand_label,
     demandSource: row.demand_source,
     demandIntegrity: row.demand_integrity,
     priorityScore: row.priority_score,

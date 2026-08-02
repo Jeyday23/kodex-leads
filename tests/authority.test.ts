@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { apiError, apiSuccess } from "../lib/authority/api";
 import { summarizeAuthority } from "../lib/authority/analytics";
 import { extractBrandMention, extractCitations, extractCompetitorMentions, extractionConfidence } from "../lib/authority/citation-parser";
-import { calculateOpportunityScore, demandLabel, normalizeQuery, recommendedDecision } from "../lib/authority/opportunity-scoring";
+import { calculateOpportunityScore, contentGapScore, demandLabel, isSemanticDuplicate, normalizeQuery, recommendedDecision, semanticSimilarity } from "../lib/authority/opportunity-scoring";
 
 test("citation parser extracts and deduplicates cited URLs", () => {
   const citations = extractCitations("Kodex is cited at https://kodex-compliance.com/learn. See https://example.com/path.", [
@@ -102,6 +102,17 @@ test("demand labeling avoids invented search volumes", () => {
   assert.equal(demandLabel(72), "High");
   assert.equal(demandLabel(50), "Medium");
   assert.equal(demandLabel(20), "Low");
+});
+
+test("semantic duplicate threshold behavior is deterministic", () => {
+  assert.equal(isSemanticDuplicate("AI Act Article 50 checklist", "Article 50 AI Act checklist"), true);
+  assert.equal(isSemanticDuplicate("AI Act Article 50 checklist", "NIS2 evidence Germany"), false);
+  assert.ok(semanticSimilarity("AI disclosure chatbot", "chatbot AI disclosure") >= 0.82);
+});
+
+test("content gap detection distinguishes missing and existing content", () => {
+  assert.equal(contentGapScore(false, 90), 100);
+  assert.equal(contentGapScore(true, 80), 20);
 });
 
 test("API responses use consistent envelope", async () => {

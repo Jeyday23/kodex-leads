@@ -4,7 +4,7 @@ import { requireAuthorityApi } from "@/lib/authority/auth";
 import { applyOpportunityDecision } from "@/lib/authority/opportunities";
 
 const decisionSchema = z.object({
-  decision: z.enum(["Build", "Expand", "Merge", "Research", "Ignore"]),
+  decision: z.enum(["Build", "Expand", "Merge", "Research", "Ignore", "Archive"]),
   reason: z.string().max(500).optional(),
 });
 

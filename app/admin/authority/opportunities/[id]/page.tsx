@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { OpportunityDecisionButton } from "../../AuthorityActions";
+import { AuthorityActionButton, OpportunityDecisionButton } from "../../AuthorityActions";
 import { getOpportunity } from "@/lib/authority/opportunities";
 
 export const metadata: Metadata = { title: "Authority Opportunity", robots: { index: false, follow: false } };
@@ -23,7 +23,8 @@ export default async function OpportunityDetailPage({ params }: { params: Promis
         <article className="authority-panel">
           <h2>Actions</h2>
           <div className="authority-action-row">
-            {["Build", "Expand", "Merge", "Research", "Ignore"].map((decision) => <OpportunityDecisionButton id={opportunity.id} decision={decision} key={decision} />)}
+            {["Build", "Expand", "Merge", "Research", "Ignore", "Archive"].map((decision) => <OpportunityDecisionButton id={opportunity.id} decision={decision} key={decision} />)}
+            <AuthorityActionButton endpoint={`/api/authority/opportunities/${opportunity.id}/recalculate`} label="Recalculate" />
           </div>
         </article>
       </section>

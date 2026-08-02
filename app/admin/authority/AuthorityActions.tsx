@@ -30,8 +30,9 @@ export function AuthorityActionButton({ endpoint, label, method = "POST", body, 
 }
 
 export function OpportunityDecisionButton({ id, decision, canonicalId }: { id: string; decision: string; canonicalId?: string }) {
-  const endpoint = decision === "Merge" ? `/api/authority/opportunities/${id}/merge` : `/api/authority/opportunities/${id}/decision`;
-  return <AuthorityActionButton endpoint={endpoint} label={`${decision} →`} body={decision === "Merge" ? { canonicalId } : { decision }} className="authority-link-button" />;
+  const useCanonicalMerge = decision === "Merge" && canonicalId;
+  const endpoint = useCanonicalMerge ? `/api/authority/opportunities/${id}/merge` : `/api/authority/opportunities/${id}/decision`;
+  return <AuthorityActionButton endpoint={endpoint} label={`${decision} →`} body={useCanonicalMerge ? { canonicalId } : { decision }} className="authority-link-button" />;
 }
 
 export function NewOpportunityForm() {

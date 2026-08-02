@@ -15,6 +15,8 @@ export default async function OpportunitiesPage({ searchParams }: { searchParams
     status: params.status,
     source: params.source,
     sort: params.sort,
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
     limit: 50,
   });
 
@@ -42,6 +44,8 @@ export default async function OpportunitiesPage({ searchParams }: { searchParams
         <select name="country" defaultValue={params.country ?? ""}><option value="">All countries</option><option>DE</option><option>EU</option></select>
         <select name="language" defaultValue={params.language ?? ""}><option value="">All languages</option><option>en</option><option>de</option></select>
         <select name="status" defaultValue={params.status ?? ""}><option value="">All statuses</option><option>active</option><option>in_progress</option><option>merged</option><option>ignored</option></select>
+        <select name="source" defaultValue={params.source ?? ""}><option value="">All sources</option><option value="configured_topic">Configured topics</option><option value="indexed_content">Indexed content</option><option value="manual">Manual</option></select>
+        <input name="dateFrom" type="date" defaultValue={params.dateFrom ?? ""} aria-label="Date from" />
         <select name="sort" defaultValue={params.sort ?? "priority-high"}><option value="priority-high">Priority: High first</option><option value="priority-low">Priority: Low first</option></select>
         <button type="submit">Apply</button>
       </form>
@@ -59,7 +63,7 @@ export default async function OpportunitiesPage({ searchParams }: { searchParams
             <span>{item.intent}</span>
             <span>{item.searchDemandValue ? item.searchDemandValue : item.searchDemandLabel}</span>
             <span><strong>{item.priorityScore}</strong><i style={{ width: `${item.priorityScore}%` }} /></span>
-            <span><OpportunityDecisionButton id={item.id} decision={item.recommendedDecision} /></span>
+            <span className="authority-row-actions"><OpportunityDecisionButton id={item.id} decision={item.recommendedDecision} /><OpportunityDecisionButton id={item.id} decision="Archive" /></span>
             <span>{new Date(item.lastSeenAt).toLocaleDateString()}</span>
             <span>{item.status}</span>
           </article>

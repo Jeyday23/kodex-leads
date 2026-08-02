@@ -269,6 +269,13 @@ a {
   gap: 10px;
 }
 
+.authority-row-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .authority-icon-button,
 .authority-primary,
 .authority-link-button,

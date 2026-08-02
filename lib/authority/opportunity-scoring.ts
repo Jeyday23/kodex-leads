@@ -47,6 +47,24 @@ export function demandLabel(score: number | null | undefined): "Very high" | "Hi
   return "Low";
 }
 
+export function semanticSimilarity(a: string, b: string): number {
+  const left = new Set(normalizeQuery(a).split(" ").filter(Boolean));
+  const right = new Set(normalizeQuery(b).split(" ").filter(Boolean));
+  if (left.size === 0 || right.size === 0) return 0;
+  const intersection = [...left].filter((term) => right.has(term)).length;
+  const union = new Set([...left, ...right]).size;
+  return Number((intersection / union).toFixed(2));
+}
+
+export function isSemanticDuplicate(a: string, b: string, threshold = 0.82): boolean {
+  return semanticSimilarity(a, b) >= threshold;
+}
+
+export function contentGapScore(hasExistingContent: boolean, relevanceScore: number): number {
+  if (!hasExistingContent) return 100;
+  return Math.max(0, 100 - Math.min(Math.max(relevanceScore, 0), 100));
+}
+
 function normalize(value: number): number {
   if (Number.isNaN(value)) return 0;
   return Math.min(Math.max(value, 0), 100);
