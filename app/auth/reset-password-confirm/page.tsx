@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 import { updatePassword } from "@/lib/auth-client";
 
 export default function ResetPasswordConfirmPage() {
@@ -29,7 +30,7 @@ export default function ResetPasswordConfirmPage() {
 
     try {
       await updatePassword(password);
-      router.push("/auth/login?message=Password updated successfully");
+      router.push("/auth/login?message=Password%20updated%20successfully" as Route);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Password update failed");
     } finally {

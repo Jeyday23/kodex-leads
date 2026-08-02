@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import type { Route } from "next";
 import { signIn } from "@/lib/auth-client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -44,7 +45,7 @@ export default function LoginPage() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{" "}
             <Link
-              href="/auth/signup"
+              href={"/auth/signup" as Route}
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               create a new account
@@ -103,7 +104,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-end">
             <div className="text-sm">
               <Link
-                href="/auth/reset-password"
+                href={"/auth/reset-password" as Route}
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 Forgot your password?
@@ -121,5 +122,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

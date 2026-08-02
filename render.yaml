@@ -1,0 +1,64 @@
+services:
+  - type: web
+    name: kodex-leads
+    runtime: node
+    plan: starter
+    branch: master
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://kodex-leads.onrender.com
+      - key: CRON_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+      - key: GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL
+        sync: false
+      - key: GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY
+        sync: false
+
+  - type: cron
+    name: kodex-seo-intelligence-cycle
+    runtime: node
+    schedule: "0 */6 * * *"
+    branch: master
+    buildCommand: npm ci
+    startCommand: curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/seo/cron"
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://kodex-leads.onrender.com
+      - key: CRON_SECRET
+        sync: false
+
+  - type: cron
+    name: kodex-llm-placement-cycle
+    runtime: node
+    schedule: "30 */12 * * *"
+    branch: master
+    buildCommand: npm ci
+    startCommand: curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/seo/llm-sync"
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://kodex-leads.onrender.com
+      - key: CRON_SECRET
+        sync: false

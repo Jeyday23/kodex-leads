@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import type { Route } from "next";
 import { resetPassword } from "@/lib/auth-client";
 
 export default function ResetPasswordPage() {
@@ -51,7 +52,7 @@ export default function ResetPasswordPage() {
               </p>
               <p className="mt-4 text-center text-sm text-gray-600">
                 <Link
-                  href="/auth/login"
+                  href={"/auth/login" as Route}
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                 >
                   Back to login
@@ -87,7 +88,7 @@ export default function ResetPasswordPage() {
 
               <p className="text-center text-sm text-gray-600">
                 <Link
-                  href="/auth/login"
+                  href={"/auth/login" as Route}
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                 >
                   Back to login

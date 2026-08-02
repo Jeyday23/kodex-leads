@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import type { Route } from "next";
 import { signUp } from "@/lib/auth-client";
 
 export default function SignUpPage() {
@@ -23,7 +24,7 @@ export default function SignUpPage() {
       await signUp(email, password, fullName);
       setSuccess(true);
       setTimeout(() => {
-        router.push("/auth/login?message=Check your email to confirm your account");
+        router.push("/auth/login?message=Check%20your%20email%20to%20confirm%20your%20account" as Route);
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
@@ -42,7 +43,7 @@ export default function SignUpPage() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{" "}
             <Link
-              href="/auth/login"
+              href={"/auth/login" as Route}
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               sign in to your account

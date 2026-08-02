@@ -3,13 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase credentials for auth");
+function getSupabase() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing Supabase credentials for auth");
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 export async function signUp(email: string, password: string, fullName: string) {
+  const supabase = getSupabase();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -25,6 +28,7 @@ export async function signUp(email: string, password: string, fullName: string) 
 }
 
 export async function signIn(email: string, password: string) {
+  const supabase = getSupabase();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -35,11 +39,13 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signOut() {
+  const supabase = getSupabase();
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }
 
 export async function resetPassword(email: string) {
+  const supabase = getSupabase();
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password-confirm`,
   });
@@ -49,6 +55,7 @@ export async function resetPassword(email: string) {
 }
 
 export async function updatePassword(newPassword: string) {
+  const supabase = getSupabase();
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword,
   });
@@ -58,6 +65,7 @@ export async function updatePassword(newPassword: string) {
 }
 
 export async function getCurrentUser() {
+  const supabase = getSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -65,6 +73,7 @@ export async function getCurrentUser() {
 }
 
 export async function getSession() {
+  const supabase = getSupabase();
   const {
     data: { session },
   } = await supabase.auth.getSession();

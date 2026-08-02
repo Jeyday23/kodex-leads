@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/seo.test.ts",
+    "test:seo-live": "node scripts/seo-smoke-test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
