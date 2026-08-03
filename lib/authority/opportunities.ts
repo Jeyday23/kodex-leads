@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { getSeoSupabase } from "@/lib/seo/db";
 import { getAllSeoPages } from "@/lib/seo/content";
+import { getSiteUrl } from "@/lib/seo/config";
 import { checkApprovedSources, searchConsoleStatus } from "@/lib/seo/source-intelligence";
 import { calculateOpportunityScore, demandLabel, normalizeQuery, recommendedDecision } from "./opportunity-scoring";
 import { getProviderStatuses } from "./providers";
@@ -126,8 +127,9 @@ export async function runOpportunityDiscovery(options: { actor?: string; runType
     return { status: "database-unavailable", itemsProcessed: 0, itemsCreated: 0, itemsUpdated: 0, itemsSkipped: 0, providerFailures: ["Supabase is not configured."] };
   }
 
-  const projectId = await getDefaultProjectId();
-  if (!projectId) return { status: "failed", itemsProcessed: 0, itemsCreated: 0, itemsUpdated: 0, itemsSkipped: 0, providerFailures: ["No monitoring project exists."] };
+  const project = await getOrCreateDefaultProjectId();
+  if (!project.id) return { status: "failed", itemsProcessed: 0, itemsCreated: 0, itemsUpdated: 0, itemsSkipped: 0, providerFailures: [project.error ?? "No monitoring project exists."] };
+  const projectId = project.id;
 
   const idempotencyKey = options.idempotencyKey ?? `${options.runType ?? "manual"}-${new Date().toISOString().slice(0, 10)}`;
   const started = Date.now();
@@ -364,7 +366,8 @@ function scoreCandidate(input: {
 async function upsertOpportunity(candidate: ReturnType<typeof scoreCandidate>) {
   const supabase = getSeoSupabase();
   if (!supabase) return { id: randomUUID(), action: "skipped" as const };
-  const projectId = candidate.projectId ?? await getDefaultProjectId();
+  const project = candidate.projectId ? { id: candidate.projectId } : await getOrCreateDefaultProjectId();
+  const projectId = project.id;
   if (!projectId) return { id: randomUUID(), action: "skipped" as const };
 
   const { data: existing } = await supabase
@@ -493,11 +496,42 @@ async function createKnowledgeTask(opportunity: AuthorityOpportunity, actor?: st
   }
 }
 
-async function getDefaultProjectId() {
+async function getOrCreateDefaultProjectId(): Promise<{ id: string | null; error?: string }> {
   const supabase = getSeoSupabase();
-  if (!supabase) return null;
-  const { data } = await supabase.from("monitoring_projects").select("id").eq("active", true).order("created_at", { ascending: true }).limit(1).single();
-  return data?.id ?? null;
+  if (!supabase) return { id: null, error: "Supabase is not configured." };
+
+  const { data: existing, error: existingError } = await supabase
+    .from("monitoring_projects")
+    .select("id")
+    .eq("active", true)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (existing?.id) return { id: existing.id };
+  if (existingError) return { id: null, error: `Monitoring project lookup failed: ${existingError.message}` };
+
+  const { data: org, error: orgError } = await supabase
+    .from("organizations")
+    .upsert({ name: "Kodex", slug: "kodex" }, { onConflict: "slug" })
+    .select("id")
+    .single();
+  if (orgError || !org?.id) return { id: null, error: `Kodex organization bootstrap failed: ${orgError?.message ?? "No organization returned."}` };
+
+  const { data: project, error: projectError } = await supabase
+    .from("monitoring_projects")
+    .insert({
+      organization_id: org.id,
+      name: "Kodex Authority Monitoring",
+      brand_name: "Kodex",
+      website_url: getSiteUrl(),
+      default_country: "US",
+      default_language: "en",
+      active: true,
+    })
+    .select("id")
+    .single();
+  if (projectError || !project?.id) return { id: null, error: `Monitoring project bootstrap failed: ${projectError?.message ?? "No project returned."}` };
+  return { id: project.id };
 }
 
 async function audit(actor: string | undefined, action: string, entityType: string, entityId: string, payload: Record<string, unknown>) {
