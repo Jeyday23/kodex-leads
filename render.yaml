@@ -30,6 +30,16 @@ services:
         sync: false
       - key: PERPLEXITY_MODEL
         sync: false
+      - key: GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL
+        sync: false
+      - key: GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY
+        sync: false
+      - key: SEO_SOURCE_FETCH_ENABLED
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+      - key: HUBSPOT_PRIVATE_APP_TOKEN
+        sync: false
 
   - type: worker
     name: kodex-authority-monitoring-worker
@@ -54,6 +64,8 @@ services:
       - key: PERPLEXITY_API_KEY
         sync: false
       - key: PERPLEXITY_MODEL
+        sync: false
+      - key: SLACK_WEBHOOK_URL
         sync: false
 
   - type: worker
@@ -90,6 +102,10 @@ services:
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+      - key: HUBSPOT_PRIVATE_APP_TOKEN
+        sync: false
 
 cronJobs:
   - name: kodex-authority-search-console-sync
@@ -109,6 +125,8 @@ cronJobs:
         sync: false
       - key: GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
 
   - name: kodex-authority-autonomous-planning
     runtime: node
@@ -126,6 +144,8 @@ cronJobs:
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
       - key: CRON_SECRET
+        sync: false
+      - key: SLACK_WEBHOOK_URL
         sync: false
 
   - name: kodex-authority-research-and-drafting
@@ -147,6 +167,8 @@ cronJobs:
         sync: false
       - key: CLAUDE_MODEL
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
 
   - name: kodex-authority-quality-gates
     runtime: node
@@ -160,6 +182,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SLACK_WEBHOOK_URL
         sync: false
 
   - name: kodex-authority-publication-queue
@@ -175,6 +199,8 @@ cronJobs:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
 
   - name: kodex-authority-technical-audit
     runtime: node
@@ -188,6 +214,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SLACK_WEBHOOK_URL
         sync: false
 
   - name: kodex-authority-daily-discovery
@@ -213,6 +241,8 @@ cronJobs:
         sync: false
       - key: PERPLEXITY_MODEL
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
 
   - name: kodex-authority-weekly-discovery-refresh
     runtime: node
@@ -224,6 +254,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SLACK_WEBHOOK_URL
         sync: false
 
   - name: kodex-authority-monitoring-cron
@@ -249,6 +281,8 @@ cronJobs:
         sync: false
       - key: PERPLEXITY_MODEL
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
 
   - name: kodex-authority-weekly-visibility-recalculation
     runtime: node
@@ -273,6 +307,8 @@ cronJobs:
         sync: false
       - key: PERPLEXITY_MODEL
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
 
   - name: kodex-authority-revision-planner
     runtime: node
@@ -287,6 +323,8 @@ cronJobs:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
 
   - name: kodex-authority-hourly-retry
     runtime: node
@@ -298,6 +336,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SLACK_WEBHOOK_URL
         sync: false
 
   - name: kodex-authority-source-verification
@@ -312,4 +352,6 @@ cronJobs:
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
+        sync: false
+      - key: SLACK_WEBHOOK_URL
         sync: false
