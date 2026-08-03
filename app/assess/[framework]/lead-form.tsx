@@ -61,14 +61,21 @@ export function LeadForm({ framework }: LeadFormProps) {
 
   return (
     <form className="lead-form" onSubmit={onSubmit}>
+      <div className="form-intro">
+        <p className="eyebrow">Step 1 of 1</p>
+        <h2>Check your readiness</h2>
+        <p>Use your best estimate. You can refine the details later.</p>
+      </div>
       <div className="form-grid">
         <label>
           Work email
           <input name="email" type="email" autoComplete="email" required placeholder="you@company.com" />
+          <span>Used to save your result and avoid duplicate assessments.</span>
         </label>
         <label>
           Company
           <input name="companyName" type="text" autoComplete="organization" required placeholder="Company name" />
+          <span>The organization this readiness score should apply to.</span>
         </label>
         <label>
           Company size
@@ -79,6 +86,7 @@ export function LeadForm({ framework }: LeadFormProps) {
             <option value="201-1000">201-1000</option>
             <option value="1000+">1000+</option>
           </select>
+          <span>Larger teams usually have more documentation and control obligations.</span>
         </label>
         <label>
           AI usage
@@ -89,6 +97,7 @@ export function LeadForm({ framework }: LeadFormProps) {
             <option value="customer-facing">Customer-facing AI</option>
             <option value="high-risk">Potential high-risk AI</option>
           </select>
+          <span>Choose the closest current or planned use case.</span>
         </label>
         <label>
           Compliance maturity
@@ -98,6 +107,7 @@ export function LeadForm({ framework }: LeadFormProps) {
             <option value="documented">Documented controls</option>
             <option value="audited">Audited program</option>
           </select>
+          <span>Tell us how formal your controls are today.</span>
         </label>
         <label>
           Timeline
@@ -107,23 +117,36 @@ export function LeadForm({ framework }: LeadFormProps) {
             <option value="this-month">This month</option>
             <option value="immediate">Immediate</option>
           </select>
+          <span>How soon do you need a defensible plan?</span>
         </label>
       </div>
 
       <button className="cta form-submit" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Scoring..." : `Score ${frameworkLabel} readiness`}
+        {isSubmitting ? "Scoring your answers..." : `Get my ${frameworkLabel} score`}
       </button>
 
       {error ? <p className="notice">{error}</p> : null}
       {response ? (
-        <output className="result-panel">
-          <span className="eyebrow">Lead score</span>
+        <output className="result-panel" aria-live="polite">
+          <span className="eyebrow">Your readiness score</span>
           <strong>{response.score.score} / 100</strong>
-          <span>{response.score.grade}</span>
-          <span>Recommended action: {response.score.recommendedAction}</span>
-          <span>{response.storage === "supabase" ? "Saved to Supabase." : "Saved to local workspace storage."}</span>
+          <span className="result-grade">{response.score.grade.replace("-", " ")}</span>
+          <p>{resultMessage(response.score.recommendedAction)}</p>
+          <ul>
+            {response.score.reasons.slice(0, 3).map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+          <a className="cta" href="/deadlines/eu-ai-act">Review key deadlines</a>
         </output>
       ) : null}
     </form>
   );
+}
+
+function resultMessage(action: string): string {
+  if (action === "book-demo") return "You likely need a focused readiness plan. Start with deadlines, then decide whether to book a deeper review.";
+  if (action === "sales-review") return "You have enough urgency or exposure to review the details with a compliance lead.";
+  if (action === "nurture") return "You are in planning mode. Use the source-backed pages to understand what changes first.";
+  return "Use this score as a starting point for the next compliance conversation.";
 }

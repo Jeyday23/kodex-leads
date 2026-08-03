@@ -868,11 +868,32 @@ input {
   padding-bottom: 32px;
 }
 
-.hero {
+.hero,
+.assessment-hero {
   display: grid;
   gap: 22px;
   max-width: 980px;
   padding: 56px 0 28px;
+}
+
+.assessment-hero {
+  padding-top: clamp(42px, 7vw, 84px);
+}
+
+.assessment-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.assessment-proof span {
+  background: #e9f4f2;
+  border: 1px solid #cce5df;
+  border-radius: 999px;
+  color: var(--accent-dark);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 9px 12px;
 }
 
 .command-center {
@@ -1153,10 +1174,76 @@ p {
 }
 
 .assessment-shell {
+  align-items: start;
   display: grid;
   gap: 28px;
   grid-template-columns: minmax(0, 0.8fr) minmax(320px, 1.2fr);
   max-width: 1080px;
+}
+
+.assessment-guide {
+  background: #eef6f3;
+  border: 1px solid #cce5df;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.assessment-guide h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+.assessment-guide p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.assessment-steps {
+  counter-reset: step;
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.assessment-steps li {
+  background: #fff;
+  border: 1px solid #d8e7e2;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 14px 14px 14px 48px;
+  position: relative;
+}
+
+.assessment-steps li::before {
+  align-items: center;
+  background: var(--accent);
+  border-radius: 999px;
+  color: #fff;
+  content: counter(step);
+  counter-increment: step;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 800;
+  height: 26px;
+  justify-content: center;
+  left: 14px;
+  position: absolute;
+  top: 14px;
+  width: 26px;
+}
+
+.assessment-steps strong {
+  color: var(--ink);
+}
+
+.assessment-steps span {
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .lead-form {
@@ -1166,6 +1253,20 @@ p {
   display: grid;
   gap: 18px;
   padding: 20px;
+}
+
+.form-intro {
+  display: grid;
+  gap: 6px;
+}
+
+.form-intro h2 {
+  margin: 0;
+}
+
+.form-intro p {
+  color: var(--muted);
+  margin: 0;
 }
 
 .form-grid {
@@ -1180,6 +1281,13 @@ label {
   font-size: 0.9rem;
   font-weight: 700;
   gap: 8px;
+}
+
+label span {
+  color: #728078;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 input,
@@ -1204,14 +1312,35 @@ select {
 }
 
 .result-panel {
-  border-top: 1px solid var(--line);
+  background: #f4faf8;
+  border: 1px solid #cce5df;
+  border-radius: 8px;
   display: grid;
-  gap: 6px;
-  padding-top: 16px;
+  gap: 10px;
+  padding: 18px;
 }
 
 .result-panel strong {
   font-size: 2rem;
+}
+
+.result-panel p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.result-panel ul {
+  color: var(--muted);
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.result-grade {
+  color: var(--accent-dark);
+  font-weight: 800;
+  text-transform: capitalize;
 }
 
 .process-grid {

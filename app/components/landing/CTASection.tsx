@@ -8,7 +8,7 @@ export default function CTASection() {
   return (
     <Box
       sx={{
-        background: "linear-gradient(135deg, #764ba2 0%, #667eea 100%)",
+        background: "linear-gradient(135deg, #0f766e 0%, #10192d 100%)",
         color: "white",
         py: { xs: 8, md: 10 },
       }}
@@ -23,7 +23,7 @@ export default function CTASection() {
               lineHeight: 1.2,
             }}
           >
-            Ready to Get Compliant?
+            Start with the readiness check.
           </Typography>
 
           <Typography
@@ -34,7 +34,7 @@ export default function CTASection() {
               opacity: 0.95,
             }}
           >
-            Start your free compliance assessment today. No credit card required.
+            Get a score, see the reasoning, and use the result to decide what deserves attention first.
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "center" }}>
@@ -44,7 +44,7 @@ export default function CTASection() {
               variant="contained"
               sx={{
                 backgroundColor: "white",
-                color: "#667eea",
+                color: "#0f766e",
                 py: 1.5,
                 px: 4,
                 fontSize: "1rem",
@@ -57,7 +57,7 @@ export default function CTASection() {
               }}
               endIcon={<ArrowRight size={20} />}
             >
-              Start Free Assessment
+              Get My Score
             </Button>
 
             <Button

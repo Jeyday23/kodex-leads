@@ -6,33 +6,33 @@ import { CheckCircle, Zap, BarChart3, Shield, Layers, Brain } from "lucide-react
 const features = [
   {
     icon: Brain,
-    title: "AI-Powered Assessment",
-    description: "Automated compliance evaluation using advanced AI to identify gaps and risks.",
+    title: "Fast Readiness Score",
+    description: "Answer plain-language questions and get a practical score in minutes.",
   },
   {
     icon: BarChart3,
-    title: "Real-Time Dashboard",
-    description: "Track compliance progress with live metrics and actionable insights.",
+    title: "Priority Next Steps",
+    description: "See whether to research, document controls, or move into a deeper review.",
   },
   {
     icon: Shield,
-    title: "Enterprise Security",
-    description: "Bank-level encryption and compliance with data protection regulations.",
+    title: "Official Sources",
+    description: "Guidance links back to EU and regulator sources instead of unsupported claims.",
   },
   {
     icon: Zap,
-    title: "Instant Insights",
-    description: "Get immediate recommendations tailored to your business.",
+    title: "No-Call First Step",
+    description: "Start with a self-serve assessment before deciding whether you need help.",
   },
   {
     icon: Layers,
-    title: "Multi-Framework Support",
-    description: "Support for EU AI Act, GDPR, NIS2, and more frameworks.",
+    title: "Multiple Frameworks",
+    description: "Cover EU AI Act, GDPR and NIS2 entry points from one place.",
   },
   {
     icon: CheckCircle,
-    title: "Source Verification",
-    description: "All recommendations backed by official regulatory sources.",
+    title: "Lead and Admin Workflow",
+    description: "Qualified results can route into admin review, follow-up and reporting.",
   },
 ];
 
@@ -52,10 +52,10 @@ export default function FeaturesSection() {
               color: "#1a202c",
             }}
           >
-            Compliance Simplified
+            A clearer first step for messy compliance questions
           </Typography>
           <Typography variant="subtitle1" sx={{ color: "#666", maxWidth: 500, mx: "auto" }}>
-            Everything you need to understand and meet EU regulatory requirements.
+            The app is designed to move a visitor from uncertainty to a scored next action.
           </Typography>
         </Stack>
 

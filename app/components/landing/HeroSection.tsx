@@ -1,14 +1,14 @@
 "use client";
 
-import { Box, Container, Typography, Button, Stack } from "@mui/material";
-import { ArrowRight } from "lucide-react";
+import { Box, Container, Typography, Button, Stack, Chip } from "@mui/material";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export default function HeroSection() {
   return (
     <Box
       sx={{
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, #10192d 0%, #0f766e 100%)",
         color: "white",
         py: { xs: 8, md: 12 },
         position: "relative",
@@ -27,7 +27,18 @@ export default function HeroSection() {
       }}
     >
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-        <Stack spacing={4} sx={{ textAlign: "center", maxWidth: 800, mx: "auto" }}>
+        <Stack spacing={4} sx={{ textAlign: "center", maxWidth: 860, mx: "auto" }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ justifyContent: "center", alignItems: "center" }}>
+            {["Free readiness score", "EU AI Act, GDPR, NIS2", "Source-backed next steps"].map((label) => (
+              <Chip
+                key={label}
+                icon={<CheckCircle2 size={16} />}
+                label={label}
+                sx={{ color: "white", borderColor: "rgba(255,255,255,0.42)" }}
+                variant="outlined"
+              />
+            ))}
+          </Stack>
           <Typography
             variant="h2"
             sx={{
@@ -37,7 +48,7 @@ export default function HeroSection() {
               letterSpacing: "-0.02em",
             }}
           >
-            EU Compliance Made Simple
+            Know your EU compliance risk before it becomes a sales blocker.
           </Typography>
 
           <Typography
@@ -49,8 +60,7 @@ export default function HeroSection() {
               lineHeight: 1.6,
             }}
           >
-            Automated compliance assessments, deadline intelligence, and source-backed readiness
-            paths for growth teams.
+            Kodex gives startups and growth teams a fast readiness score, clear compliance deadlines, and source-backed next steps for the EU AI Act, GDPR and NIS2.
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "center" }}>
@@ -60,7 +70,7 @@ export default function HeroSection() {
               variant="contained"
               sx={{
                 backgroundColor: "white",
-                color: "#667eea",
+                color: "#0f766e",
                 py: 1.5,
                 px: 4,
                 fontSize: "1rem",
@@ -73,7 +83,7 @@ export default function HeroSection() {
               }}
               endIcon={<ArrowRight size={20} />}
             >
-              Start Assessment
+              Start Free Check
             </Button>
 
             <Button
@@ -95,7 +105,7 @@ export default function HeroSection() {
                 },
               }}
             >
-              View Deadlines
+              See Key Deadlines
             </Button>
           </Stack>
         </Stack>
