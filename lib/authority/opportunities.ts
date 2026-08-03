@@ -1,4 +1,3 @@
-import "server-only";
 import { randomUUID } from "node:crypto";
 import { getSeoSupabase } from "@/lib/seo/db";
 import { getAllSeoPages } from "@/lib/seo/content";

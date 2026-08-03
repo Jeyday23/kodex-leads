@@ -8,8 +8,13 @@ const nav = [
   ["Command", "/admin/authority/command", "⌁"],
   ["Opportunities", "/admin/authority/opportunities", "◎"],
   ["Editorial", "/admin/authority/editorial", "▦"],
+  ["Content", "/admin/authority/content", "▤"],
   ["Knowledge", "/admin/authority/knowledge", "◇"],
   ["Observatory", "/admin/authority/observatory", "◉"],
+  ["Publications", "/admin/authority/publications", "↗"],
+  ["Revisions", "/admin/authority/revisions", "↻"],
+  ["Technical SEO", "/admin/authority/technical-seo", "⌘"],
+  ["Outreach", "/admin/authority/outreach", "✉"],
 ];
 
 export default async function AuthorityLayout({ children }: { children: ReactNode }) {

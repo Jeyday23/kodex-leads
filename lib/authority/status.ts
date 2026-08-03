@@ -1,4 +1,3 @@
-import "server-only";
 import { getSeoSupabase } from "@/lib/seo/db";
 import { getProviderStatuses } from "./providers";
 

@@ -1,4 +1,3 @@
-import "server-only";
 import { getSeoSupabase } from "@/lib/seo/db";
 
 export async function listEditorialItems() {

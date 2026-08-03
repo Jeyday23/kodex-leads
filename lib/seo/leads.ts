@@ -1,4 +1,3 @@
-import "server-only";
 import { getSeoSupabase } from "./db";
 import { listLocalLeads, type StoredLead } from "./local-store";
 import type { LeadScoreResult } from "./types";
