@@ -779,8 +779,13 @@ input {
   padding: 14px;
 }
 
+.operator-step.action_required {
+  border-color: #f0aa31;
+}
+
 .operator-step.failed {
   border-color: #f0aa31;
+  background: rgba(240, 170, 49, 0.14);
 }
 
 .operator-step p,

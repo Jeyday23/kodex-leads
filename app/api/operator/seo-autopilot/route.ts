@@ -5,7 +5,7 @@ import { runSeoIntelligenceCycle } from "@/lib/seo/cron-cycle";
 
 type StepResult = {
   name: string;
-  status: "completed" | "failed";
+  status: "completed" | "action_required" | "failed";
   summary: string;
   data?: unknown;
 };
@@ -72,8 +72,9 @@ export async function POST(request: Request) {
   }));
 
   const failed = steps.filter((step) => step.status === "failed");
+  const actionRequired = steps.filter((step) => step.status === "action_required");
   return Response.json({
-    status: failed.length === 0 ? "completed" : "completed_with_failures",
+    status: failed.length > 0 ? "completed_with_failures" : actionRequired.length > 0 ? "action_required" : "completed",
     startedAt,
     completedAt: new Date().toISOString(),
     steps,
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
 async function runStep(name: string, fn: () => Promise<{ summary: string; data: unknown }>): Promise<StepResult> {
   try {
     const result = await fn();
-    return { name, status: "completed", summary: result.summary, data: result.data };
+    return { name, status: needsAction(result.data) ? "action_required" : "completed", summary: result.summary, data: result.data };
   } catch (error) {
     return {
       name,
@@ -92,6 +93,17 @@ async function runStep(name: string, fn: () => Promise<{ summary: string; data: 
       summary: error instanceof Error ? error.message : "Unknown failure",
     };
   }
+}
+
+function needsAction(data: unknown): boolean {
+  const text = JSON.stringify(data);
+  return [
+    "missing_credentials",
+    "database-unavailable",
+    "Supabase is not configured",
+    "non-operational",
+    "\"status\":\"skipped\"",
+  ].some((signal) => text.includes(signal));
 }
 
 function summarizeNextActions(steps: StepResult[]) {

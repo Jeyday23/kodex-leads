@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 type Step = {
   name: string;
-  status: "completed" | "failed";
+  status: "completed" | "action_required" | "failed";
   summary: string;
 };
 
@@ -24,6 +24,7 @@ export function OperatorConsole() {
   const [error, setError] = useState<string | null>(null);
 
   const completed = useMemo(() => result?.steps.filter((step) => step.status === "completed").length ?? 0, [result]);
+  const actionRequired = useMemo(() => result?.steps.filter((step) => step.status === "action_required").length ?? 0, [result]);
   const failed = useMemo(() => result?.steps.filter((step) => step.status === "failed").length ?? 0, [result]);
 
   async function runAutonomousSeo() {
@@ -84,14 +85,15 @@ export function OperatorConsole() {
             </div>
             <div className="operator-counts">
               <span>{completed} completed</span>
+              <span>{actionRequired} need setup</span>
               <span>{failed} failed</span>
             </div>
           </div>
           <div className="operator-steps">
             {result.steps.map((step) => (
-              <article className={step.status === "failed" ? "operator-step failed" : "operator-step"} key={step.name}>
+              <article className={`operator-step ${step.status}`} key={step.name}>
                 <strong>{step.name}</strong>
-                <span>{step.status}</span>
+                <span>{step.status.replace("_", " ")}</span>
                 <p>{step.summary}</p>
               </article>
             ))}

@@ -13,7 +13,7 @@ const pipeline = [
   "Research official sources",
   "Draft or revise source-backed pages",
   "Block unsupported claims",
-  "Publish only approved/indexable assets",
+  "Queue or publish only when policy allows it",
   "Monitor mentions, citations and competitors",
 ];
 
@@ -24,7 +24,7 @@ export default function Home() {
         <p className="eyebrow">Private SEO Authority System</p>
         <h1>Kodex visibility autopilot.</h1>
         <p className="summary">
-          One private control surface to improve Kodex recognition in search engines and LLM answers. Run the loop, review the output, repeat.
+          One private control surface to work on Kodex recognition in search engines and LLM answers. Run the loop, review the output, repeat.
         </p>
       </section>
 
@@ -42,7 +42,7 @@ export default function Home() {
       <section className="internal-panel" aria-label="Autonomous SEO pipeline">
         <div>
           <p className="eyebrow">Goal</p>
-          <h2>Make Kodex easier for search engines and LLMs to understand, trust and recommend.</h2>
+          <h2>Make Kodex easier for search engines and LLM systems to crawl, understand and cite accurately.</h2>
         </div>
         <ol className="internal-pipeline">
           {pipeline.map((item) => <li key={item}>{item}</li>)}
