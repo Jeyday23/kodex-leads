@@ -26,7 +26,7 @@ function LoginForm() {
 
     try {
       await signIn(email, password);
-      router.push("/admin/leads");
+      router.push(searchParams.get("next") ?? "/admin/leads");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not sign in.");
     } finally {

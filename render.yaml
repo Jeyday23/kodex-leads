@@ -1,0 +1,168 @@
+services:
+  - type: web
+    name: kodex-leads-staging
+    runtime: node
+    plan: starter
+    branch: staging
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/authority/health
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+
+  - type: worker
+    name: kodex-authority-monitoring-worker
+    runtime: node
+    plan: starter
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx workers/monitoring-worker.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+
+cronJobs:
+  - name: kodex-authority-daily-discovery
+    runtime: node
+    schedule: "0 5 * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: AUTHORITY_RUN_TYPE=daily-discovery npx tsx scripts/run-authority-discovery.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+
+  - name: kodex-authority-weekly-discovery-refresh
+    runtime: node
+    schedule: "0 6 * * 1"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: AUTHORITY_RUN_TYPE=weekly-discovery-refresh npx tsx scripts/run-authority-discovery.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+  - name: kodex-authority-monitoring-cron
+    runtime: node
+    schedule: "0 7 * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-monitoring.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+
+  - name: kodex-authority-weekly-visibility-recalculation
+    runtime: node
+    schedule: "0 8 * * 1"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-monitoring.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+
+  - name: kodex-authority-hourly-retry
+    runtime: node
+    schedule: "0 * * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-retry.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+  - name: kodex-authority-source-verification
+    runtime: node
+    schedule: "30 6 * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-source-verification.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SEO_SOURCE_FETCH_ENABLED
+        sync: false

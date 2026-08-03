@@ -1,7 +1,6 @@
 "use client";
 
-import { Box, Container, Typography, Button, Grid, Card, CardContent, Chip } from "@mui/material";
-import { ArrowRight, CheckCircle, Zap, BarChart3, Shield, Layers } from "lucide-react";
+import { Box } from "@mui/material";
 import HeroSection from "./components/landing/HeroSection";
 import FeaturesSection from "./components/landing/FeaturesSection";
 import PricingSection from "./components/landing/PricingSection";
