@@ -1,10 +1,10 @@
-import { getIndexedContentPages } from "@/lib/seo/content";
+import { getAuthorityInventoryPages } from "@/lib/seo/content";
 import { getSiteUrl } from "@/lib/seo/config";
 import { pathForSeoPage } from "@/lib/seo/urls";
 
 export async function GET() {
   const base = getSiteUrl();
-  const pages = await getIndexedContentPages();
+  const pages = await getAuthorityInventoryPages();
   return Response.json({
     site: base,
     generatedAt: new Date().toISOString(),
@@ -23,7 +23,7 @@ export async function GET() {
         title: source.title,
         url: source.sourceUrl,
       })),
-      conversion: page.body.nextAction ?? (page.targetTool ? { label: "Start assessment", href: page.targetTool } : null),
+      operatorAction: page.body.nextAction ?? (page.targetTool ? { label: "Review target", href: page.targetTool } : null),
     })),
   });
 }

@@ -24,7 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <nav className="nav" aria-label="Primary">
               <Link href="/admin/authority/command">Authority</Link>
               <Link href="/admin/seo">SEO Queue</Link>
-              <Link href="/api/seo/ai-sitemap">AI Sitemap</Link>
+              <Link href="/api/seo/ai-sitemap">Crawler JSON</Link>
               <Link href="/auth/login">Login</Link>
             </nav>
           </header>

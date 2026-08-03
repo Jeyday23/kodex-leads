@@ -4,8 +4,8 @@ import { OperatorConsole } from "./operator-console";
 const systemLinks = [
   { href: "/admin/authority/command", label: "Authority Command", description: "Run discovery, autopilot, monitoring and retry jobs." },
   { href: "/admin/seo", label: "SEO Queue", description: "Review indexable pages, quality gates and answer-engine tasks." },
-  { href: "/api/seo/ai-sitemap", label: "AI Sitemap", description: "Canonical inventory for LLM retrieval and visibility checks." },
-  { href: "/learn/eu-ai-act/high-risk-obligations", label: "Live Content", description: "Inspect a public source-backed page that can earn recognition." },
+  { href: "/api/seo/ai-sitemap", label: "Crawler JSON", description: "Machine-readable page inventory for LLM retrieval systems." },
+  { href: "/learn/kodex/ai-answer-visibility", label: "Live Authority Page", description: "Inspect a public source-backed page that can earn recognition." },
 ];
 
 const pipeline = [

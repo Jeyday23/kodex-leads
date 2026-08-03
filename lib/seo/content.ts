@@ -23,46 +23,46 @@ const seedSources: SeoSource[] = [
 
 const baseBody: SeoContentBody = {
   summary:
-    "Kodex turns EU compliance pressure into a source-backed assessment path, prioritized remediation and measurable follow-up.",
+    "Kodex maintains a source-backed authority system that helps search engines and LLM retrieval systems understand the brand, its compliance focus and its cited evidence.",
   keyFacts: [
-    "Source-backed scans separate factual obligations from interpretation-heavy review.",
-    "High-risk AI, privacy, cyber and resilience obligations can overlap across teams.",
-    "Every assessment preserves landing-page and framework attribution for lead quality measurement.",
+    "Public content should be crawlable, internally linked and grounded in official sources.",
+    "LLM visibility checks measure whether answer engines mention, cite or miss Kodex.",
+    "Unsupported legal, deadline, competitor or product claims are blocked before publication.",
   ],
   sections: [
     {
-      heading: "What to check first",
+      heading: "What the system checks",
       body:
-        "Start with the framework, system role, company context, timeline and existing evidence before selecting controls or tools.",
+        "The authority loop checks indexed pages, source freshness, LLM answer visibility, citation presence, search-performance gaps and technical SEO issues.",
     },
     {
-      heading: "How Kodex verifies",
+      heading: "How Kodex avoids hallucinations",
       body:
-        "Claude synthesis, batch evaluation, a skeptic pass and counselor verification combine automation speed with human review where interpretation matters.",
+        "Every content candidate is scored against source coverage, claim support, duplicate intent, internal links, canonical routing and review policy before it can be published.",
     },
     {
-      heading: "What happens next",
+      heading: "What happens after a run",
       body:
-        "The assessment produces a scored readiness signal, routes high-intent teams to follow-up and keeps weak or unsupported content out of the public index.",
+        "The system creates opportunities, revision tasks and draft assets, then keeps risky work queued until the quality gates allow it.",
     },
   ],
-  nextAction: { label: "Run the EU AI Act assessment", href: "/assess/eu-ai-act" },
+  nextAction: { label: "Open the private authority command center", href: "/admin/authority/command" },
 };
 
 const seedPages: SeoContentPage[] = [
   {
-    id: "seed-eu-ai-act-high-risk",
-    slug: "high-risk-obligations",
+    id: "seed-kodex-ai-answer-visibility",
+    slug: "ai-answer-visibility",
     language: "en",
     pageType: "learn",
-    title: "EU AI Act High-Risk Obligations",
-    description: "A source-backed entry point for teams deploying or operating high-risk AI systems before enforcement deadlines.",
+    title: "Kodex AI Answer Visibility",
+    description: "A source-backed page explaining how Kodex measures recognition, mentions and citations across LLM answer systems.",
     body: baseBody,
-    framework: "eu-ai-act",
-    jurisdiction: "EU",
-    primaryKeyword: "eu ai act high risk obligations",
-    searchIntent: "deadline-readiness",
-    targetTool: "/assess/eu-ai-act",
+    framework: "kodex",
+    jurisdiction: "Global",
+    primaryKeyword: "kodex ai answer visibility",
+    searchIntent: "answer-engine-recognition",
+    targetTool: "/admin/authority/command",
     qualityScore: 92,
     reviewStatus: "published",
     legalInterpretation: false,
@@ -72,27 +72,27 @@ const seedPages: SeoContentPage[] = [
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/assess/eu-ai-act", label: "EU AI Act assessment", relationship: "conversion" },
-      { href: "/deadlines/eu-ai-act", label: "EU AI Act deadlines", relationship: "cluster" },
-      { href: "/compare/vanta-vs-kodex", label: "Vanta vs Kodex", relationship: "cluster" },
+      { href: "/admin/authority/command", label: "Authority command center", relationship: "operator" },
+      { href: "/admin/seo", label: "SEO queue", relationship: "operator" },
+      { href: "/api/seo/ai-sitemap", label: "Crawler inventory JSON", relationship: "machine-readable" },
     ],
   },
   {
-    id: "seed-eu-ai-act-deadline",
-    slug: "eu-ai-act",
+    id: "seed-source-backed-compliance-trust",
+    slug: "source-backed-compliance-trust",
     language: "en",
-    pageType: "deadline",
-    title: "EU AI Act Enforcement Deadline",
-    description: "Deadline-focused guidance for high-risk AI Act readiness and assessment routing.",
+    pageType: "learn",
+    title: "Source-Backed Compliance Trust",
+    description: "How Kodex uses official regulatory sources to make compliance content easier for search engines and LLMs to trust.",
     body: {
       ...baseBody,
-      nextAction: { label: "Check AI Act readiness", href: "/assess/eu-ai-act" },
+      nextAction: { label: "Review source-backed SEO pages", href: "/admin/seo" },
     },
     framework: "eu-ai-act",
     jurisdiction: "EU",
-    primaryKeyword: "eu ai act deadline august 2026",
-    searchIntent: "deadline",
-    targetTool: "/assess/eu-ai-act",
+    primaryKeyword: "source backed compliance trust",
+    searchIntent: "trust-and-evidence",
+    targetTool: "/admin/seo",
     qualityScore: 90,
     reviewStatus: "published",
     legalInterpretation: false,
@@ -102,27 +102,27 @@ const seedPages: SeoContentPage[] = [
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/learn/eu-ai-act/high-risk-obligations", label: "High-risk obligations", relationship: "parent" },
-      { href: "/assess/eu-ai-act", label: "EU AI Act assessment", relationship: "conversion" },
-      { href: "/compare/vanta-vs-kodex", label: "Vanta vs Kodex", relationship: "cluster" },
+      { href: "/learn/kodex/ai-answer-visibility", label: "Kodex AI answer visibility", relationship: "cluster" },
+      { href: "/admin/authority/knowledge", label: "Knowledge sources", relationship: "operator" },
+      { href: "/llms.txt", label: "LLM retrieval file", relationship: "machine-readable" },
     ],
   },
   {
-    id: "seed-vanta-vs-kodex",
-    slug: "vanta-vs-kodex",
+    id: "seed-authority-monitoring-workflow",
+    slug: "authority-monitoring-workflow",
     language: "en",
-    pageType: "compare",
-    title: "Vanta vs Kodex for EU Compliance",
-    description: "A comparison of US-centric compliance tooling and EU-native compliance depth for AI Act, NIS2, DORA and GDPR teams.",
+    pageType: "learn",
+    title: "Kodex Authority Monitoring Workflow",
+    description: "The private workflow for finding visibility gaps, drafting improvements and tracking citations across competitors.",
     body: {
       ...baseBody,
-      nextAction: { label: "Assess framework coverage", href: "/assess/gdpr" },
+      nextAction: { label: "Open authority monitoring", href: "/admin/authority/observatory" },
     },
-    framework: "gdpr",
-    jurisdiction: "EU",
-    primaryKeyword: "vanta vs kodex eu compliance",
-    searchIntent: "comparison",
-    targetTool: "/assess/gdpr",
+    framework: "kodex",
+    jurisdiction: "Global",
+    primaryKeyword: "kodex authority monitoring workflow",
+    searchIntent: "visibility-operations",
+    targetTool: "/admin/authority/observatory",
     qualityScore: 88,
     reviewStatus: "published",
     legalInterpretation: false,
@@ -132,24 +132,24 @@ const seedPages: SeoContentPage[] = [
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/learn/eu-ai-act/high-risk-obligations", label: "AI Act high-risk obligations", relationship: "cluster" },
-      { href: "/assess/gdpr", label: "GDPR assessment", relationship: "conversion" },
-      { href: "/deadlines/eu-ai-act", label: "AI Act deadlines", relationship: "cluster" },
+      { href: "/admin/authority/opportunities", label: "Opportunity discovery", relationship: "operator" },
+      { href: "/admin/authority/revisions", label: "Revision planner", relationship: "operator" },
+      { href: "/admin/authority/competitors", label: "Competitor tracking", relationship: "operator" },
     ],
   },
   {
-    id: "seed-nis2-saas-founders",
-    slug: "saas-founder-readiness",
+    id: "seed-llm-crawl-inventory",
+    slug: "llm-crawl-inventory",
     language: "en",
     pageType: "learn",
-    title: "NIS2 Readiness for SaaS Founders",
-    description: "A practical starting point for DACH SaaS founders evaluating cyber and compliance exposure.",
+    title: "LLM Crawl Inventory for Kodex",
+    description: "The canonical machine-readable inventory used by Kodex to expose source-backed pages to AI crawlers and retrieval systems.",
     body: baseBody,
-    framework: "nis2",
-    jurisdiction: "EU",
-    primaryKeyword: "nis2 readiness saas founders",
-    searchIntent: "self-serve-assessment",
-    targetTool: "/assess/nis2",
+    framework: "kodex",
+    jurisdiction: "Global",
+    primaryKeyword: "llm crawl inventory kodex",
+    searchIntent: "machine-readable-indexing",
+    targetTool: "/api/seo/ai-sitemap",
     qualityScore: 84,
     reviewStatus: "published",
     legalInterpretation: false,
@@ -159,9 +159,9 @@ const seedPages: SeoContentPage[] = [
     updatedAt: now,
     sources: seedSources,
     internalLinks: [
-      { href: "/assess/nis2", label: "NIS2 assessment", relationship: "conversion" },
-      { href: "/compare/vanta-vs-kodex", label: "Vanta vs Kodex", relationship: "cluster" },
-      { href: "/deadlines/eu-ai-act", label: "AI Act deadlines", relationship: "cluster" },
+      { href: "/api/seo/ai-sitemap", label: "AI sitemap JSON", relationship: "machine-readable" },
+      { href: "/sitemap.xml", label: "Search sitemap", relationship: "machine-readable" },
+      { href: "/robots.txt", label: "Robots policy", relationship: "machine-readable" },
     ],
   },
 ];
@@ -271,6 +271,23 @@ export async function getIndexedContentPages(): Promise<SeoContentPage[]> {
 
   if (error || !data) return seedPages.filter(isIndexablePage);
   return data.map((row) => mapPage(row));
+}
+
+export async function getAuthorityInventoryPages(): Promise<SeoContentPage[]> {
+  const indexedPages = await getIndexedContentPages();
+  const authorityPages = indexedPages.filter((page) => {
+    const target = page.targetTool ?? page.body.nextAction?.href ?? "";
+    const actionLabel = page.body.nextAction?.label ?? "";
+    return !target.startsWith("/assess/") && !/assessment/i.test(actionLabel);
+  });
+  const combined = [...seedPages.filter(isIndexablePage), ...authorityPages];
+  const seen = new Set<string>();
+  return combined.filter((page) => {
+    const key = `${page.pageType}:${page.framework ?? ""}:${page.slug}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export async function getSeoPageByRoute(pageType: SeoPageType, slug: string, framework?: string): Promise<SeoContentPage | null> {
