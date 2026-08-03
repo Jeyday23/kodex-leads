@@ -1,4 +1,3 @@
-import "server-only";
 import { getSeoSupabase } from "./db";
 import { storeAuditEventLocally, storeDiscoveredLeadsLocally, type DiscoveredLead } from "./local-store";
 

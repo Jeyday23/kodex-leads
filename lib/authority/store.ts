@@ -1,4 +1,3 @@
-import "server-only";
 import { getSeoSupabase } from "@/lib/seo/db";
 import { summarizeAuthority } from "./analytics";
 import type { MonitoringPrompt, MonitoringRunRecord } from "./types";

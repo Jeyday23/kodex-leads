@@ -1,4 +1,3 @@
-import "server-only";
 import { getIndexedContentPages } from "./content";
 import { getSiteUrl } from "./config";
 import { getSeoSupabase } from "./db";

@@ -1,4 +1,3 @@
-import "server-only";
 import { randomUUID } from "node:crypto";
 import { summarizeAuthority } from "./analytics";
 import { extractBrandMention, extractCitations, extractCompetitorMentions, extractionConfidence } from "./citation-parser";

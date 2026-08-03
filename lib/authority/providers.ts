@@ -1,4 +1,3 @@
-import "server-only";
 import type { AuthorityProviderId, MonitoringProvider, MonitoringProviderInput, MonitoringProviderResult } from "./types";
 
 export function getAuthorityProviders(): MonitoringProvider[] {

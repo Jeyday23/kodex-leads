@@ -1,4 +1,3 @@
-import "server-only";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { LeadCaptureInput, LeadScoreResult, SeoContentPage, SeoRevisionTask } from "./types";
