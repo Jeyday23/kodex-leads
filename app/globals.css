@@ -678,7 +678,123 @@ input {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 28px;
   max-width: 1180px;
+}
+
+.operator-console {
+  display: grid;
+  gap: 18px;
+  max-width: 1180px;
+}
+
+.operator-runner {
+  align-items: end;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  padding: 20px;
+}
+
+.operator-button {
+  border: 0;
+  cursor: pointer;
+  min-width: 240px;
+}
+
+.operator-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.operator-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.operator-links a {
+  background: #eef6f3;
+  border: 1px solid #cce5df;
+  border-radius: 999px;
+  color: var(--accent-dark);
+  font-weight: 800;
+  padding: 9px 12px;
+  text-decoration: none;
+}
+
+.operator-result {
+  background: #10192d;
+  border-radius: 8px;
+  color: #fff;
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.operator-result .eyebrow,
+.operator-step span {
+  color: #a7e7df;
+}
+
+.operator-result-head {
+  align-items: end;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.operator-result-head h2,
+.operator-next h2 {
+  margin: 0;
+}
+
+.operator-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.operator-counts span {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 8px 10px;
+}
+
+.operator-steps {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.operator-step {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.operator-step.failed {
+  border-color: #f0aa31;
+}
+
+.operator-step p,
+.operator-next li {
+  color: #dce6df;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.operator-next ul {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding-left: 18px;
 }
 
 .internal-tile {
@@ -1588,6 +1704,8 @@ select {
 
   .internal-grid,
   .internal-panel,
+  .operator-runner,
+  .operator-steps,
   .assessment-shell,
   .form-grid,
   .dashboard-grid,

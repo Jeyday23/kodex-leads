@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OperatorConsole } from "./operator-console";
 
 const systemLinks = [
   { href: "/admin/authority/command", label: "Authority Command", description: "Run discovery, autopilot, monitoring and retry jobs." },
@@ -23,13 +24,11 @@ export default function Home() {
         <p className="eyebrow">Private SEO Authority System</p>
         <h1>Kodex visibility autopilot.</h1>
         <p className="summary">
-          This workspace is for building recognition, search visibility and LLM trust around Kodex. It finds opportunities, creates source-backed content, checks answer engines and tracks whether Kodex is being cited.
+          One private control surface to improve Kodex recognition in search engines and LLM answers. Run the loop, review the output, repeat.
         </p>
-        <div className="hero-actions">
-          <Link className="cta" href="/admin/authority/command">Open command center</Link>
-          <Link className="secondary-link" href="/api/seo/ai-sitemap">View AI sitemap</Link>
-        </div>
       </section>
+
+      <OperatorConsole />
 
       <section className="internal-grid" aria-label="System entry points">
         {systemLinks.map((link) => (
