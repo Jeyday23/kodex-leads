@@ -26,7 +26,7 @@ export default async function FounderOpsPage() {
       </header>
 
       <section className={styles.statusGrid} aria-label="Connection status">
-        <StatusCard label="Airtable" live={snapshot.airtable.live} detail={snapshot.airtable.live ? "Pipeline and tasks are live" : snapshot.airtable.error ?? "Add the four Airtable environment variables"} />
+        <StatusCard label="Airtable" live={snapshot.airtable.live} detail={snapshot.airtable.live ? "Pipeline and tasks are live" : snapshot.airtable.error ?? "Add AIRTABLE_ACCESS_TOKEN in Render"} />
         <StatusCard label="GitHub" live={snapshot.github.live} detail={snapshot.github.live ? snapshot.github.repository : snapshot.github.error ?? "Connection unavailable"} />
         <StatusCard label="Last refresh" live detail={formatDate(snapshot.generatedAt)} />
       </section>
