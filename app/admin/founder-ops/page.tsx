@@ -6,10 +6,10 @@ import styles from "./page.module.css";
 export const dynamic = "force-dynamic";
 
 export default async function FounderOpsPage() {
-  const user = await requireAuthorityPage();
+  const user = await requireAuthorityPage("/admin/founder-ops");
   const snapshot = await getFounderOpsSnapshot();
-  const liveDeals = snapshot.airtable.live;
-  const liveTasks = snapshot.airtable.live;
+  const liveDeals = snapshot.airtable.dealsLive;
+  const liveTasks = snapshot.airtable.tasksLive;
 
   return (
     <main className={styles.page}>
@@ -19,11 +19,14 @@ export default async function FounderOpsPage() {
           <h1>Decisions, pipeline and delivery.</h1>
           <p className={styles.subtitle}>A focused command view for {user.fullName ?? user.email}. Data refreshes every 60 seconds.</p>
         </div>
-        <RefreshButton />
+        <div className={styles.headerActions}>
+          <a className={styles.backLink} href="/admin/authority/command">Authority Engine</a>
+          <RefreshButton />
+        </div>
       </header>
 
       <section className={styles.statusGrid} aria-label="Connection status">
-        <StatusCard label="Airtable" live={snapshot.airtable.live} detail={snapshot.airtable.live ? "Pipeline and tasks are live" : snapshot.airtable.error ?? "Add the four Airtable environment variables"} />
+        <StatusCard label="Airtable" live={snapshot.airtable.live} detail={snapshot.airtable.live ? "Pipeline and tasks are live" : snapshot.airtable.error ?? "Add AIRTABLE_ACCESS_TOKEN in Render"} />
         <StatusCard label="GitHub" live={snapshot.github.live} detail={snapshot.github.live ? snapshot.github.repository : snapshot.github.error ?? "Connection unavailable"} />
         <StatusCard label="Last refresh" live detail={formatDate(snapshot.generatedAt)} />
       </section>
@@ -34,7 +37,7 @@ export default async function FounderOpsPage() {
           <div className={styles.rows}>
             {snapshot.airtable.deals.length === 0 ? <EmptyRow text="No Airtable opportunities found." /> : snapshot.airtable.deals.map((deal) => (
               <div className={styles.row} key={deal.id}>
-                <div><strong>{deal.company}</strong><span>{deal.nextAction}</span></div>
+                <div><strong>{deal.company} {deal.sample ? <em className={styles.sampleChip}>Sample</em> : null}</strong><span>{deal.nextAction} · Due {deal.due}</span></div>
                 <div className={styles.rowMeta}><span>{deal.stage}</span><b>{deal.value}</b></div>
               </div>
             ))}
@@ -46,7 +49,7 @@ export default async function FounderOpsPage() {
           <div className={styles.rows}>
             {snapshot.airtable.tasks.length === 0 ? <EmptyRow text="No Airtable tasks found." /> : snapshot.airtable.tasks.map((task) => (
               <div className={styles.row} key={task.id}>
-                <div><strong>{task.title}</strong><span>{task.owner}</span></div>
+                <div><strong>{task.title} {task.sample ? <em className={styles.sampleChip}>Sample</em> : null}</strong><span>{task.workstream} · {task.priority}</span></div>
                 <div className={styles.rowMeta}><span>{task.status}</span><b>{task.due}</b></div>
               </div>
             ))}
