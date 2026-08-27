@@ -60,9 +60,9 @@ export async function getFounderOpsSnapshot(): Promise<FounderOpsSnapshot> {
 
 async function getAirtableSnapshot(): Promise<FounderOpsSnapshot["airtable"]> {
   const token = process.env.AIRTABLE_ACCESS_TOKEN;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const dealsTableId = process.env.AIRTABLE_DEALS_TABLE_ID;
-  const tasksTableId = process.env.AIRTABLE_TASKS_TABLE_ID;
+  const baseId = process.env.AIRTABLE_BASE_ID ?? "appb33XA2smW0YKbP";
+  const dealsTableId = process.env.AIRTABLE_DEALS_TABLE_ID ?? "tblf3S3nEU5BGx2kU";
+  const tasksTableId = process.env.AIRTABLE_TASKS_TABLE_ID ?? "tblbCx6JC8qV5oiFF";
   const configured = Boolean(token && baseId && dealsTableId && tasksTableId);
 
   if (!configured) {
