@@ -5,6 +5,7 @@ import { getAuthoritySystemStatus } from "@/lib/authority/status";
 export const dynamic = "force-dynamic";
 
 const nav = [
+  ["Founder Ops", "/admin/founder-ops", "◆"],
   ["Command", "/admin/authority/command", "⌁"],
   ["Opportunities", "/admin/authority/opportunities", "◎"],
   ["Editorial", "/admin/authority/editorial", "▦"],
