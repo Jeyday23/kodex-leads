@@ -40,6 +40,18 @@ services:
         sync: false
       - key: HUBSPOT_PRIVATE_APP_TOKEN
         sync: false
+      - key: AIRTABLE_ACCESS_TOKEN
+        sync: false
+      - key: AIRTABLE_BASE_ID
+        sync: false
+      - key: AIRTABLE_DEALS_TABLE_ID
+        sync: false
+      - key: AIRTABLE_TASKS_TABLE_ID
+        sync: false
+      - key: FOUNDER_OPS_GITHUB_REPOSITORY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
 
   - type: worker
     name: kodex-authority-monitoring-worker
