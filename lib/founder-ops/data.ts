@@ -6,7 +6,8 @@ export type FounderOpsDeal = {
   stage: string;
   nextAction: string;
   value: string;
-  owner: string;
+  due: string;
+  sample: boolean;
 };
 
 export type FounderOpsTask = {
@@ -14,13 +15,17 @@ export type FounderOpsTask = {
   title: string;
   status: string;
   due: string;
-  owner: string;
+  priority: string;
+  workstream: string;
+  sample: boolean;
 };
 
 export type FounderOpsSnapshot = {
   airtable: {
     configured: boolean;
     live: boolean;
+    dealsLive: boolean;
+    tasksLive: boolean;
     error: string | null;
     deals: FounderOpsDeal[];
     tasks: FounderOpsTask[];
@@ -41,11 +46,11 @@ export type FounderOpsSnapshot = {
 type AirtableRecord = { id: string; fields?: Record<string, unknown> };
 
 const sampleDeals: FounderOpsDeal[] = [
-  { id: "sample-deal", company: "Example design partner", stage: "Discovery", nextAction: "Confirm pilot scope", value: "Sample", owner: "Founder" },
+  { id: "sample-deal", company: "Example design partner", stage: "Discovery", nextAction: "Confirm pilot scope", value: "Sample", due: "Sample", sample: true },
 ];
 
 const sampleTasks: FounderOpsTask[] = [
-  { id: "sample-task", title: "Review integration checklist", status: "Open", due: "Sample", owner: "Founder" },
+  { id: "sample-task", title: "Review integration checklist", status: "Open", due: "Sample", priority: "Normal", workstream: "Operations", sample: true },
 ];
 
 export async function getFounderOpsSnapshot(): Promise<FounderOpsSnapshot> {
@@ -61,31 +66,28 @@ async function getAirtableSnapshot(): Promise<FounderOpsSnapshot["airtable"]> {
   const configured = Boolean(token && baseId && dealsTableId && tasksTableId);
 
   if (!configured) {
-    return { configured: false, live: false, error: null, deals: sampleDeals, tasks: sampleTasks };
+    return { configured: false, live: false, dealsLive: false, tasksLive: false, error: null, deals: sampleDeals, tasks: sampleTasks };
   }
 
-  try {
-    const [dealRecords, taskRecords] = await Promise.all([
-      listAirtableRecords(baseId!, dealsTableId!, token!),
-      listAirtableRecords(baseId!, tasksTableId!, token!),
-    ]);
+  const [dealResult, taskResult] = await Promise.allSettled([
+    listAirtableRecords(baseId!, dealsTableId!, token!),
+    listAirtableRecords(baseId!, tasksTableId!, token!),
+  ]);
+  const dealsLive = dealResult.status === "fulfilled";
+  const tasksLive = taskResult.status === "fulfilled";
+  const errors = [dealResult, taskResult]
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+    .map((result) => result.reason instanceof Error ? result.reason.message : "Airtable connection failed.");
 
-    return {
-      configured: true,
-      live: true,
-      error: null,
-      deals: dealRecords.map(mapDeal),
-      tasks: taskRecords.map(mapTask),
-    };
-  } catch (error) {
-    return {
-      configured: true,
-      live: false,
-      error: error instanceof Error ? error.message : "Airtable connection failed.",
-      deals: sampleDeals,
-      tasks: sampleTasks,
-    };
-  }
+  return {
+    configured: true,
+    live: dealsLive && tasksLive,
+    dealsLive,
+    tasksLive,
+    error: errors.length ? [...new Set(errors)].join(" ") : null,
+    deals: dealsLive ? dealResult.value.map(mapDeal) : sampleDeals,
+    tasks: tasksLive ? taskResult.value.map(mapTask) : sampleTasks,
+  };
 }
 
 async function listAirtableRecords(baseId: string, tableId: string, token: string): Promise<AirtableRecord[]> {
@@ -96,6 +98,7 @@ async function listAirtableRecords(baseId: string, tableId: string, token: strin
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
+    signal: AbortSignal.timeout(8_000),
   });
 
   if (!response.ok) {
@@ -116,8 +119,9 @@ export function mapDeal(record: AirtableRecord): FounderOpsDeal {
     company: firstText(fields, ["Company", "Company Name", "Account", "Organization", "Name"], "Untitled opportunity"),
     stage: firstText(fields, ["Stage", "Status", "Pipeline Stage"], "Unspecified"),
     nextAction: firstText(fields, ["Next Action", "Next action", "Next Step", "Next step"], "No next action"),
-    value: firstText(fields, ["Expected Value", "Deal Value", "Value", "Amount"], "—"),
-    owner: firstText(fields, ["Owner", "Assigned To", "Lead Owner"], "Unassigned"),
+    value: euroText(fields, ["Value EUR", "Expected Value", "Deal Value", "Value", "Amount"], "—"),
+    due: firstText(fields, ["Due date", "Due Date", "Due", "Deadline"], "No due date"),
+    sample: isSample(fields, record),
   };
 }
 
@@ -127,8 +131,10 @@ export function mapTask(record: AirtableRecord): FounderOpsTask {
     id: record.id,
     title: firstText(fields, ["Task", "Title", "Name", "Action"], "Untitled task"),
     status: firstText(fields, ["Status", "State"], "Open"),
-    due: firstText(fields, ["Due Date", "Due", "Deadline"], "No due date"),
-    owner: firstText(fields, ["Owner", "Assigned To", "Assignee"], "Unassigned"),
+    due: firstText(fields, ["Due date", "Due Date", "Due", "Deadline"], "No due date"),
+    priority: firstText(fields, ["Priority"], "Normal"),
+    workstream: firstText(fields, ["Workstream", "Owner", "Assigned To", "Assignee"], "Operations"),
+    sample: isSample(fields, record),
   };
 }
 
@@ -140,7 +146,7 @@ async function getGitHubSnapshot(): Promise<FounderOpsSnapshot["github"]> {
   try {
     const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
     if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-    const response = await fetch(`https://api.github.com/repos/${repository}`, { headers, cache: "no-store" });
+    const response = await fetch(`https://api.github.com/repos/${repository}`, { headers, cache: "no-store", signal: AbortSignal.timeout(8_000) });
     if (!response.ok) throw new Error(`GitHub returned ${response.status}.`);
     const body = await response.json() as Record<string, unknown>;
     return {
@@ -167,6 +173,23 @@ function firstText(fields: Record<string, unknown>, keys: string[], fallback: st
     if (key in fields) return text(fields[key], fallback);
   }
   return fallback;
+}
+
+function euroText(fields: Record<string, unknown>, keys: string[], fallback: string): string {
+  for (const key of keys) {
+    const value = fields[key];
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return new Intl.NumberFormat("en", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
+    }
+    if (key in fields) return text(value, fallback);
+  }
+  return fallback;
+}
+
+function isSample(fields: Record<string, unknown>, record: AirtableRecord): boolean {
+  const source = firstText(fields, ["Source", "Data source"], "");
+  const name = firstText(fields, ["Company", "Task", "Name", "Title"], "");
+  return source.toLowerCase() === "sample" || name.toLowerCase().includes("[sample]") || record.id.startsWith("sample-");
 }
 
 function text(value: unknown, fallback: string): string {
