@@ -56,10 +56,11 @@ export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | nu
   };
 }
 
-export async function requireAuthorityPage() {
+export async function requireAuthorityPage(nextPath = "/admin/authority") {
   const session = await getAuthoritySession();
-  if (session.reason === "Unauthenticated.") redirect("/auth/login?next=/admin/authority");
-  if (!session.user) redirect("/auth/login?next=/admin/authority&error=admin-required");
+  const next = encodeURIComponent(nextPath);
+  if (session.reason === "Unauthenticated.") redirect(`/auth/login?next=${next}`);
+  if (!session.user) redirect(`/auth/login?next=${next}&error=admin-required`);
   return session.user;
 }
 
