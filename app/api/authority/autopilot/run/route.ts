@@ -2,10 +2,11 @@ import { z } from "zod";
 import { apiError, apiSuccess } from "@/lib/authority/api";
 import { requireAuthorityApi } from "@/lib/authority/auth";
 import { rateLimit } from "@/lib/authority/rate-limit";
-import { controlledAcceptanceTest, getAutopilotStatus, runAutopilot } from "@/lib/authority/autonomous-ranking";
+import { getAutopilotStatus, runAutopilot } from "@/lib/authority/autonomous-ranking";
+import { runAutonomyPreflight } from "@/lib/authority/preflight";
 import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 
-const schema = z.object({ acceptance: z.boolean().optional() });
+const schema = z.object({ preflight: z.boolean().optional() });
 
 function hasManualControlAccess(request: Request): boolean {
   const configured = process.env.AUTOPILOT_CONTROL_SECRET;
@@ -27,14 +28,13 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return apiError("Invalid autopilot payload.", 400);
 
-  const status = await getAutopilotStatus();
-  if (!parsed.data.acceptance && status.mode === "off") {
-    return apiError("Autopilot is OFF. Enable a mode before running.", 409);
+  if (parsed.data.preflight) {
+    return apiSuccess(await runAutonomyPreflight());
   }
 
-  if (parsed.data.acceptance) {
-    const result = await controlledAcceptanceTest(auth.actor);
-    return apiSuccess(result);
+  const status = await getAutopilotStatus();
+  if (status.mode === "off") {
+    return apiError("Autopilot is OFF. Enable a mode before running.", 409);
   }
 
   const leadDiscovery = await discoverKodexLeads();
