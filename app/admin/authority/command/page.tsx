@@ -22,11 +22,11 @@ export default async function AuthorityCommandPage() {
 
   return (
     <main className="authority-module">
-      <AuthorityTopbar section="Command" action={<AuthorityActionButton endpoint="/api/authority/autopilot/run" label="Run autopilot" />} />
+      <AuthorityTopbar section="Command" action={<a className="authority-primary" href="/admin/authority/settings">Autonomy controls</a>} />
       <section className="authority-heading">
-        <p>Private Kodex System</p>
+        <p>Kodex Growth Intelligence</p>
         <h1>Command center</h1>
-        <span>Operational status for opportunities, editorial, knowledge and observatory jobs.</span>
+        <span>Operational status for opportunities, editorial, knowledge, search and observatory jobs.</span>
       </section>
       <section className="authority-metrics">
         <Metric label="Active opportunities" value={opportunities.items.length} />
@@ -46,15 +46,16 @@ export default async function AuthorityCommandPage() {
           ))}
         </div>
         <p className="authority-empty">Mode: {autopilot.mode}. Daily limits: {autopilot.maxNewPagesPerDay} new pages, {autopilot.maxRevisionsPerDay} revisions.</p>
+        <div className="authority-action-row"><a className="authority-link-button" href="/admin/authority/settings">Change autonomy mode →</a></div>
       </section>
       <section className="authority-split">
         <article className="authority-panel">
           <h2>Priority actions</h2>
           <div className="authority-action-row">
             <AuthorityActionButton endpoint="/api/authority/opportunities/discover" label="Run discovery" />
-            <AuthorityActionButton endpoint="/api/authority/autopilot/run" label="Run autopilot" />
             <AuthorityActionButton endpoint="/api/authority/monitoring/run" label="Run LLM monitoring" />
             <AuthorityActionButton endpoint="/api/authority/retry" label="Retry failed jobs" />
+            <a className="authority-primary" href="/admin/authority/settings">Run autopilot privately</a>
           </div>
           {highPriority.length === 0 ? <p className="authority-empty">No high-priority opportunities currently loaded.</p> : highPriority.map((item) => (
             <a className="authority-priority-item" href={`/admin/authority/opportunities/${item.id}`} key={item.id}>
@@ -97,7 +98,7 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 function AuthorityTopbar({ section, action }: { section: string; action: React.ReactNode }) {
   return (
     <header className="authority-topbar">
-      <div><p>Private Kodex System</p><h1>{section}</h1></div>
+      <div><p>Kodex Growth Intelligence</p><h1>{section}</h1></div>
       <div className="authority-topbar-actions"><a className="authority-icon-button" href="/admin/authority/settings">⌕</a><a className="authority-icon-button" href="/admin/authority/command">○</a>{action}</div>
     </header>
   );
