@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "kodex-product-tour-v1";
 
@@ -46,6 +46,8 @@ const steps = [
 export function ProductTour() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     try {
@@ -58,6 +60,16 @@ export function ProductTour() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") finish();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
   function finish() {
     try {
       window.localStorage.setItem(STORAGE_KEY, "done");
@@ -66,6 +78,7 @@ export function ProductTour() {
     }
     setOpen(false);
     setStep(0);
+    window.setTimeout(() => launcherRef.current?.focus(), 0);
   }
 
   function launch() {
@@ -77,7 +90,7 @@ export function ProductTour() {
 
   return (
     <>
-      <button className="kx-tour-launcher" type="button" onClick={launch} aria-label="Open Kodex product tour">
+      <button ref={launcherRef} className="kx-tour-launcher" type="button" onClick={launch} aria-label="Open Kodex product tour">
         <span aria-hidden="true">?</span>
         Tour
       </button>
@@ -86,14 +99,14 @@ export function ProductTour() {
         <div className="kx-tour-backdrop" role="presentation" onMouseDown={(event) => {
           if (event.currentTarget === event.target) finish();
         }}>
-          <section className="kx-tour-card" role="dialog" aria-modal="true" aria-labelledby="kx-tour-title">
+          <section className="kx-tour-card" role="dialog" aria-modal="true" aria-labelledby="kx-tour-title" aria-describedby="kx-tour-description">
             <div className="kx-tour-top">
               <span className="kx-tour-step">Step {step + 1} of {steps.length}</span>
-              <button className="kx-tour-close" type="button" onClick={finish} aria-label="Close walkthrough">×</button>
+              <button ref={closeRef} className="kx-tour-close" type="button" onClick={finish} aria-label="Close walkthrough">×</button>
             </div>
 
             <h2 id="kx-tour-title">{current.title}</h2>
-            <p>{current.body}</p>
+            <p id="kx-tour-description">{current.body}</p>
 
             <div className="kx-tour-callout">
               <strong>What to know</strong>
