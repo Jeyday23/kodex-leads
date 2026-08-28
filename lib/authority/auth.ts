@@ -10,6 +10,10 @@ export interface AuthorityAdmin {
   fullName?: string | null;
 }
 
+type AuthorityApiResult =
+  | { ok: true; actor: string; role: string }
+  | { ok: false; response: Response };
+
 const publicStagingAdmin: AuthorityAdmin = {
   id: "public-staging",
   email: "public-staging@kodex.local",
@@ -66,14 +70,14 @@ export async function requireAuthorityPage(_nextPath = "/admin/authority") {
   return session.user ?? publicStagingAdmin;
 }
 
-export async function requireAuthorityApi(request: Request, options: { allowCron?: boolean } = {}) {
+export async function requireAuthorityApi(request: Request, options: { allowCron?: boolean } = {}): Promise<AuthorityApiResult> {
   if (options.allowCron && process.env.CRON_SECRET && request.headers.get("authorization") === `Bearer ${process.env.CRON_SECRET}`) {
-    return { ok: true as const, actor: "render-cron", role: "system" };
+    return { ok: true, actor: "render-cron", role: "system" };
   }
 
   const session = await getAuthoritySession();
   const actor = session.user ?? publicStagingAdmin;
-  return { ok: true as const, actor: actor.email, role: actor.role };
+  return { ok: true, actor: actor.email, role: actor.role };
 }
 
 export function isAuthorityAdmin(role: string): boolean {
