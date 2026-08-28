@@ -3,7 +3,7 @@ import { skipScheduledAutonomy } from "./scheduled-autonomy-gate";
 
 async function main() {
   const service = "kodex-authority-publication";
-  if (skipScheduledAutonomy(service)) return;
+  if (await skipScheduledAutonomy(service)) return;
   const assets = await listContentAssets(25);
   const results = [];
   for (const asset of assets.filter((item) => item.status === "approved")) {
