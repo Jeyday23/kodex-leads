@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 type Mode = "off" | "draft_only" | "guarded" | "controlled";
+type ControlState = "idle" | "saving" | "running" | "testing" | "done" | "failed";
 
 const labels: Record<Mode, { title: string; detail: string }> = {
   off: { title: "Off", detail: "No autonomous discovery, drafting or publishing runs." },
@@ -14,7 +15,7 @@ const labels: Record<Mode, { title: string; detail: string }> = {
 export function AutopilotControl({ currentMode }: { currentMode: Mode }) {
   const [mode, setMode] = useState<Mode>(currentMode);
   const [secret, setSecret] = useState("");
-  const [state, setState] = useState<"idle" | "saving" | "running" | "done" | "failed">("idle");
+  const [state, setState] = useState<ControlState>("idle");
   const [message, setMessage] = useState("");
 
   async function saveMode(nextMode: Mode) {
@@ -64,9 +65,34 @@ export function AutopilotControl({ currentMode }: { currentMode: Mode }) {
       return;
     }
     setState("done");
-    setMessage("Autonomous run completed.");
+    setMessage("Autonomous run completed. Refreshing workspace data…");
     window.location.reload();
   }
+
+  async function runSafetyTest() {
+    if (!secret.trim()) {
+      setState("failed");
+      setMessage("Enter the private control key first.");
+      return;
+    }
+    setState("testing");
+    setMessage("");
+    const response = await fetch("/api/authority/autopilot/run", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-kodex-control-secret": secret },
+      body: JSON.stringify({ acceptance: true }),
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      setState("failed");
+      setMessage(payload?.error ?? "Safety test failed.");
+      return;
+    }
+    setState("done");
+    setMessage("Safety acceptance test completed successfully. You can review the audit trail before running a normal cycle.");
+  }
+
+  const busy = state === "saving" || state === "running" || state === "testing";
 
   return (
     <section className="authority-panel">
@@ -86,7 +112,7 @@ export function AutopilotControl({ currentMode }: { currentMode: Mode }) {
             type="button"
             className={item === mode ? "authority-primary" : "authority-link-button"}
             onClick={() => saveMode(item)}
-            disabled={state === "saving" || state === "running"}
+            disabled={busy}
             style={{ textAlign: "left", minHeight: 118 }}
           >
             <strong style={{ display: "block", marginBottom: 8 }}>{labels[item].title}</strong>
@@ -102,13 +128,20 @@ export function AutopilotControl({ currentMode }: { currentMode: Mode }) {
           onChange={(event) => setSecret(event.target.value)}
           placeholder="Private control key"
           autoComplete="off"
+          aria-label="Private autonomy control key"
           style={{ minWidth: 260, flex: "1 1 320px" }}
         />
-        <button className="authority-primary" type="button" onClick={runNow} disabled={state === "running" || state === "saving" || mode === "off"}>
-          {state === "running" ? "Running autonomous cycle..." : "Run now"}
+        <button className="authority-link-button" type="button" onClick={runSafetyTest} disabled={busy}>
+          {state === "testing" ? "Testing safety gates…" : "Run safety test"}
+        </button>
+        <button className="authority-primary" type="button" onClick={runNow} disabled={busy || mode === "off"}>
+          {state === "running" ? "Running autonomous cycle…" : "Run now"}
         </button>
       </div>
-      {message ? <p className={state === "failed" ? "authority-warning" : "authority-empty"}>{message}</p> : null}
+      <p className="authority-empty" style={{ marginBottom: 0 }}>
+        Safety test does not require autonomy to be armed. Use it to validate acceptance controls before a normal run.
+      </p>
+      {message ? <p role="status" className={state === "failed" ? "authority-warning" : "authority-empty"}>{message}</p> : null}
     </section>
   );
 }
