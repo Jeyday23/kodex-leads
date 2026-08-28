@@ -3,7 +3,7 @@ import { skipScheduledAutonomy } from "./scheduled-autonomy-gate";
 
 async function main() {
   const service = "kodex-authority-retry";
-  if (skipScheduledAutonomy(service)) return;
+  if (await skipScheduledAutonomy(service)) return;
   const supabase = getSeoSupabase();
   let marked = 0;
 
