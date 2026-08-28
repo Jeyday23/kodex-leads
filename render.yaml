@@ -18,6 +18,10 @@ services:
         sync: false
       - key: CRON_SECRET
         sync: false
+      - key: AUTOPILOT_CONTROL_SECRET
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
@@ -37,6 +41,14 @@ services:
       - key: GOOGLE_SEARCH_CONSOLE_SITE_URL
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
+        sync: false
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+      - key: NORTHDATA_API_KEY
+        sync: false
+      - key: LEAD_ENRICHMENT_MAX_PER_RUN
         sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
@@ -66,6 +78,8 @@ services:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: OPENAI_API_KEY
         sync: false
@@ -98,6 +112,8 @@ services:
         sync: false
       - key: CRON_SECRET
         sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
@@ -118,6 +134,14 @@ services:
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+      - key: NORTHDATA_API_KEY
+        sync: false
+      - key: LEAD_ENRICHMENT_MAX_PER_RUN
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
       - key: HUBSPOT_PRIVATE_APP_TOKEN
@@ -136,6 +160,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL
         sync: false
@@ -163,6 +189,16 @@ cronJobs:
         sync: false
       - key: CRON_SECRET
         sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+      - key: NORTHDATA_API_KEY
+        sync: false
+      - key: LEAD_ENRICHMENT_MAX_PER_RUN
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
 
@@ -178,6 +214,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
@@ -201,6 +239,8 @@ cronJobs:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
 
@@ -216,6 +256,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
@@ -233,6 +275,8 @@ cronJobs:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
 
@@ -246,6 +290,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: OPENAI_API_KEY
         sync: false
@@ -273,6 +319,8 @@ cronJobs:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
 
@@ -286,6 +334,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: OPENAI_API_KEY
         sync: false
@@ -312,6 +362,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: OPENAI_API_KEY
         sync: false
@@ -341,6 +393,8 @@ cronJobs:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
 
@@ -355,6 +409,8 @@ cronJobs:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
 
@@ -368,6 +424,8 @@ cronJobs:
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
