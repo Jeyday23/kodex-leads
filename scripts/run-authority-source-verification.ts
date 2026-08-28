@@ -3,7 +3,7 @@ import { skipScheduledAutonomy } from "./scheduled-autonomy-gate";
 
 async function main() {
   const service = "kodex-authority-source-verification";
-  if (skipScheduledAutonomy(service)) return;
+  if (await skipScheduledAutonomy(service)) return;
   const sources = await listKnowledgeSources();
   let checked = 0;
   let changed = 0;
