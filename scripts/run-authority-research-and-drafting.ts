@@ -3,7 +3,7 @@ import { skipScheduledAutonomy } from "./scheduled-autonomy-gate";
 
 async function main() {
   const service = "kodex-authority-research-and-drafting";
-  if (skipScheduledAutonomy(service)) return;
+  if (await skipScheduledAutonomy(service)) return;
   const result = await runAutopilot({ actor: "render-research-and-drafting", modeOverride: "draft_only" });
   console.log(JSON.stringify({ service, ...result }));
 }
