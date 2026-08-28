@@ -14,13 +14,22 @@ test("direct lead discovery requires a private control or cron secret", () => {
   assert.match(route, /status:\s*403/);
 });
 
-test("manual autonomy includes lead discovery but acceptance test does not", () => {
+test("manual autonomy runs a non-publishing preflight before normal lead discovery", () => {
   const route = read("app/api/authority/autopilot/run/route.ts");
-  const acceptanceIndex = route.indexOf("if (parsed.data.acceptance)");
+  const preflightIndex = route.indexOf("if (parsed.data.preflight)");
   const discoveryIndex = route.indexOf("await discoverKodexLeads()");
-  assert.ok(acceptanceIndex >= 0);
-  assert.ok(discoveryIndex > acceptanceIndex);
-  assert.match(route, /controlledAcceptanceTest/);
+  assert.ok(preflightIndex >= 0);
+  assert.ok(discoveryIndex > preflightIndex);
+  assert.match(route, /runAutonomyPreflight/);
+  assert.doesNotMatch(route, /controlledAcceptanceTest/);
+});
+
+test("preflight is explicitly non-publishing and checks required controls", () => {
+  const preflight = read("lib/authority/preflight.ts");
+  assert.match(preflight, /nonPublishing:\s*true/);
+  assert.match(preflight, /AUTOPILOT_CONTROL_SECRET/);
+  assert.match(preflight, /getProviderStatuses/);
+  assert.match(preflight, /databaseConfigured/);
 });
 
 test("scheduled autopilot includes lead discovery and respects master enable flag", () => {
@@ -36,11 +45,12 @@ test("persistent monitoring worker uses the shared autonomy gate", () => {
   assert.match(worker, /skipScheduledAutonomy/);
 });
 
-test("private UI exposes safety test and lead discovery controls", () => {
+test("private UI exposes non-publishing preflight and lead discovery controls", () => {
   const autopilot = read("app/admin/authority/AutopilotControl.tsx");
   const command = read("app/seo-command-center.tsx");
-  assert.match(autopilot, /Run safety test/);
-  assert.match(autopilot, /acceptance:\s*true/);
+  assert.match(autopilot, /Run safety preflight/);
+  assert.match(autopilot, /preflight:\s*true/);
+  assert.match(autopilot, /Preflight is non-publishing/);
   assert.match(command, /Private control key/);
   assert.match(command, /x-kodex-control-secret/);
 });
@@ -49,7 +59,7 @@ test("Render blueprint wires the master schedule gate to every background execut
   const render = read("render.yaml");
   const serviceBlocks = render.split(/\n(?=\s*- (?:type|name):)/g);
   const backgroundBlocks = serviceBlocks.filter((block) =>
-    /type:\s*worker/.test(block) || /name:\s*kodex-authority-/.test(block) && /schedule:/.test(block)
+    /type:\s*worker/.test(block) || (/name:\s*kodex-authority-/.test(block) && /schedule:/.test(block))
   );
   assert.ok(backgroundBlocks.length >= 10, "Expected workers and cron jobs in Render blueprint");
   for (const block of backgroundBlocks) {
