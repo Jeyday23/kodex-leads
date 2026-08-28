@@ -3,7 +3,7 @@ import { skipScheduledAutonomy } from "./scheduled-autonomy-gate";
 
 async function main() {
   const service = "kodex-authority-discovery";
-  if (skipScheduledAutonomy(service)) return;
+  if (await skipScheduledAutonomy(service)) return;
   const runType = process.env.AUTHORITY_RUN_TYPE ?? "daily-discovery";
   const result = await runOpportunityDiscovery({
     actor: "render-cron",
