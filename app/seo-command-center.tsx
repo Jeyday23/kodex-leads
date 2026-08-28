@@ -15,6 +15,11 @@ interface DiscoveryLead {
   sourceUrl: string;
   retrievedAt: string;
   contactEmail?: string | null;
+  triggerCategory?: string | null;
+  regulatoryFramework?: string | null;
+  fineAmount?: string | null;
+  decisionMakerName?: string | null;
+  decisionMakerTitle?: string | null;
 }
 
 interface DiscoveryResponse {
@@ -32,24 +37,32 @@ interface DiscoveryResponse {
 }
 
 const thinkingSteps = [
-  "Scanning demand signals",
-  "Checking LLM discovery gaps",
-  "Matching prospect segments",
-  "Scoring traffic fit",
-  "Saving lead candidates",
+  "Scanning enforcement and market signals",
+  "Checking new-company activity",
+  "Matching regulatory exposure",
+  "Finding compliance decision makers",
+  "Saving verified lead candidates",
 ];
 
 export function SeoCommandCenter() {
   const [isRunning, setIsRunning] = useState(false);
+  const [secret, setSecret] = useState("");
   const [result, setResult] = useState<DiscoveryResponse["result"] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function runDiscovery() {
+    if (!secret.trim()) {
+      setError("Enter the private control key before running lead discovery.");
+      return;
+    }
     setIsRunning(true);
     setError(null);
     setResult(null);
-    const response = await fetch("/api/leads/discover", { method: "POST" });
-    const body = await response.json();
+    const response = await fetch("/api/leads/discover", {
+      method: "POST",
+      headers: { "x-kodex-control-secret": secret },
+    });
+    const body = await response.json().catch(() => ({}));
     setIsRunning(false);
     if (!response.ok) {
       const details = Array.isArray(body.errors) && body.errors.length > 0 ? ` ${body.errors.join(" ")}` : "";
@@ -64,15 +77,25 @@ export function SeoCommandCenter() {
     <section className="command-center">
       <section className="command-hero">
         <div>
-          <p className="eyebrow">Autonomous SEO engine</p>
-          <h1>Find traffic opportunities, get cited by LLMs, capture leads.</h1>
+          <p className="eyebrow">Private lead intelligence</p>
+          <h1>Find regulatory signals, the company, and the person who owns the decision.</h1>
           <p className="summary">
-            One workflow checks search intent, answer-engine readiness, landing-page fit and lead capture paths.
+            Scan evidence-backed enforcement, new-company formation, compliance hiring, funding and AI-product signals, then prioritize the most likely compliance, privacy, legal, security or executive buyer.
           </p>
         </div>
-        <button className="cta command-button" type="button" onClick={runDiscovery} disabled={isRunning}>
-          {isRunning ? "Running..." : "Run Lead Discovery"}
-        </button>
+        <div className="kx-command-control">
+          <input
+            type="password"
+            value={secret}
+            onChange={(event) => setSecret(event.target.value)}
+            placeholder="Private control key"
+            aria-label="Private lead discovery control key"
+            autoComplete="off"
+          />
+          <button className="cta command-button" type="button" onClick={runDiscovery} disabled={isRunning}>
+            {isRunning ? "Running…" : "Run Lead Discovery"}
+          </button>
+        </div>
       </section>
 
       <section className="thinking-strip" aria-label="Automation status">
@@ -84,7 +107,7 @@ export function SeoCommandCenter() {
       </section>
 
       {isRunning ? <SkeletonResults /> : null}
-      {error ? <p className="notice">{error}</p> : null}
+      {error ? <p className="notice" role="alert">{error}</p> : null}
 
       {result ? (
         <section className="discovery-results" aria-label="Discovered lead candidates">
@@ -100,26 +123,32 @@ export function SeoCommandCenter() {
             {result.leads.map((lead) => (
               <article className="lead-card" key={lead.id}>
                 <div>
-                  <span>{lead.segment}</span>
+                  <span>{lead.triggerCategory ?? lead.segment}</span>
                   <strong>{lead.companyName}</strong>
                 </div>
                 <p>{lead.fitReason}</p>
                 <dl>
                   <div>
-                    <dt>Intent</dt>
-                    <dd>{lead.suggestedSearchIntent}</dd>
+                    <dt>Framework</dt>
+                    <dd>{lead.regulatoryFramework ?? "Needs classification"}</dd>
                   </div>
                   <div>
-                    <dt>Landing page</dt>
-                    <dd>{lead.suggestedLandingPage}</dd>
+                    <dt>Decision maker</dt>
+                    <dd>{lead.decisionMakerName ?? lead.decisionMakerTitle ?? "Not resolved"}</dd>
                   </div>
+                  {lead.fineAmount ? (
+                    <div>
+                      <dt>Published fine</dt>
+                      <dd>{lead.fineAmount}</dd>
+                    </div>
+                  ) : null}
                   <div>
                     <dt>Source</dt>
-                    <dd><a href={lead.sourceUrl}>{lead.source}</a></dd>
+                    <dd><a href={lead.sourceUrl} target="_blank" rel="noreferrer">{lead.source}</a></dd>
                   </div>
                   <div>
                     <dt>Confidence</dt>
-                    <dd>{lead.confidence}</dd>
+                    <dd>{lead.confidence} / 100</dd>
                   </div>
                 </dl>
               </article>
@@ -130,16 +159,16 @@ export function SeoCommandCenter() {
 
       <section className="feature-row" aria-label="Autonomous features">
         <article>
-          <h2>Google</h2>
-          <p>Sitemap, canonical URLs, robots controls, quality gates and Search Console readiness.</p>
+          <h2>Enforcement</h2>
+          <p>Evidence-backed fine and enforcement signals keep the sales angle tied to a public source.</p>
         </article>
         <article>
-          <h2>LLMs</h2>
-          <p>llms.txt, AI sitemap, answer-first pages and provider sync for ChatGPT, Claude and Perplexity.</p>
+          <h2>New companies</h2>
+          <p>Optional North Data discovery targets recent German GmbH and UG registrations when configured.</p>
         </article>
         <article>
-          <h2>Leads</h2>
-          <p>Discovery, scoring, local persistence, admin inbox and optional Slack/HubSpot routing.</p>
+          <h2>Decision makers</h2>
+          <p>Hunter enrichment works today when configured; Apollo can improve role discovery when the API plan supports People Search.</p>
         </article>
       </section>
     </section>
@@ -148,7 +177,7 @@ export function SeoCommandCenter() {
 
 function SkeletonResults() {
   return (
-    <section className="lead-cards" aria-label="Loading lead candidates">
+    <section className="lead-cards" aria-label="Loading lead candidates" role="status">
       {[0, 1, 2].map((item) => (
         <article className="lead-card skeleton-card" key={item}>
           <span />
@@ -157,6 +186,7 @@ function SkeletonResults() {
           <p />
         </article>
       ))}
+      <span className="sr-only">Discovering regulatory lead candidates…</span>
     </section>
   );
 }
