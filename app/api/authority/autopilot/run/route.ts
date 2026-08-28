@@ -3,6 +3,7 @@ import { apiError, apiSuccess } from "@/lib/authority/api";
 import { requireAuthorityApi } from "@/lib/authority/auth";
 import { rateLimit } from "@/lib/authority/rate-limit";
 import { controlledAcceptanceTest, getAutopilotStatus, runAutopilot } from "@/lib/authority/autonomous-ranking";
+import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 
 const schema = z.object({ acceptance: z.boolean().optional() });
 
@@ -31,8 +32,12 @@ export async function POST(request: Request) {
     return apiError("Autopilot is OFF. Enable a mode before running.", 409);
   }
 
-  const result = parsed.data.acceptance
-    ? await controlledAcceptanceTest(auth.actor)
-    : await runAutopilot({ actor: auth.actor });
-  return apiSuccess(result);
+  if (parsed.data.acceptance) {
+    const result = await controlledAcceptanceTest(auth.actor);
+    return apiSuccess(result);
+  }
+
+  const leadDiscovery = await discoverKodexLeads();
+  const result = await runAutopilot({ actor: auth.actor });
+  return apiSuccess({ ...result, leadDiscovery });
 }
