@@ -3,27 +3,27 @@ import Link from "next/link";
 const modules = [
   {
     name: "Lead Signal Engine",
-    copy: "Finds compliance buying signals, scores fit, enriches contacts and routes high-intent accounts into the pipeline.",
+    copy: "Find compliance buying signals, score fit, enrich contacts and route high-intent accounts into the pipeline.",
     href: "/admin/leads",
-    stat: "LIVE",
+    stat: "Signals",
   },
   {
     name: "SEO Autopilot",
-    copy: "Builds source-backed compliance pages, applies quality gates and keeps weak or unsupported pages out of search.",
+    copy: "Build source-backed compliance pages, apply quality gates and keep weak or unsupported pages out of search.",
     href: "/admin/seo",
-    stat: "GUARDED",
+    stat: "Guarded",
   },
   {
     name: "Authority Engine",
-    copy: "Tracks prompts, citations, competitors and visibility across ChatGPT, Claude and Perplexity.",
+    copy: "Track prompts, citations, competitors and visibility across connected answer engines.",
     href: "/admin/authority/command",
-    stat: "3 LLMs",
+    stat: "Authority",
   },
   {
     name: "Google Discovery",
-    copy: "Submits the sitemap, inspects eligible URLs and closes the feedback loop between publishing and indexing.",
+    copy: "Submit the sitemap, inspect eligible URLs and close the feedback loop between publishing and indexing.",
     href: "/api/seo/google-discovery",
-    stat: "GSC",
+    stat: "Indexing",
   },
 ];
 
@@ -34,126 +34,136 @@ export default function HomePage() {
     <main className="kodex-landing">
       <style>{`
         .kodex-landing {
-          --ink: #edf7f4;
-          --muted: #8ba6a0;
-          --panel: rgba(9, 19, 22, .72);
-          --line: rgba(121, 255, 222, .16);
-          --mint: #78ffd6;
-          --cyan: #73d8ff;
-          --rose: #d58ca8;
+          --ink: #f5f5f7;
+          --muted: #a1a1a6;
+          --panel: rgba(255, 255, 255, .055);
+          --line: rgba(255, 255, 255, .09);
+          --mint: #77f2cf;
+          --cyan: #80d7ff;
           position: relative;
           isolation: isolate;
-          min-height: calc(100vh - 140px);
-          padding: 64px 20px 96px;
+          min-height: calc(100vh - 58px);
+          padding: clamp(54px, 8vw, 104px) 20px 96px;
           color: var(--ink);
           overflow: hidden;
           background:
-            radial-gradient(circle at 18% 16%, rgba(52, 255, 198, .14), transparent 28%),
-            radial-gradient(circle at 83% 20%, rgba(87, 175, 255, .13), transparent 26%),
-            linear-gradient(180deg, #071013 0%, #091215 46%, #071013 100%);
+            radial-gradient(circle at 12% 4%, rgba(86, 255, 207, .09), transparent 28%),
+            radial-gradient(circle at 86% 9%, rgba(108, 180, 255, .08), transparent 25%),
+            #070709;
         }
         .kodex-landing::before {
           content: "";
           position: absolute;
           inset: 0;
           z-index: -1;
-          opacity: .22;
-          background-image:
-            linear-gradient(rgba(120,255,214,.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(120,255,214,.08) 1px, transparent 1px);
-          background-size: 44px 44px;
-          mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
+          pointer-events: none;
+          background: linear-gradient(180deg, rgba(255,255,255,.018), transparent 40%);
         }
-        .landing-shell { max-width: 1180px; margin: 0 auto; }
-        .status-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+        .landing-shell { max-width: 1220px; margin: 0 auto; }
+        .status-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 38px; }
         .chip {
           display: inline-flex; align-items: center; gap: 8px;
-          border: 1px solid var(--line); background: rgba(7,17,19,.72);
-          border-radius: 999px; padding: 7px 11px;
-          color: #a9c5be; font: 600 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
-          letter-spacing: .08em; text-transform: uppercase;
+          border: 1px solid var(--line);
+          background: rgba(255,255,255,.035);
+          border-radius: 999px; padding: 7px 10px;
+          color: #b7b7bc; font-size: 10px; line-height: 1.2;
+          letter-spacing: .055em; text-transform: uppercase;
+          backdrop-filter: blur(16px);
         }
-        .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 18px var(--mint); }
-        .hero-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 32px; align-items: end; }
-        .eyebrow { color: var(--mint); font: 700 12px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .16em; text-transform: uppercase; }
-        .hero-title { margin: 14px 0 18px; max-width: 850px; font-size: clamp(46px, 8vw, 92px); line-height: .92; letter-spacing: -.055em; }
-        .hero-title span { background: linear-gradient(90deg, var(--mint), var(--cyan) 58%, #ccb6ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .hero-copy { max-width: 780px; color: var(--muted); font-size: clamp(17px, 2vw, 21px); line-height: 1.58; }
-        .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 14px rgba(119,242,207,.72); }
+        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr); gap: clamp(36px, 6vw, 80px); align-items: end; }
+        .eyebrow { margin: 0; color: var(--mint); font-size: 11px; font-weight: 650; letter-spacing: .11em; text-transform: uppercase; }
+        .hero-title { margin: 16px 0 22px; max-width: 920px; font-size: clamp(48px, 7.5vw, 94px); font-weight: 680; line-height: .94; letter-spacing: -.065em; }
+        .hero-title span { display: block; color: #a6a6ab; font-weight: 560; }
+        .hero-copy { max-width: 760px; margin: 0; color: var(--muted); font-size: clamp(17px, 1.65vw, 21px); line-height: 1.52; letter-spacing: -.018em; }
+        .cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
         .primary-cta, .secondary-cta {
-          display: inline-flex; align-items: center; justify-content: center; min-height: 48px;
-          border-radius: 13px; padding: 0 18px; text-decoration: none; font-weight: 800;
+          display: inline-flex; align-items: center; justify-content: center; min-height: 46px;
+          border-radius: 999px; padding: 0 17px; text-decoration: none; font-size: 14px; font-weight: 620;
+          transition: transform .16s ease, background .16s ease, border-color .16s ease;
         }
-        .primary-cta { background: var(--mint); color: #06110e; box-shadow: 0 0 30px rgba(120,255,214,.2); }
-        .secondary-cta { border: 1px solid var(--line); color: var(--ink); background: rgba(255,255,255,.025); }
-        .terminal {
-          border: 1px solid var(--line); border-radius: 18px; padding: 18px; background: rgba(3,10,12,.78);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 24px 70px rgba(0,0,0,.28);
+        .primary-cta { background: #f5f5f7; color: #111113; }
+        .secondary-cta { border: 1px solid var(--line); color: #f1f1f3; background: rgba(255,255,255,.045); }
+        .primary-cta:hover, .secondary-cta:hover { transform: translateY(-1px); }
+        .secondary-cta:hover { background: rgba(255,255,255,.075); }
+        .system-card {
+          border: 1px solid var(--line); border-radius: 24px; padding: 22px;
+          background: rgba(255,255,255,.045);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 24px 80px rgba(0,0,0,.25);
+          backdrop-filter: blur(26px);
         }
-        .terminal-head { display: flex; gap: 6px; margin-bottom: 16px; }
-        .terminal-head i { width: 8px; height: 8px; border-radius: 50%; background: #3b5450; }
-        .terminal code { display: block; white-space: pre-wrap; color: #8aa39d; font: 500 12px/1.8 ui-monospace, SFMono-Regular, Menlo, monospace; }
-        .terminal .ok { color: var(--mint); }
-        .flow-wrap { margin-top: 54px; padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: rgba(7,17,20,.6); }
-        .flow-label { margin-bottom: 13px; color: #78958e; font: 700 10px/1 ui-monospace, monospace; letter-spacing: .13em; text-transform: uppercase; }
-        .flow { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
-        .flow-step { position: relative; text-align: center; padding: 11px 6px; border: 1px solid rgba(120,255,214,.1); border-radius: 10px; background: rgba(120,255,214,.025); color: #b4cbc5; font: 700 11px/1.2 ui-monospace, monospace; }
-        .modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 18px; }
+        .system-card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+        .system-card-head strong { font-size: 14px; font-weight: 620; letter-spacing: -.02em; }
+        .system-card-head span { color: #7f7f85; font-size: 11px; }
+        .contract-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.065); }
+        .contract-row:first-of-type { border-top: 0; }
+        .contract-row span { color: #85858b; font-size: 12px; }
+        .contract-row strong { color: #d8d8dc; font: 600 11px/1.2 var(--kx-font-mono); letter-spacing: .015em; }
+        .contract-row strong.good { color: var(--mint); }
+        .flow-wrap { margin-top: 68px; padding: 22px; border: 1px solid var(--line); border-radius: 24px; background: rgba(255,255,255,.035); backdrop-filter: blur(18px); }
+        .flow-label { margin-bottom: 14px; color: #727278; font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+        .flow { display: grid; grid-template-columns: repeat(8, 1fr); gap: 7px; }
+        .flow-step { position: relative; text-align: center; padding: 10px 6px; border-radius: 999px; background: rgba(255,255,255,.045); color: #b6b6bb; font-size: 10px; font-weight: 620; letter-spacing: .015em; }
+        .modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 14px; }
         .module-card {
-          position: relative; min-height: 210px; padding: 24px; overflow: hidden;
-          border: 1px solid var(--line); border-radius: 20px; background: var(--panel);
-          text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, background .18s ease;
+          position: relative; min-height: 220px; padding: 26px; overflow: hidden;
+          border: 1px solid var(--line); border-radius: 26px; background: var(--panel);
+          text-decoration: none; color: inherit;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+          transition: transform .18s ease, border-color .18s ease, background .18s ease;
+          backdrop-filter: blur(18px);
         }
-        .module-card:hover { transform: translateY(-3px); border-color: rgba(120,255,214,.38); background: rgba(12,25,28,.88); }
-        .module-card::after { content: "↗"; position: absolute; top: 20px; right: 22px; color: #56726b; font-size: 20px; }
-        .module-stat { display: inline-block; margin-bottom: 38px; padding: 6px 9px; border-radius: 8px; background: rgba(120,255,214,.08); color: var(--mint); font: 800 10px/1 ui-monospace, monospace; letter-spacing: .1em; }
-        .module-card h2 { margin: 0 0 10px; font-size: 24px; letter-spacing: -.025em; }
-        .module-card p { margin: 0; max-width: 510px; color: var(--muted); line-height: 1.55; }
-        .footer-note { margin-top: 22px; color: #658078; font: 600 11px/1.6 ui-monospace, monospace; }
-        @media (max-width: 820px) {
-          .kodex-landing { padding-top: 38px; }
+        .module-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.17); background: rgba(255,255,255,.075); }
+        .module-card::after { content: "↗"; position: absolute; top: 24px; right: 25px; color: #717177; font-size: 18px; }
+        .module-stat { display: inline-block; margin-bottom: 48px; color: #77777d; font-size: 10px; font-weight: 650; letter-spacing: .065em; text-transform: uppercase; }
+        .module-card h2 { margin: 0 0 10px; font-size: 25px; font-weight: 650; letter-spacing: -.04em; }
+        .module-card p { margin: 0; max-width: 510px; color: #929298; font-size: 14px; line-height: 1.55; letter-spacing: -.01em; }
+        .footer-note { margin-top: 24px; color: #66666c; font-size: 10px; line-height: 1.6; letter-spacing: .04em; text-transform: uppercase; }
+        @media (max-width: 860px) {
+          .kodex-landing { padding-top: 46px; }
           .hero-grid, .modules { grid-template-columns: 1fr; }
-          .terminal { margin-top: 8px; }
+          .system-card { margin-top: 8px; }
+          .flow { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 520px) {
+          .hero-title { font-size: clamp(45px, 15vw, 64px); }
           .flow { grid-template-columns: repeat(2, 1fr); }
+          .module-card { min-height: 190px; }
         }
       `}</style>
 
       <div className="landing-shell">
         <div className="status-row">
           <span className="chip"><span className="dot" /> staging online</span>
-          <span className="chip">open access</span>
-          <span className="chip">EU-native growth stack</span>
+          <span className="chip">public workspace</span>
+          <span className="chip">private autonomy controls</span>
         </div>
 
         <section className="hero-grid">
           <div>
-            <p className="eyebrow">Kodex Growth Intelligence / v0.2</p>
-            <h1 className="hero-title">Turn compliance signals into <span>search authority + revenue.</span></h1>
+            <p className="eyebrow">Kodex Growth Intelligence</p>
+            <h1 className="hero-title">A control layer for compliant growth. <span>Signal in. Authority out.</span></h1>
             <p className="hero-copy">
-              One control layer for lead discovery, source-backed SEO, Google indexing feedback and LLM citation visibility—built around the compliance market Kodex already understands.
+              Discover buying intent, build source-backed search authority, monitor answer-engine visibility and keep autonomous execution behind an explicit control switch.
             </p>
             <div className="cta-row">
-              <Link className="primary-cta" href="/admin/seo">Launch command center →</Link>
-              <Link className="secondary-cta" href="/admin/leads">Open lead inbox</Link>
+              <Link className="primary-cta" href="/admin/authority/command">Open command center</Link>
+              <Link className="secondary-cta" href="/admin/leads">View lead signals</Link>
             </div>
           </div>
 
-          <aside className="terminal" aria-label="System status">
-            <div className="terminal-head"><i /><i /><i /></div>
-            <code>
-              <span className="ok">$ kodex --status</span>{"\n"}
-              lead_engine ........ online{"\n"}
-              seo_autopilot ...... guarded{"\n"}
-              google_discovery ... connected{"\n"}
-              llm_visibility ..... armed{"\n"}
-              auth_gate .......... bypassed/staging{"\n"}
-              <span className="ok">system_ready = true</span>
-            </code>
+          <aside className="system-card" aria-label="Control contract">
+            <div className="system-card-head"><strong>Control contract</strong><span>staging</span></div>
+            <div className="contract-row"><span>Dashboard</span><strong className="good">PUBLIC</strong></div>
+            <div className="contract-row"><span>Manual autonomy</span><strong>PRIVATE KEY</strong></div>
+            <div className="contract-row"><span>Scheduled autonomy</span><strong>OPT-IN</strong></div>
+            <div className="contract-row"><span>Risk gates</span><strong className="good">ENFORCED</strong></div>
+            <div className="contract-row"><span>Publishing</span><strong>MODE-BOUND</strong></div>
           </aside>
         </section>
 
         <section className="flow-wrap" aria-label="Growth loop">
-          <div className="flow-label">Autonomous growth loop</div>
+          <div className="flow-label">Growth loop</div>
           <div className="flow">
             {flow.map((item) => <div className="flow-step" key={item}>{item}</div>)}
           </div>
@@ -169,7 +179,7 @@ export default function HomePage() {
           ))}
         </section>
 
-        <p className="footer-note">STAGING MODE // public access enabled temporarily // secure auth should be restored before production.</p>
+        <p className="footer-note">Staging environment · public viewing enabled temporarily · production authentication remains a release gate.</p>
       </div>
     </main>
   );
