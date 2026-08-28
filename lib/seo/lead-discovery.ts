@@ -605,7 +605,7 @@ export function extractCompanyFromEnforcementTitle(title: string): string | null
 }
 
 export function extractFineAmount(title: string): string | null {
-  const match = title.match(/(?:€\s?[\d., ]+(?:\s?(?:million|billion|m|bn))?|[\d., ]+\s?(?:EUR|€))/i);
+  const match = title.match(/(?:€\s*\d(?:[\d., ]*\d)?(?:\s*(?:million|billion|m|bn))?|\d(?:[\d., ]*\d)?\s*(?:EUR|€))/i);
   return match?.[0]?.replace(/\s+/g, " ").trim() ?? null;
 }
 
