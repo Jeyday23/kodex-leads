@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     default: "Kodex",
     template: "%s | Kodex",
   },
-  description: "EU compliance assessments, deadline intelligence and source-backed readiness paths for growth teams.",
+  description: "Private Kodex SEO authority system for source-backed content, LLM visibility checks and search recognition.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -22,13 +22,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               Kodex
             </Link>
             <nav className="nav" aria-label="Primary">
-              <Link href="/deadlines/eu-ai-act">Deadlines</Link>
-              <Link href="/compare/vanta-vs-kodex">Compare</Link>
-              <Link href="/assess/eu-ai-act">Assessment</Link>
+              <Link href="/admin/authority/command">Authority</Link>
+              <Link href="/admin/seo">SEO Queue</Link>
+              <Link href="/api/seo/ai-sitemap">Crawler JSON</Link>
+              <Link href="/auth/login">Login</Link>
             </nav>
           </header>
           {children}
-          <footer className="footer">Source-backed compliance pages publish only after quality, indexing and attribution checks pass.</footer>
+          <footer className="footer">Private authority system. Public pages are source-backed and publish only after quality, indexing and attribution checks pass.</footer>
         </div>
       </body>
     </html>

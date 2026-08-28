@@ -10,8 +10,8 @@ export async function generateMetadata({ params }: AssessmentPageProps): Promise
   const { framework } = await params;
   const label = displayFramework(framework);
   return {
-    title: `${label} Readiness Assessment`,
-    description: `Capture and score ${label} compliance readiness leads from acquisition traffic.`,
+    title: `${label} Readiness Check`,
+    description: `Answer a few questions and get a practical ${label} readiness score with the next steps to prioritize.`,
     robots: { index: false, follow: true },
   };
 }
@@ -22,21 +22,41 @@ export default async function AssessmentPage({ params }: AssessmentPageProps) {
 
   return (
     <main className="main">
-      <section className="hero">
-        <p className="eyebrow">Assessment</p>
-        <h1>{label} Readiness Assessment</h1>
+      <section className="assessment-hero">
+        <p className="eyebrow">Free readiness check</p>
+        <h1>Find your {label} gaps in 2 minutes.</h1>
         <p className="summary">
-          Capture visitor context, score lead quality, attach acquisition attribution and route the result toward nurture, sales review or demo booking.
+          Answer six short questions. Kodex scores your current exposure, shows what to prioritize, and gives you a clear next step without requiring a sales call.
         </p>
+        <div className="assessment-proof" aria-label="What happens next">
+          <span>Instant score</span>
+          <span>Source-backed guidance</span>
+          <span>No credit card</span>
+        </div>
       </section>
 
       <section className="assessment-shell">
-        <div>
-          <h2>Qualification Logic</h2>
+        <aside className="assessment-guide" aria-label="Assessment process">
+          <p className="eyebrow">How it works</p>
+          <h2>Your result is built from practical operating signals.</h2>
           <p>
-            The score weights company size, AI exposure, compliance maturity gaps, urgency and topic fit. High-intent leads are marked for sales review or demo follow-up.
+            We look at company size, AI usage, compliance maturity and urgency, then turn that into a readiness grade you can act on.
           </p>
-        </div>
+          <ol className="assessment-steps">
+            <li>
+              <strong>Tell us your context</strong>
+              <span>Pick the closest answers for your company and timeline.</span>
+            </li>
+            <li>
+              <strong>Get a readiness score</strong>
+              <span>See whether you are researching, need a plan, or should move now.</span>
+            </li>
+            <li>
+              <strong>Use the next action</strong>
+              <span>Continue with a deadline page, deeper assessment, or follow-up.</span>
+            </li>
+          </ol>
+        </aside>
         <LeadForm framework={framework} />
       </section>
     </main>

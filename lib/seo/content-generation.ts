@@ -1,4 +1,3 @@
-import "server-only";
 import { createHash } from "node:crypto";
 import { getSiteUrl } from "./config";
 import { getSeoSupabase } from "./db";

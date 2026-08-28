@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       .from("leads")
       .insert({
         email: parsed.data.email,
+        company: parsed.data.companyName,
         company_name: parsed.data.companyName,
         framework: parsed.data.framework,
         company_size: parsed.data.companySize,

@@ -1,0 +1,29 @@
+name: SEO Automation Cron
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC (adjust time zone as needed)
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  seo-automation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger SEO cron job
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.SEO_CRON_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.RENDER_APP_URL }}/api/seo/cron" \
+            --fail \
+            --show-error \
+            --silent
+
+      - name: Log success
+        if: success()
+        run: echo "SEO cron job completed successfully"
+
+      - name: Log failure
+        if: failure()
+        run: echo "SEO cron job failed" && exit 1

@@ -1,4 +1,3 @@
-import "server-only";
 import type { LeadCaptureInput, LeadScoreResult } from "./types";
 import type { RoutingStatus } from "./local-store";
 
