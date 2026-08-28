@@ -35,6 +35,12 @@ interface EnrichedContact {
   title?: string | null;
 }
 
+interface ApolloDecisionMaker {
+  name: string | null;
+  title: string | null;
+  source: string;
+}
+
 export interface LeadDiscoveryResult {
   mode: "live";
   searchedAt: string;
@@ -50,6 +56,7 @@ const PRODUCT_HUNT_AI = "https://www.producthunt.com/categories/artificial-intel
 const GITHUB_API = "https://api.github.com";
 const EDPB_NEWS = "https://www.edpb.europa.eu/news/news_en?field_edpb_member_states_target_id=All&news_type=2";
 const NORTHDATA_POWER = "https://www.northdata.com/_api/search/v1/power";
+const APOLLO_PEOPLE_SEARCH = "https://api.apollo.io/api/v1/mixed_people/api_search";
 
 const complianceJobKeywords = [
   "Data Protection Officer",
@@ -118,7 +125,8 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
     .slice(0, 60);
 
   const enriched = await enrichDecisionMakers(leads);
-  await persistDiscoveredLeads(enriched);
+  const persistError = await persistDiscoveredLeads(enriched);
+  if (persistError) errors.push(persistError);
   const stored = await storeDiscoveredLeadsLocally(enriched);
 
   await storeAuditEventLocally({
@@ -152,10 +160,10 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
   };
 }
 
-async function persistDiscoveredLeads(leads: Omit<DiscoveredLead, "id" | "createdAt">[]): Promise<void> {
+async function persistDiscoveredLeads(leads: Omit<DiscoveredLead, "id" | "createdAt">[]): Promise<string | null> {
   const supabase = getSeoSupabase();
-  if (!supabase || leads.length === 0) return;
-  await supabase.from("discovered_leads").insert(leads.map((lead) => ({
+  if (!supabase || leads.length === 0) return null;
+  const { error } = await supabase.from("discovered_leads").insert(leads.map((lead) => ({
     company_name: lead.companyName,
     website: lead.website,
     segment: lead.segment,
@@ -168,7 +176,15 @@ async function persistDiscoveredLeads(leads: Omit<DiscoveredLead, "id" | "create
     retrieved_at: lead.retrievedAt,
     contact_email: lead.contactEmail,
     enrichment_provider: lead.enrichmentProvider,
+    trigger_category: lead.triggerCategory,
+    regulatory_framework: lead.regulatoryFramework,
+    fine_amount: lead.fineAmount,
+    decision_maker_name: lead.decisionMakerName,
+    decision_maker_title: lead.decisionMakerTitle,
+    decision_maker_source: lead.decisionMakerSource,
+    outreach_angle: lead.outreachAngle,
   })));
+  return error ? `Supabase discovered_leads insert: ${error.message}` : null;
 }
 
 async function scrapeRegulatoryEnforcement(): Promise<{ leads: ScrapedLead[]; errors: string[] }> {
@@ -192,7 +208,6 @@ async function scrapeRegulatoryEnforcement(): Promise<{ leads: ScrapedLead[]; er
       if (seen.has(key)) continue;
       seen.add(key);
       const href = match[1].startsWith("http") ? match[1] : new URL(match[1], EDPB_NEWS).toString();
-      const framework = "GDPR";
       leads.push({
         companyName,
         website: href,
@@ -205,7 +220,7 @@ async function scrapeRegulatoryEnforcement(): Promise<{ leads: ScrapedLead[]; er
         sourceUrl: href,
         retrievedAt: new Date().toISOString(),
         triggerCategory: "enforcement_fine",
-        regulatoryFramework: framework,
+        regulatoryFramework: "GDPR",
         fineAmount: extractFineAmount(title),
         outreachAngle: "Post-enforcement remediation, audit evidence and controls that can be demonstrated to customers, counsel and regulators.",
       });
@@ -232,11 +247,12 @@ async function scrapeNewGermanCompanies(): Promise<{ leads: ScrapedLead[]; error
     representatives: "true",
     extras: "true",
     censor: "true",
+    api_key: key,
   });
 
   try {
     const response = await fetch(`${NORTHDATA_POWER}?${params.toString()}`, {
-      headers: { accept: "application/json", "X-Api-Key": key },
+      headers: { accept: "application/json" },
       signal: AbortSignal.timeout(18000),
     });
     if (!response.ok) return { leads: [], errors: [`North Data new companies: HTTP ${response.status}`] };
@@ -448,25 +464,94 @@ async function scrapeAICompanies(): Promise<{ leads: ScrapedLead[]; errors: stri
 
 async function enrichDecisionMakers(leads: ScrapedLead[]): Promise<Omit<DiscoveredLead, "id" | "createdAt">[]> {
   const enriched: Omit<DiscoveredLead, "id" | "createdAt">[] = [];
-  for (const lead of leads) {
+  const maxEnrichments = Math.max(0, Math.min(Number(process.env.LEAD_ENRICHMENT_MAX_PER_RUN ?? 12) || 12, 30));
+
+  for (const [index, lead] of leads.entries()) {
     const domain = extractDomain(lead.website);
-    const contact = domain ? await enrichContact(domain) : null;
+    const apollo = domain ? await searchApolloDecisionMaker(domain) : null;
+    const contact = domain && index < maxEnrichments ? await enrichContact(domain, apollo?.name ?? undefined) : null;
     enriched.push({
       ...lead,
       contactEmail: contact?.email ?? lead.contactEmail ?? null,
-      enrichmentProvider: contact?.provider ?? lead.enrichmentProvider ?? null,
-      decisionMakerName: contact?.name ?? lead.decisionMakerName ?? null,
-      decisionMakerTitle: contact?.title ?? lead.decisionMakerTitle ?? fallbackBuyerTitle(lead.triggerCategory),
-      decisionMakerSource: contact ? "Hunter public professional contact enrichment" : lead.decisionMakerSource ?? null,
+      enrichmentProvider: contact?.provider ?? lead.enrichmentProvider ?? (apollo ? "apollo-search" : null),
+      decisionMakerName: apollo?.name ?? contact?.name ?? lead.decisionMakerName ?? null,
+      decisionMakerTitle: apollo?.title ?? contact?.title ?? lead.decisionMakerTitle ?? fallbackBuyerTitle(lead.triggerCategory),
+      decisionMakerSource: apollo?.source ?? (contact ? "Hunter public professional contact enrichment" : lead.decisionMakerSource ?? null),
     });
-    await delay(220);
+    await delay(180);
   }
   return enriched;
 }
 
-async function enrichContact(domain: string): Promise<EnrichedContact | null> {
+async function searchApolloDecisionMaker(domain: string): Promise<ApolloDecisionMaker | null> {
+  const apiKey = process.env.APOLLO_API_KEY;
+  if (!apiKey) return null;
+  const params = new URLSearchParams({
+    include_similar_titles: "true",
+    per_page: "10",
+    page: "1",
+  });
+  for (const title of ["data protection officer", "privacy", "compliance", "general counsel", "legal", "security", "risk", "chief technology officer", "managing director", "founder"]) {
+    params.append("person_titles[]", title);
+  }
+  for (const seniority of ["manager", "director", "vp", "c_suite", "head"]) {
+    params.append("person_seniorities[]", seniority);
+  }
+  params.append("q_organization_domains_list[]", domain);
+
+  try {
+    const response = await fetch(`${APOLLO_PEOPLE_SEARCH}?${params.toString()}`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+      },
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!response.ok) return null;
+    const data = await response.json() as { people?: Array<Record<string, unknown>> };
+    const ranked = (data.people ?? [])
+      .map((person) => {
+        const title = String(person.title ?? "").trim();
+        const rawName = String(person.name ?? [person.first_name, person.last_name].filter(Boolean).join(" ") ?? "").trim();
+        return { title, name: cleanApolloName(rawName), score: scoreDecisionMaker(title) };
+      })
+      .sort((a, b) => b.score - a.score);
+    const best = ranked[0];
+    if (!best) return null;
+    return { name: best.name, title: best.title || null, source: "Apollo People API Search" };
+  } catch {
+    return null;
+  }
+}
+
+async function enrichContact(domain: string, preferredName?: string): Promise<EnrichedContact | null> {
   const hunterKey = process.env.HUNTER_API_KEY;
   if (!hunterKey) return null;
+
+  if (preferredName) {
+    try {
+      const params = new URLSearchParams({ domain, full_name: preferredName, api_key: hunterKey });
+      const response = await fetch(`https://api.hunter.io/v2/email-finder?${params.toString()}`, { signal: AbortSignal.timeout(10000) });
+      if (response.ok) {
+        const payload = await response.json() as { data?: Record<string, unknown> };
+        const data = payload.data;
+        const email = String(data?.email ?? "").trim();
+        if (email) {
+          return {
+            email,
+            provider: "hunter-email-finder",
+            name: [data?.first_name, data?.last_name].map((value) => String(value ?? "").trim()).filter(Boolean).join(" ") || preferredName,
+            title: String(data?.position ?? "").trim() || null,
+          };
+        }
+      }
+    } catch {
+      // Fall back to domain search below.
+    }
+  }
+
   try {
     const response = await fetch(`https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(domain)}&api_key=${hunterKey}&limit=10`, {
       signal: AbortSignal.timeout(10000),
@@ -488,7 +573,7 @@ async function enrichContact(domain: string): Promise<EnrichedContact | null> {
       .filter((item) => item.email.includes("@"))
       .sort((a, b) => b.score - a.score);
     const best = ranked[0];
-    return best ? { email: best.email, provider: "hunter", name: best.name || null, title: best.title || null } : null;
+    return best ? { email: best.email, provider: "hunter-domain-search", name: best.name || null, title: best.title || null } : null;
   } catch {
     return null;
   }
@@ -528,6 +613,12 @@ function fallbackBuyerTitle(category?: LeadTriggerCategory): string {
   if (category === "new_company") return "Founder / Managing Director / Compliance owner";
   if (category === "enforcement_fine") return "DPO / Head of Compliance / General Counsel";
   return "DPO / Compliance / Legal / Security decision maker";
+}
+
+function cleanApolloName(value: string): string | null {
+  const name = value.replace(/\s+/g, " ").trim();
+  if (!name || name.includes("*") || name.split(" ").length < 2) return null;
+  return name;
 }
 
 function scoreDecisionMakerName(value: unknown): string {
