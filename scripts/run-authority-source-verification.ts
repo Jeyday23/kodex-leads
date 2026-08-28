@@ -1,6 +1,9 @@
 import { checkKnowledgeSource, listKnowledgeSources } from "@/lib/authority/knowledge";
+import { skipScheduledAutonomy } from "./scheduled-autonomy-gate";
 
 async function main() {
+  const service = "kodex-authority-source-verification";
+  if (skipScheduledAutonomy(service)) return;
   const sources = await listKnowledgeSources();
   let checked = 0;
   let changed = 0;
@@ -16,7 +19,7 @@ async function main() {
   }
 
   console.log(JSON.stringify({
-    service: "kodex-authority-source-verification",
+    service,
     status: process.env.SEO_SOURCE_FETCH_ENABLED === "true" ? "ready" : "disabled",
     sources: sources.length,
     checked,
