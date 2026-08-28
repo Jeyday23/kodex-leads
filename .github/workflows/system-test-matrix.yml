@@ -1,0 +1,63 @@
+name: System Test Matrix
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ux-tutorial:
+    name: UX + tutorial
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Test product experience
+        run: npx tsx --test tests/product-experience.test.ts tests/particles.test.ts
+
+  autonomy-security:
+    name: Autonomy + security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Test control surfaces and schedule gates
+        run: npx tsx --test tests/control-surface.test.ts tests/scheduled-autonomy-gate.test.ts tests/autonomous-ranking.test.ts
+
+  lead-engine:
+    name: Regulatory lead engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Test lead signals and scoring
+        run: npx tsx --test tests/lead-discovery-signals.test.ts tests/seo.test.ts
+
+  production-build:
+    name: Production readiness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
