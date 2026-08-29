@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "bash scripts/install-agent-reach.sh",
+    "agent-reach:install": "bash scripts/install-agent-reach.sh",
     "lint": "eslint",
     "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit",
