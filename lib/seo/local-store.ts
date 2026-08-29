@@ -126,14 +126,27 @@ export async function listLocalAuditEvents(limit = 50): Promise<StoredAuditEvent
 
 export async function storeDiscoveredLeadsLocally(leads: Omit<DiscoveredLead, "id" | "createdAt">[]): Promise<DiscoveredLead[]> {
   const store = await readStore();
-  const discovered = leads.map((lead) => ({
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-    ...lead,
-  }));
-  store.discoveredLeads = [...discovered, ...(store.discoveredLeads ?? [])].slice(0, 300);
+  const existing = store.discoveredLeads ?? [];
+  const byKey = new Map(existing.map((lead) => [discoveredLeadKey(lead), lead]));
+  const upserted: DiscoveredLead[] = [];
+
+  for (const lead of leads) {
+    const key = discoveredLeadKey(lead);
+    const current = byKey.get(key);
+    const stored: DiscoveredLead = current
+      ? { ...current, ...lead, id: current.id, createdAt: current.createdAt }
+      : { id: crypto.randomUUID(), createdAt: new Date().toISOString(), ...lead };
+    byKey.set(key, stored);
+    upserted.push(stored);
+  }
+
+  const refreshedKeys = new Set(upserted.map(discoveredLeadKey));
+  store.discoveredLeads = [
+    ...upserted,
+    ...existing.filter((lead) => !refreshedKeys.has(discoveredLeadKey(lead))),
+  ].slice(0, 300);
   await writeStore(store);
-  return discovered;
+  return upserted;
 }
 
 export async function listDiscoveredLeads(limit = 50): Promise<DiscoveredLead[]> {
@@ -204,4 +217,12 @@ export async function queueRevisionTasks(tasks: Omit<SeoRevisionTask, "id" | "cr
 export async function listRevisionTasks(limit = 50): Promise<SeoRevisionTask[]> {
   const store = await readStore();
   return (store.revisionTasks ?? []).slice(0, limit);
+}
+
+function discoveredLeadKey(lead: Pick<DiscoveredLead, "companyName" | "sourceUrl">): string {
+  const company = lead.companyName
+    .toLowerCase()
+    .replace(/\b(gmbh|ug|ag|se|ltd|limited|inc|sa|sarl|bv)\b/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+  return `${company}|${lead.sourceUrl.trim().toLowerCase()}`;
 }

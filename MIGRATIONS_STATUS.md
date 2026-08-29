@@ -1,155 +1,69 @@
-# Database Migrations Status
+# Database migrations and runtime verification
 
-## Overview
+Kodex uses Supabase/PostgreSQL migrations under `supabase/migrations/`.
 
-Kodex uses Supabase for PostgreSQL database management with versioned migrations.
+## Important
 
-## Current Migrations
+The repository can prove which migrations **exist**, but it cannot prove which migrations have been applied to the connected Supabase project. Do not treat this file as a live database-status report.
 
-| Migration | Status | Purpose |
-|-----------|--------|---------|
-| 010_seo_engine.sql | ✅ Applied | Core SEO tables (topics, content, leads) |
-| 011_authority_engine.sql | ✅ Applied | Authority source management |
-| 012_authority_operational_modules.sql | ✅ Applied | Editorial and knowledge management |
-| 013_opportunity_intelligence_completion.sql | ✅ Applied | Opportunity discovery and analysis |
-| 014_autonomous_ranking_engine.sql | ⏳ Pending | Content automation and ranking |
+For live readiness, open `/admin/authority/settings` and run the non-publishing safety preflight. If Supabase credentials are detected but the Authority settings table cannot be read, verify the migration history and service-role access in Supabase.
 
-## Migration Details
+## Migrations in this repository
 
-### 014_autonomous_ranking_engine.sql
-The latest migration adds:
+| Migration | Purpose |
+| --- | --- |
+| `010_seo_engine.sql` | Core SEO/content/lead tables |
+| `011_authority_engine.sql` | Authority monitoring and source management |
+| `012_authority_operational_modules.sql` | Editorial and knowledge modules |
+| `013_opportunity_intelligence_completion.sql` | Opportunity discovery/decision data |
+| `014_autonomous_ranking_engine.sql` | Autonomy policy, content lifecycle and ranking engine |
+| `015_leads_schema_repair.sql` | Lead schema compatibility repair |
+| `016_legacy_leads_company_compat.sql` | Legacy company-field compatibility |
+| `017_leads_source_constraint_compat.sql` | Lead source constraint compatibility |
+| `018_regulatory_trigger_leads.sql` | Regulatory-trigger discovered leads and enrichment fields |
+| `019_discovered_lead_dedupe.sql` | Cross-run discovered-lead idempotency/dedupe trigger |
 
-**New Types:**
-- `authority_autopilot_mode` - Automation control (off, draft_only, guarded, controlled)
-- `authority_asset_status` - Content lifecycle states
-- `authority_claim_category` - Claim categorization
-- `authority_verification_result` - Verification states
+## Runtime requirements
 
-**New Tables:**
-- `authority_automation_settings` - Global autopilot configuration
-- `authority_content_assets` - Content pieces and metadata
-- `authority_content_versions` - Version history for content
-- `authority_content_claims` - Claims extracted from content
-- (More tables in the full migration)
+The autonomous regulatory lead path expects the SEO base schema plus `018_regulatory_trigger_leads.sql`. Apply `019_discovered_lead_dedupe.sql` to enable database-side cross-run dedupe. The application also performs local/package-level dedupe, so duplicate approval packages remain suppressed if migration 019 has not yet been applied.
 
-## Applying Migrations
+The Authority autonomy controls depend on the tables introduced by migrations 011–014. The Settings page reports whether the live `authority_automation_settings` table is readable rather than guessing from repository state.
 
-### Option 1: Using Supabase Dashboard (Easiest)
+## Verify in Supabase
 
-1. Go to https://supabase.com/dashboard
-2. Select your project
-3. Go to **SQL Editor**
-4. Create a new query
-5. Copy the contents of `supabase/migrations/014_autonomous_ranking_engine.sql`
-6. Run the query
-
-### Option 2: Using Supabase CLI (Recommended)
-
-```bash
-# Start local Supabase (requires Docker)
-supabase start
-
-# Push migrations to local environment
-supabase db push
-
-# Push to production (requires authentication)
-supabase db push --linked
-```
-
-### Option 3: Manual SQL Execution
-
-Connect to your Supabase database with a PostgreSQL client and execute the migration SQL.
-
-## Verifying Migrations
-
-After applying, verify the tables exist:
+Use the Supabase SQL Editor or CLI against the intended project. A quick table check is:
 
 ```sql
--- Check if new tables exist
-SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
-AND table_name LIKE 'authority_%';
-
--- Should show:
--- authority_automation_settings
--- authority_content_assets
--- authority_content_versions
--- authority_content_claims
--- ... (more tables)
+select table_name
+from information_schema.tables
+where table_schema = 'public'
+  and table_name in (
+    'authority_automation_settings',
+    'authority_content_assets',
+    'discovered_leads',
+    'seo_audit_events'
+  )
+order by table_name;
 ```
 
-Or via CLI:
-```bash
-supabase status
+For migration 019 specifically:
+
+```sql
+select column_name
+from information_schema.columns
+where table_schema = 'public'
+  and table_name = 'discovered_leads'
+  and column_name = 'lead_key';
 ```
 
-## Local Development
+If `lead_key` is present, also verify the trigger:
 
-To test migrations locally:
-
-1. **Install Docker** - Required for local Supabase
-2. **Start Supabase:**
-   ```bash
-   supabase start
-   ```
-3. **Apply migrations:**
-   ```bash
-   supabase db push
-   ```
-4. **Verify:**
-   ```bash
-   supabase status
-   ```
-
-## Production Deployment
-
-Migrations are automatically applied in production through:
-
-1. **Manual application** via Supabase Dashboard (safest)
-2. **CLI push** with `--linked` flag (requires auth)
-3. **Scheduled maintenance** window (if set up)
-
-## Rollback
-
-To rollback a migration:
-
-```bash
-# List migration history
-supabase migration list
-
-# Rollback last migration (if supported)
-supabase db reset
+```sql
+select trigger_name
+from information_schema.triggers
+where event_object_schema = 'public'
+  and event_object_table = 'discovered_leads'
+  and trigger_name = 'discovered_leads_dedupe_before_insert';
 ```
 
-**Note:** Not all migrations are reversible. Always backup production before applying new migrations.
-
-## Next Steps
-
-- [ ] Apply 014_autonomous_ranking_engine.sql to production
-- [ ] Verify tables created in Supabase dashboard
-- [ ] Test dashboard queries work with new schema
-- [ ] Monitor Render logs for any database errors
-
-## Troubleshooting
-
-### Migration fails
-- Check Supabase logs in dashboard
-- Verify no conflicting table names
-- Ensure proper permissions in Supabase
-
-### Tables don't appear
-- Wait 30-60 seconds for commit to finish
-- Refresh browser
-- Check "All Schemas" dropdown in Supabase
-
-### Local Supabase issues
-- Restart Docker: `docker restart supabase_db`
-- Reset database: `supabase db reset`
-- Check logs: `supabase logs --follow`
-
-## For More Info
-
-- [Supabase Migrations Docs](https://supabase.com/docs/guides/database/migrations)
-- [PostgreSQL Docs](https://www.postgresql.org/docs/)
-- See [HANDOFF.md](HANDOFF.md) for overall project documentation
+Never paste Supabase service-role keys into the browser UI. Server secrets belong in the Render environment.

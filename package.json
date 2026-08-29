@@ -9,6 +9,7 @@
     "agent-reach:install": "bash scripts/install-agent-reach.sh",
     "lint": "eslint",
     "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "cf:types": "wrangler types cloudflare/worker-configuration.d.ts",
     "cf:typecheck": "npm run cf:types && tsc -p cloudflare/tsconfig.json --noEmit",
