@@ -43,6 +43,13 @@ npx wrangler whoami
 
 For CI, use a scoped Cloudflare API token supplied by the deployment platform. Do not commit the token or place it in `wrangler.jsonc`.
 
+The repository includes a manual `Deploy Cloudflare Worker` GitHub Actions workflow. Add these repository or environment secrets before running it:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+Create the token from Cloudflare's **Edit Cloudflare Workers** template and scope it to the intended account. Keep production secrets in a protected GitHub `production` environment.
+
 ## Deployment
 
 Deploy staging first:
