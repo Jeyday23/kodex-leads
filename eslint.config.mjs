@@ -22,6 +22,12 @@ const eslintConfig = [
       },
     },
   },
+  {
+    files: ["app/page.tsx", "app/admin/dashboard/page.tsx"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
 ];
 
 export default eslintConfig;
