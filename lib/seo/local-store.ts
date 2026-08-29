@@ -35,6 +35,14 @@ export interface StoredAuditEvent {
   createdAt: string;
 }
 
+export type LeadTriggerCategory =
+  | "enforcement_fine"
+  | "regulatory_exposure"
+  | "new_company"
+  | "compliance_hiring"
+  | "funding"
+  | "ai_product";
+
 export interface DiscoveredLead {
   id: string;
   createdAt: string;
@@ -50,6 +58,13 @@ export interface DiscoveredLead {
   retrievedAt: string;
   contactEmail?: string | null;
   enrichmentProvider?: string | null;
+  triggerCategory?: LeadTriggerCategory;
+  regulatoryFramework?: string | null;
+  fineAmount?: string | null;
+  decisionMakerName?: string | null;
+  decisionMakerTitle?: string | null;
+  decisionMakerSource?: string | null;
+  outreachAngle?: string | null;
 }
 
 interface SeoStore {
@@ -116,7 +131,7 @@ export async function storeDiscoveredLeadsLocally(leads: Omit<DiscoveredLead, "i
     createdAt: new Date().toISOString(),
     ...lead,
   }));
-  store.discoveredLeads = [...discovered, ...(store.discoveredLeads ?? [])].slice(0, 200);
+  store.discoveredLeads = [...discovered, ...(store.discoveredLeads ?? [])].slice(0, 300);
   await writeStore(store);
   return discovered;
 }

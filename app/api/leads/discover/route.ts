@@ -1,9 +1,17 @@
-import { requireAuthorityApi } from "@/lib/authority/auth";
 import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 
+function hasDiscoveryControl(request: Request): boolean {
+  const controlSecret = process.env.AUTOPILOT_CONTROL_SECRET;
+  const cronSecret = process.env.CRON_SECRET;
+  const controlMatch = Boolean(controlSecret && request.headers.get("x-kodex-control-secret") === controlSecret);
+  const cronMatch = Boolean(cronSecret && request.headers.get("authorization") === `Bearer ${cronSecret}`);
+  return controlMatch || cronMatch;
+}
+
 export async function POST(request: Request) {
-  const auth = await requireAuthorityApi(request, { allowCron: true });
-  if (!auth.ok) return auth.response;
+  if (!hasDiscoveryControl(request)) {
+    return Response.json({ status: "error", error: "Private lead-discovery control key required." }, { status: 403 });
+  }
 
   try {
     const result = await discoverKodexLeads();

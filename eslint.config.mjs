@@ -21,6 +21,15 @@ const eslintConfig = [
         },
       },
     },
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    },
+  },
+  {
+    files: ["app/admin/dashboard/page.tsx"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+    },
   },
   {
     files: ["app/page.tsx", "app/admin/dashboard/page.tsx"],

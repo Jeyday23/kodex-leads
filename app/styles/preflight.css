@@ -1,0 +1,70 @@
+.kx-preflight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.kx-preflight-check {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  min-height: 142px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.kx-preflight-check > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.kx-preflight-check strong {
+  color: #242426;
+  font-size: 0.88rem;
+  letter-spacing: -0.02em;
+}
+
+.kx-preflight-check span {
+  color: #86868b;
+  font-size: 0.67rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.kx-preflight-check p {
+  margin: 0;
+  color: #6e6e73;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.kx-preflight-check b {
+  align-self: end;
+  justify-self: start;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.kx-preflight-check.ok b {
+  background: rgba(10, 124, 102, 0.1);
+  color: #08705e;
+}
+
+.kx-preflight-check.blocked b {
+  background: rgba(179, 55, 55, 0.1);
+  color: #a33434;
+}
+
+.kx-preflight-check.optional b {
+  background: rgba(0, 0, 0, 0.05);
+  color: #6e6e73;
+}
