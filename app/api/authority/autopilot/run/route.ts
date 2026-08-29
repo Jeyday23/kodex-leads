@@ -5,6 +5,7 @@ import { rateLimit } from "@/lib/authority/rate-limit";
 import { getAutopilotStatus, runAutopilot } from "@/lib/authority/autonomous-ranking";
 import { runAutonomyPreflight } from "@/lib/authority/preflight";
 import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
+import { createLeadWorkPackages } from "@/lib/seo/lead-work-packages";
 
 const schema = z.object({ preflight: z.boolean().optional() });
 
@@ -38,6 +39,15 @@ export async function POST(request: Request) {
   }
 
   const leadDiscovery = await discoverKodexLeads();
+  const leadPackages = await createLeadWorkPackages(leadDiscovery.leads);
   const result = await runAutopilot({ actor: auth.actor });
-  return apiSuccess({ ...result, leadDiscovery });
+  return apiSuccess({
+    ...result,
+    leadDiscovery,
+    leadPackages: {
+      queuedForApproval: leadPackages.queued.length,
+      errors: leadPackages.errors,
+      approvalQueue: "/admin/authority/outreach",
+    },
+  });
 }

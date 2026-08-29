@@ -42,6 +42,11 @@ interface ApolloDecisionMaker {
   source: string;
 }
 
+interface DecisionMakerEnrichmentResult {
+  leads: Omit<DiscoveredLead, "id" | "createdAt">[];
+  apolloCalls: number;
+}
+
 export interface LeadDiscoveryResult {
   mode: "live";
   searchedAt: string;
@@ -125,8 +130,8 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 60);
 
-  const decisionMakerEnriched = await enrichDecisionMakers(leads);
-  const agentReach = await enrichLeadsWithAgentReach(decisionMakerEnriched);
+  const decisionMakerEnrichment = await enrichDecisionMakers(leads);
+  const agentReach = await enrichLeadsWithAgentReach(decisionMakerEnrichment.leads);
   errors.push(...agentReach.errors);
 
   const persistError = await persistDiscoveredLeads(agentReach.leads);
@@ -140,6 +145,7 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
       query,
       discovered: stored.length,
       agentReachEnriched: agentReach.enrichedCount,
+      apolloCalls: decisionMakerEnrichment.apolloCalls,
       errors,
       sources: [...new Set(stored.map((lead) => lead.source))],
       triggerCategories: [...new Set(stored.map((lead) => lead.triggerCategory).filter(Boolean))],
@@ -157,7 +163,7 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
           `Agent-Reach enriched ${agentReach.enrichedCount} of the highest-priority live candidates with additional public buying signals.`,
           "Prioritize evidence-backed enforcement leads first, then high-confidence exposure and new-company signals.",
           "Review the source URL before outreach; regulatory-exposure signals are not findings of noncompliance.",
-          "Contact the identified compliance, privacy, legal, security or executive buyer through an approved outreach workflow.",
+          "Prepare outreach for the approval queue; do not send external messages automatically.",
         ]
       : [
           "No live leads were stored. Check source errors and enrichment credentials.",
@@ -468,14 +474,20 @@ async function scrapeAICompanies(): Promise<{ leads: ScrapedLead[]; errors: stri
   return { leads, errors };
 }
 
-async function enrichDecisionMakers(leads: ScrapedLead[]): Promise<Omit<DiscoveredLead, "id" | "createdAt">[]> {
+async function enrichDecisionMakers(leads: ScrapedLead[]): Promise<DecisionMakerEnrichmentResult> {
   const enriched: Omit<DiscoveredLead, "id" | "createdAt">[] = [];
   const maxEnrichments = Math.max(0, Math.min(Number(process.env.LEAD_ENRICHMENT_MAX_PER_RUN ?? 12) || 12, 30));
+  let apolloCalls = 0;
 
   for (const [index, lead] of leads.entries()) {
     const domain = extractDomain(lead.website);
-    const apollo = domain ? await searchApolloDecisionMaker(domain) : null;
-    const contact = domain && index < maxEnrichments ? await enrichContact(domain, apollo?.name ?? undefined) : null;
+    let apollo: ApolloDecisionMaker | null = null;
+    let contact: EnrichedContact | null = null;
+    if (shouldRunPaidEnrichment(index, maxEnrichments, domain)) {
+      if (process.env.APOLLO_API_KEY) apolloCalls += 1;
+      apollo = await searchApolloDecisionMaker(domain);
+      contact = await enrichContact(domain, apollo?.name ?? undefined);
+    }
     enriched.push({
       ...lead,
       contactEmail: contact?.email ?? lead.contactEmail ?? null,
@@ -486,7 +498,11 @@ async function enrichDecisionMakers(leads: ScrapedLead[]): Promise<Omit<Discover
     });
     await delay(180);
   }
-  return enriched;
+  return { leads: enriched, apolloCalls };
+}
+
+export function shouldRunPaidEnrichment(index: number, maxEnrichments: number, domain: string | null): domain is string {
+  return Boolean(domain && index < maxEnrichments);
 }
 
 async function searchApolloDecisionMaker(domain: string): Promise<ApolloDecisionMaker | null> {

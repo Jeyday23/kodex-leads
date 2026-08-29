@@ -50,6 +50,8 @@ services:
         sync: false
       - key: LEAD_ENRICHMENT_MAX_PER_RUN
         sync: false
+      - key: LEAD_PACKAGE_MAX_PER_RUN
+        sync: false
       - key: SLACK_WEBHOOK_URL
         sync: false
       - key: HUBSPOT_PRIVATE_APP_TOKEN
@@ -148,6 +150,30 @@ services:
         sync: false
 
 cronJobs:
+  - name: kodex-lead-intelligence
+    runtime: node
+    schedule: "30 5 * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-lead-intelligence.ts
+    envVars:
+      - key: LEAD_AUTOMATION_ENABLED
+        value: "true"
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+      - key: NORTHDATA_API_KEY
+        sync: false
+      - key: LEAD_ENRICHMENT_MAX_PER_RUN
+        sync: false
+      - key: LEAD_PACKAGE_MAX_PER_RUN
+        sync: false
+
   - name: kodex-authority-search-console-sync
     runtime: node
     schedule: "0 4 * * *"
