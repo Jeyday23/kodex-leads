@@ -14,17 +14,17 @@ type AuthorityApiResult =
   | { ok: true; actor: string; role: string }
   | { ok: false; response: Response };
 
-const publicStagingAdmin: AuthorityAdmin = {
+const publicStagingViewer: AuthorityAdmin = {
   id: "public-staging",
   email: "public-staging@kodex.local",
-  role: "admin",
+  role: "viewer",
   fullName: "Public Staging Access",
 };
 
 export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | null; supabase: SupabaseClient | null; reason?: string }> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return { user: publicStagingAdmin, supabase: null, reason: "Public staging mode." };
+  if (!url || !anonKey) return { user: null, supabase: null, reason: "Public staging read-only mode." };
 
   const cookieStore = await cookies();
   const supabase = createServerClient(url, anonKey, {
@@ -43,7 +43,7 @@ export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | nu
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) return { user: publicStagingAdmin, supabase, reason: "Public staging mode." };
+  if (!user?.email) return { user: null, supabase, reason: "Public staging read-only mode." };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -52,7 +52,7 @@ export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | nu
     .maybeSingle();
 
   const role = String(profile?.role ?? user.user_metadata?.role ?? "member");
-  if (!isAuthorityAdmin(role)) return { user: publicStagingAdmin, supabase, reason: "Public staging mode." };
+  if (!isAuthorityAdmin(role)) return { user: null, supabase, reason: "Authenticated account is not an Authority administrator." };
 
   return {
     supabase,
@@ -67,7 +67,7 @@ export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | nu
 
 export async function requireAuthorityPage(_nextPath = "/admin/authority") {
   const session = await getAuthoritySession();
-  return session.user ?? publicStagingAdmin;
+  return session.user ?? publicStagingViewer;
 }
 
 export async function requireAuthorityApi(request: Request, options: { allowCron?: boolean } = {}): Promise<AuthorityApiResult> {
@@ -75,9 +75,27 @@ export async function requireAuthorityApi(request: Request, options: { allowCron
     return { ok: true, actor: "render-cron", role: "system" };
   }
 
+  const controlSecret = process.env.AUTOPILOT_CONTROL_SECRET;
+  if (controlSecret && request.headers.get("x-kodex-control-secret") === controlSecret) {
+    return { ok: true, actor: "founder-control", role: "founder" };
+  }
+
   const session = await getAuthoritySession();
-  const actor = session.user ?? publicStagingAdmin;
-  return { ok: true, actor: actor.email, role: actor.role };
+  if (session.user && isAuthorityAdmin(session.user.role)) {
+    return { ok: true, actor: session.user.email, role: session.user.role };
+  }
+
+  return {
+    ok: false,
+    response: Response.json(
+      {
+        status: "error",
+        error: "Private founder authorization required for this action.",
+        code: "FOUNDER_CONTROL_REQUIRED",
+      },
+      { status: 403 },
+    ),
+  };
 }
 
 export function isAuthorityAdmin(role: string): boolean {
