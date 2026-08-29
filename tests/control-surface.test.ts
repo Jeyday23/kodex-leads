@@ -12,6 +12,7 @@ test("direct lead discovery requires a private control or cron secret", () => {
   assert.match(route, /x-kodex-control-secret/);
   assert.match(route, /CRON_SECRET/);
   assert.match(route, /status:\s*403/);
+  assert.match(route, /createLeadWorkPackages/);
 });
 
 test("manual autonomy runs a non-publishing preflight before normal lead discovery", () => {
@@ -21,6 +22,7 @@ test("manual autonomy runs a non-publishing preflight before normal lead discove
   assert.ok(preflightIndex >= 0);
   assert.ok(discoveryIndex > preflightIndex);
   assert.match(route, /runAutonomyPreflight/);
+  assert.match(route, /createLeadWorkPackages/);
   assert.doesNotMatch(route, /controlledAcceptanceTest/);
 });
 
@@ -32,12 +34,16 @@ test("preflight is explicitly non-publishing and checks required controls", () =
   assert.match(preflight, /databaseConfigured/);
 });
 
-test("scheduled autopilot includes lead discovery and respects master enable flag", () => {
-  const script = read("scripts/run-authority-autopilot.ts");
-  assert.match(script, /AUTOPILOT_SCHEDULE_ENABLED/);
-  assert.match(script, /status\.databaseConfigured/);
-  assert.match(script, /status\.mode === "off"/);
-  assert.match(script, /discoverKodexLeads/);
+test("scheduled lead intelligence owns autonomous lead discovery and packaging", () => {
+  const leadScript = read("scripts/run-lead-intelligence.ts");
+  const authorityScript = read("scripts/run-authority-autopilot.ts");
+  assert.match(leadScript, /discoverKodexLeads/);
+  assert.match(leadScript, /createLeadWorkPackages/);
+  assert.match(leadScript, /LEAD_AUTOMATION_ENABLED/);
+  assert.doesNotMatch(authorityScript, /discoverKodexLeads/);
+  assert.match(authorityScript, /AUTOPILOT_SCHEDULE_ENABLED/);
+  assert.match(authorityScript, /status\.databaseConfigured/);
+  assert.match(authorityScript, /status\.mode === "off"/);
 });
 
 test("persistent monitoring worker uses the shared autonomy gate", () => {
@@ -64,7 +70,7 @@ test("private UI exposes non-publishing preflight and lead discovery controls", 
   assert.match(command, /x-kodex-control-secret/);
 });
 
-test("Render blueprint wires the master schedule gate to every background execution service", () => {
+test("Render blueprint wires the master schedule gate to every authority background service", () => {
   const render = read("render.yaml");
   const serviceBlocks = render.split(/\n(?=\s*- (?:type|name):)/g);
   const backgroundBlocks = serviceBlocks.filter((block) =>
@@ -76,10 +82,21 @@ test("Render blueprint wires the master schedule gate to every background execut
   }
 });
 
+test("dedicated lead cron is enabled, staggered and has enrichment controls", () => {
+  const render = read("render.yaml");
+  const leadBlock = render.split(/\n(?=\s*- name:)/g).find((block) => /name:\s*kodex-lead-intelligence/.test(block));
+  assert.ok(leadBlock, "Expected dedicated lead-intelligence cron");
+  assert.match(leadBlock, /schedule:\s*"30 5 \* \* \*"/);
+  assert.match(leadBlock, /LEAD_AUTOMATION_ENABLED/);
+  assert.match(leadBlock, /value:\s*"true"/);
+  assert.match(leadBlock, /LEAD_ENRICHMENT_MAX_PER_RUN/);
+  assert.match(leadBlock, /LEAD_PACKAGE_MAX_PER_RUN/);
+});
+
 test("lead source credentials are declared for web and autonomous lead execution", () => {
   const render = read("render.yaml");
   for (const key of ["HUNTER_API_KEY", "APOLLO_API_KEY", "NORTHDATA_API_KEY", "LEAD_ENRICHMENT_MAX_PER_RUN"]) {
     const occurrences = render.match(new RegExp(key, "g"))?.length ?? 0;
-    assert.ok(occurrences >= 3, `${key} should be available to web, worker and autonomous planning cron`);
+    assert.ok(occurrences >= 3, `${key} should be available to web, worker and autonomous lead execution`);
   }
 });
