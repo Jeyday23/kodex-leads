@@ -47,10 +47,19 @@ test("persistent monitoring worker uses the shared autonomy gate", () => {
 
 test("private UI exposes non-publishing preflight and lead discovery controls", () => {
   const autopilot = read("app/admin/authority/AutopilotControl.tsx");
+  const settings = read("app/admin/authority/settings/page.tsx");
+  const legacySettings = read("app/admin/authority/settings/automation/page.tsx");
   const command = read("app/seo-command-center.tsx");
   assert.match(autopilot, /Run safety preflight/);
   assert.match(autopilot, /preflight:\s*true/);
   assert.match(autopilot, /Preflight is non-publishing/);
+  assert.match(autopilot, /AUTOPILOT_CONTROL_SECRET/);
+  assert.match(autopilot, /does not configure or save provider API keys/);
+  assert.match(autopilot, /aria-pressed/);
+  assert.match(autopilot, /Confirm run/);
+  assert.match(settings, /Provider keys are not entered on this page/);
+  assert.match(settings, /Configured/);
+  assert.match(legacySettings, /redirect\("\/admin\/authority\/settings"\)/);
   assert.match(command, /Private control key/);
   assert.match(command, /x-kodex-control-secret/);
 });

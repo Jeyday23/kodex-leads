@@ -6,6 +6,7 @@ import "./globals.css";
 import "./styles/apple-polish.css";
 import "./styles/experience.css";
 import "./styles/preflight.css";
+import "./styles/autopilot-control.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://kodex-compliance.com"),
