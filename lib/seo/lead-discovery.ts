@@ -1,4 +1,5 @@
 import { getSeoSupabase } from "./db";
+import { enrichLeadsWithAgentReach } from "./agent-reach-enrichment";
 import { storeAuditEventLocally, storeDiscoveredLeadsLocally, type DiscoveredLead } from "./local-store";
 
 interface ScrapedLead {
@@ -65,9 +66,12 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
     .filter((lead) => lead.confidence >= 40)
     .slice(0, 40);
 
-  const enriched = await enrichEmails(leads);
-  await persistDiscoveredLeads(enriched);
-  const stored = await storeDiscoveredLeadsLocally(enriched);
+  const emailEnriched = await enrichEmails(leads);
+  const agentReach = await enrichLeadsWithAgentReach(emailEnriched);
+  errors.push(...agentReach.errors);
+
+  await persistDiscoveredLeads(agentReach.leads);
+  const stored = await storeDiscoveredLeadsLocally(agentReach.leads);
 
   await storeAuditEventLocally({
     eventType: errors.length > 0 && stored.length === 0 ? "lead_discovery_failed" : "lead_discovery_completed",
@@ -75,6 +79,7 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
       mode: "live",
       query,
       discovered: stored.length,
+      agentReachEnriched: agentReach.enrichedCount,
       errors,
       sources: [...new Set(stored.map((lead) => lead.source))],
     },
@@ -88,6 +93,7 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
     errors,
     nextActions: stored.length > 0
       ? [
+          `Agent-Reach enriched ${agentReach.enrichedCount} of the highest-priority live candidates with additional public buying signals.`,
           "Review source URLs before outreach.",
           "Prioritize leads with score 40+ and direct compliance or AI signals.",
           "Route outreach only through an approved human or configured CRM workflow.",
