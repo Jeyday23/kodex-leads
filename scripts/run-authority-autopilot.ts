@@ -1,5 +1,4 @@
 import { getAutopilotStatus, runAutopilot } from "@/lib/authority/autonomous-ranking";
-import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 
 async function main() {
   const scheduledEnabled = process.env.AUTOPILOT_SCHEDULE_ENABLED === "true";
@@ -33,9 +32,8 @@ async function main() {
     return;
   }
 
-  const leadDiscovery = await discoverKodexLeads();
   const result = await runAutopilot({ actor: "render-cron" });
-  console.log(JSON.stringify({ service: "kodex-authority-autopilot", leadDiscovery, ...result }));
+  console.log(JSON.stringify({ service: "kodex-authority-autopilot", ...result }));
 }
 
 main().catch((error) => {
