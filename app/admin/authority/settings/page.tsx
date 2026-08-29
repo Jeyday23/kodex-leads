@@ -12,7 +12,7 @@ interface IntegrationCard {
   purpose: string;
   configured: boolean;
   required: boolean;
-  missing: string[];
+  detail: string;
 }
 
 const providerPurposes: Record<string, string> = {
@@ -26,6 +26,10 @@ export default async function AuthoritySettingsPage() {
   const autopilot = await getAutopilotStatus();
   const scheduleEnabled = process.env.AUTOPILOT_SCHEDULE_ENABLED === "true";
   const controlSecretConfigured = Boolean(process.env.AUTOPILOT_CONTROL_SECRET);
+  const supabaseEnvironmentConfigured = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL
+    && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  );
 
   const integrations: IntegrationCard[] = [
     {
@@ -34,7 +38,11 @@ export default async function AuthoritySettingsPage() {
       purpose: "Stores autonomy policy, leads, drafts and run history.",
       configured: autopilot.databaseConfigured,
       required: true,
-      missing: autopilot.databaseConfigured ? [] : ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY"],
+      detail: autopilot.databaseConfigured
+        ? "Settings table connected and readable."
+        : supabaseEnvironmentConfigured
+          ? "Credentials detected, but authority_automation_settings could not be read. Verify migrations, project access and the service-role key."
+          : "Add in Render: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY).",
     },
     {
       name: "control-secret",
@@ -42,12 +50,13 @@ export default async function AuthoritySettingsPage() {
       purpose: "Authorizes manual mode changes, preflight and runs.",
       configured: controlSecretConfigured,
       required: true,
-      missing: controlSecretConfigured ? [] : ["AUTOPILOT_CONTROL_SECRET"],
+      detail: controlSecretConfigured ? "Server-side setting detected." : "Add in Render: AUTOPILOT_CONTROL_SECRET.",
     },
     ...providers.map((provider) => ({
       ...provider,
       purpose: providerPurposes[provider.name] ?? "LLM monitoring provider.",
       required: false,
+      detail: provider.configured ? "Server-side settings detected." : `Add in Render: ${provider.missing.join(", ")}.`,
     })),
     {
       name: "northdata",
@@ -55,7 +64,7 @@ export default async function AuthoritySettingsPage() {
       purpose: "Discovers newly registered German GmbH and UG companies.",
       configured: Boolean(process.env.NORTHDATA_API_KEY),
       required: false,
-      missing: process.env.NORTHDATA_API_KEY ? [] : ["NORTHDATA_API_KEY"],
+      detail: process.env.NORTHDATA_API_KEY ? "Server-side setting detected." : "Add in the Render web service: NORTHDATA_API_KEY.",
     },
     {
       name: "hunter",
@@ -63,7 +72,7 @@ export default async function AuthoritySettingsPage() {
       purpose: "Enriches discovered companies with public professional emails.",
       configured: Boolean(process.env.HUNTER_API_KEY),
       required: false,
-      missing: process.env.HUNTER_API_KEY ? [] : ["HUNTER_API_KEY"],
+      detail: process.env.HUNTER_API_KEY ? "Server-side setting detected." : "Add in the Render web service: HUNTER_API_KEY.",
     },
     {
       name: "apollo",
@@ -71,7 +80,7 @@ export default async function AuthoritySettingsPage() {
       purpose: "Finds relevant buyers and decision makers when the plan permits it.",
       configured: Boolean(process.env.APOLLO_API_KEY),
       required: false,
-      missing: process.env.APOLLO_API_KEY ? [] : ["APOLLO_API_KEY"],
+      detail: process.env.APOLLO_API_KEY ? "Server-side setting detected." : "Add in the Render web service: APOLLO_API_KEY.",
     },
   ];
 
@@ -124,9 +133,7 @@ export default async function AuthoritySettingsPage() {
               </div>
               <h3>{integration.label}</h3>
               <p>{integration.purpose}</p>
-              <small>
-                {integration.configured ? "Server-side setting detected." : `Add in Render: ${integration.missing.join(", ")}`}
-              </small>
+              <small>{integration.detail}</small>
             </article>
           ))}
         </div>
