@@ -22,7 +22,7 @@ export default async function AuthorityCommandPage() {
 
   return (
     <main className="authority-module">
-      <AuthorityTopbar section="Command" action={<a className="authority-primary" href="/admin/authority/settings">Autonomy controls</a>} />
+      <AuthorityTopbar section="Command" action={<a className="authority-primary" href="/admin/authority/settings" title="Configure autonomy, integrations and private controls">Autonomy controls</a>} />
       <section className="authority-heading">
         <p>Kodex Growth Intelligence</p>
         <h1>Command center</h1>
@@ -46,7 +46,7 @@ export default async function AuthorityCommandPage() {
           ))}
         </div>
         <p className="authority-empty">Mode: {autopilot.mode}. Daily limits: {autopilot.maxNewPagesPerDay} new pages, {autopilot.maxRevisionsPerDay} revisions.</p>
-        <div className="authority-action-row"><a className="authority-link-button" href="/admin/authority/settings">Change autonomy mode →</a></div>
+        <div className="authority-action-row"><a className="authority-link-button" href="/admin/authority/settings" title="Change autonomy mode and run the non-publishing safety preflight">Change autonomy mode →</a></div>
       </section>
       <section className="authority-split">
         <article className="authority-panel">
@@ -55,7 +55,7 @@ export default async function AuthorityCommandPage() {
             <AuthorityActionButton endpoint="/api/authority/opportunities/discover" label="Run discovery" />
             <AuthorityActionButton endpoint="/api/authority/monitoring/run" label="Run LLM monitoring" />
             <AuthorityActionButton endpoint="/api/authority/retry" label="Retry failed jobs" />
-            <a className="authority-primary" href="/admin/authority/settings">Run autopilot privately</a>
+            <a className="authority-primary" href="/admin/authority/settings" title="Open the protected autonomy control and preflight screen">Run autopilot privately</a>
           </div>
           {highPriority.length === 0 ? <p className="authority-empty">No high-priority opportunities currently loaded.</p> : highPriority.map((item) => (
             <a className="authority-priority-item" href={`/admin/authority/opportunities/${item.id}`} key={item.id}>
@@ -99,7 +99,11 @@ function AuthorityTopbar({ section, action }: { section: string; action: React.R
   return (
     <header className="authority-topbar">
       <div><p>Kodex Growth Intelligence</p><h1>{section}</h1></div>
-      <div className="authority-topbar-actions"><a className="authority-icon-button" href="/admin/authority/settings">⌕</a><a className="authority-icon-button" href="/admin/authority/command">○</a>{action}</div>
+      <div className="authority-topbar-actions">
+        <a className="authority-icon-button" href="/admin/authority/settings" aria-label="Settings and integration readiness" title="Settings: autonomy, integration readiness and API configuration">Settings</a>
+        <a className="authority-icon-button" href="/admin/authority/observatory" aria-label="System status and observatory" title="System status: monitoring runs, citations, competitors and failures">Status</a>
+        {action}
+      </div>
     </header>
   );
 }
