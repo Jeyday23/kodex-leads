@@ -1,6 +1,10 @@
+import { requireAuthorityApi } from "@/lib/authority/auth";
 import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 
-export async function POST() {
+export async function POST(request: Request) {
+  const auth = await requireAuthorityApi(request, { allowCron: true });
+  if (!auth.ok) return auth.response;
+
   try {
     const result = await discoverKodexLeads();
     const status = result.leads.length === 0 && result.errors.length > 0 ? 502 : 200;
