@@ -1,4 +1,5 @@
 import { getSeoSupabase } from "./db";
+import { enrichLeadsWithAgentReach } from "./agent-reach-enrichment";
 import {
   storeAuditEventLocally,
   storeDiscoveredLeadsLocally,
@@ -124,10 +125,13 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 60);
 
-  const enriched = await enrichDecisionMakers(leads);
-  const persistError = await persistDiscoveredLeads(enriched);
+  const decisionMakerEnriched = await enrichDecisionMakers(leads);
+  const agentReach = await enrichLeadsWithAgentReach(decisionMakerEnriched);
+  errors.push(...agentReach.errors);
+
+  const persistError = await persistDiscoveredLeads(agentReach.leads);
   if (persistError) errors.push(persistError);
-  const stored = await storeDiscoveredLeadsLocally(enriched);
+  const stored = await storeDiscoveredLeadsLocally(agentReach.leads);
 
   await storeAuditEventLocally({
     eventType: errors.length > 0 && stored.length === 0 ? "lead_discovery_failed" : "lead_discovery_completed",
@@ -135,6 +139,7 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
       mode: "live",
       query,
       discovered: stored.length,
+      agentReachEnriched: agentReach.enrichedCount,
       errors,
       sources: [...new Set(stored.map((lead) => lead.source))],
       triggerCategories: [...new Set(stored.map((lead) => lead.triggerCategory).filter(Boolean))],
@@ -149,6 +154,7 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
     errors,
     nextActions: stored.length > 0
       ? [
+          `Agent-Reach enriched ${agentReach.enrichedCount} of the highest-priority live candidates with additional public buying signals.`,
           "Prioritize evidence-backed enforcement leads first, then high-confidence exposure and new-company signals.",
           "Review the source URL before outreach; regulatory-exposure signals are not findings of noncompliance.",
           "Contact the identified compliance, privacy, legal, security or executive buyer through an approved outreach workflow.",

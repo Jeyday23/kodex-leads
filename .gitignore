@@ -1,6 +1,9 @@
 node_modules/
 .next/
+.wrangler/
+cloudflare/worker-configuration.d.ts
 .data/
+.agent-reach-venv/
 *.log
 .env
 .env.local
