@@ -157,15 +157,23 @@ export async function getAutopilotStatus() {
     mode: "draft_only" as AutopilotMode,
     maxNewPagesPerDay: dailyDefaults.newPages,
     maxRevisionsPerDay: dailyDefaults.revisions,
+    pilotCompleted: false,
+    changedAt: null as string | null,
     databaseConfigured: false,
     searchConsole: searchConsoleStatus(),
   };
   if (!supabase) return fallback;
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("authority_automation_settings")
     .select("mode,max_new_pages_per_day,max_revisions_per_day,pilot_completed,changed_at")
     .eq("id", "global")
     .maybeSingle();
+  if (error) {
+    return {
+      ...fallback,
+      databaseError: "Autonomy settings could not be read from Supabase.",
+    };
+  }
   return {
     mode: (data?.mode ?? "draft_only") as AutopilotMode,
     maxNewPagesPerDay: Number(data?.max_new_pages_per_day ?? dailyDefaults.newPages),
