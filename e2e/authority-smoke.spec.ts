@@ -24,7 +24,7 @@ test("protected action explains authorization failures instead of a generic fail
   await page.goto("/admin/authority/command");
   page.once("dialog", async (dialog) => dialog.accept("incorrect-test-key"));
   await page.getByRole("button", { name: "Run discovery" }).click();
-  await expect(page.getByRole("alert")).toContainText("Private founder authorization required");
+  await expect(page.getByText("Private founder authorization required for this action.", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
 });
 
