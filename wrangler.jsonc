@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kodex-leads-edge",
+  "main": "cloudflare/src/index.ts",
+  "compatibility_date": "2026-08-29",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {
+    "ORIGIN_BASE_URL": "https://kodex-leads-it6d.onrender.com"
+  },
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true
+    }
+  },
+  "env": {
+    "staging": {
+      "name": "kodex-leads-edge-staging",
+      "vars": {
+        "ORIGIN_BASE_URL": "https://kodex-leads-it6d.onrender.com"
+      },
+      "triggers": {
+        "crons": ["*/15 * * * *"]
+      }
+    },
+    "production": {
+      "name": "kodex-leads-edge",
+      "vars": {
+        "ORIGIN_BASE_URL": "https://kodex-leads-it6d.onrender.com"
+      },
+      "triggers": {
+        "crons": ["*/15 * * * *"]
+      }
+    }
+  }
+}
