@@ -4,6 +4,7 @@ import {
   extractCompanyFromEnforcementTitle,
   extractFineAmount,
   scoreDecisionMaker,
+  shouldRunPaidEnrichment,
 } from "../lib/seo/lead-discovery";
 
 test("enforcement parser extracts a named company without inventing one", () => {
@@ -34,4 +35,12 @@ test("decision-maker ranking prioritizes privacy and compliance ownership", () =
   assert.ok(scoreDecisionMaker("Data Protection Officer") > scoreDecisionMaker("Chief Technology Officer"));
   assert.ok(scoreDecisionMaker("Head of Compliance") > scoreDecisionMaker("Founder"));
   assert.ok(scoreDecisionMaker("General Counsel") > scoreDecisionMaker("Chief Executive Officer"));
+});
+
+test("paid enrichment applies the same per-run cap to Apollo and Hunter", () => {
+  assert.equal(shouldRunPaidEnrichment(0, 12, "example.com"), true);
+  assert.equal(shouldRunPaidEnrichment(11, 12, "example.com"), true);
+  assert.equal(shouldRunPaidEnrichment(12, 12, "example.com"), false);
+  assert.equal(shouldRunPaidEnrichment(0, 12, null), false);
+  assert.equal(shouldRunPaidEnrichment(0, 0, "example.com"), false);
 });
