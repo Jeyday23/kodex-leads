@@ -20,6 +20,16 @@ test("public staging cannot mutate Authority APIs without founder authorization"
   expect(payload.code).toBe("FOUNDER_CONTROL_REQUIRED");
 });
 
+test("media generation is founder protected and media studio renders", async ({ page, request }) => {
+  const response = await request.post("/api/media/jobs", { data: { title: "test", brief: "test", kind: "image" } });
+  expect(response.status()).toBe(403);
+
+  await page.goto("/admin/authority/media");
+  await expect(page.getByRole("heading", { name: "Media studio" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "New media brief" })).toBeVisible();
+  await expect(page.locator("body")).toContainText("Generation never publishes automatically");
+});
+
 test("protected action explains authorization failures instead of a generic failed label", async ({ page }) => {
   await page.goto("/admin/authority/command");
   page.once("dialog", async (dialog) => dialog.accept("incorrect-test-key"));
@@ -36,6 +46,7 @@ test("core runtime surfaces render in a clean public staging session", async ({ 
     "/admin/authority/command",
     "/admin/authority/settings",
     "/admin/authority/outreach",
+    "/admin/authority/media",
     "/admin/authority/opportunities",
     "/admin/leads",
   ]) {

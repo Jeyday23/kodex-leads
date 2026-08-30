@@ -10,6 +10,7 @@ const nav = [
   ["Opportunities", "/admin/authority/opportunities", "◎"],
   ["Editorial", "/admin/authority/editorial", "▦"],
   ["Content", "/admin/authority/content", "▤"],
+  ["Media", "/admin/authority/media", "▣"],
   ["Knowledge", "/admin/authority/knowledge", "◇"],
   ["Observatory", "/admin/authority/observatory", "◉"],
   ["Publications", "/admin/authority/publications", "↗"],
