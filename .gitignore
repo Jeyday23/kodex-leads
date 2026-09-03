@@ -1,5 +1,10 @@
 node_modules/
+supabase/.temp/
+test-results/
+playwright-report/
 .next/
+.wrangler/
+cloudflare/worker-configuration.d.ts
 .data/
 .agent-reach-venv/
 *.log

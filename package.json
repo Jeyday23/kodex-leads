@@ -6,10 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "bash scripts/install-agent-reach.sh",
+    "agent-reach:install": "bash scripts/install-agent-reach.sh",
     "lint": "eslint",
-    "test": "tsx --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "cf:types": "wrangler types cloudflare/worker-configuration.d.ts",
+    "cf:typecheck": "npm run cf:types && tsc -p cloudflare/tsconfig.json --noEmit",
+    "cf:test": "node --import tsx --test cloudflare/test/*.test.ts",
+    "cf:dev": "wrangler dev --env staging",
+    "cf:check": "npm run cf:typecheck && wrangler deploy --dry-run --env staging",
+    "cf:deploy:staging": "wrangler deploy --env staging",
+    "cf:deploy:production": "wrangler deploy --env production",
+    "verify:supabase": "tsx scripts/verify-supabase.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -41,7 +50,8 @@
     "globals": "^17.8.0",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "typescript-eslint": "^8.65.0"
+    "typescript-eslint": "^8.65.0",
+    "wrangler": "^4.127.1"
   },
   "overrides": {
     "postcss": "^8.5.25",

@@ -1,74 +1,30 @@
-"use client";
+import type { Metadata } from "next";
+import { LoginForm } from "./LoginForm";
 
-import Link from "next/link";
-import type { Route } from "next";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
-import { signIn } from "@/lib/auth-client";
+export const metadata: Metadata = {
+  title: "Sign in",
+  description: "Sign in to the private Kodex workspace.",
+  robots: { index: false, follow: false },
+};
 
-function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setMessage(searchParams.get("message") ?? "");
-  }, [searchParams]);
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      await signIn(email, password);
-      router.push(searchParams.get("next") ?? "/admin/leads");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not sign in.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <section className="auth-panel">
-      <p className="eyebrow">Kodex account</p>
-      <h1>Sign in</h1>
-      <p className="auth-copy">Access admin, lead capture and SEO automation controls.</p>
-
-      {message ? <div className="auth-status success">{message}</div> : null}
-
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <label>
-          Email
-          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
-        </label>
-        <label>
-          Password
-          <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
-        </label>
-        {error ? <div className="auth-status error">{error}</div> : null}
-        <button className="auth-button" type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</button>
-      </form>
-
-      <div className="auth-links">
-        <Link href={"/auth/reset-password" as Route}>Forgot password?</Link>
-        <Link href={"/auth/signup" as Route}>Create account</Link>
-      </div>
-    </section>
-  );
+/** Only same-origin relative paths are followed, to prevent open redirects. */
+function safeNext(value: string | string[] | undefined): string {
+  const next = Array.isArray(value) ? value[0] : value;
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return "/admin/authority/command";
+  return next;
 }
 
-export default function LoginPage() {
-  return (
-    <main className="auth-page">
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
-    </main>
-  );
+function first(value: string | string[] | undefined): string | null {
+  const found = Array.isArray(value) ? value[0] : value;
+  return found ?? null;
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  // Resolved on the server so the form is present in the initial HTML.
+  return <LoginForm next={safeNext(params.next)} reason={first(params.reason)} />;
 }

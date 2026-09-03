@@ -8,6 +8,7 @@ import type { SeoContentPage } from "./types";
 import { checkApprovedSources, searchConsoleStatus, type SourceCheckResult } from "./source-intelligence";
 import { storeAuditEventLocally, updateGeneratedContentDecision } from "./local-store";
 import { deriveTopicGraph } from "./topic-graph";
+import { runGoogleDiscoveryCycle, type GoogleDiscoveryCycleResult } from "./google-search-console";
 
 export interface SeoCycleResult {
   checkedAt: string;
@@ -20,6 +21,7 @@ export interface SeoCycleResult {
   revalidated: string[];
   sourceChecks: SourceCheckResult[];
   searchConsole: ReturnType<typeof searchConsoleStatus>;
+  googleDiscovery: GoogleDiscoveryCycleResult | null;
   nextActions: string[];
 }
 
@@ -91,6 +93,7 @@ export async function runSeoIntelligenceCycle(): Promise<SeoCycleResult> {
     revalidated: [],
     sourceChecks,
     searchConsole: searchConsoleStatus(),
+    googleDiscovery: null,
     nextActions: [],
   };
 
@@ -99,7 +102,7 @@ export async function runSeoIntelligenceCycle(): Promise<SeoCycleResult> {
   }
 
   if (result.searchConsole.status === "missing_credentials") {
-    result.nextActions.push("Configure Google Search Console credentials to ingest live query, impression, click and rank data.");
+    result.nextActions.push("Configure Google Search Console credentials to submit the sitemap and inspect indexing status.");
   }
 
   if (sourceChecks.some((check) => check.status === "configured")) {
@@ -123,6 +126,14 @@ export async function runSeoIntelligenceCycle(): Promise<SeoCycleResult> {
     }
   }
 
+  if (result.searchConsole.status === "configured") {
+    try {
+      result.googleDiscovery = await runGoogleDiscoveryCycle(20);
+    } catch (error) {
+      result.nextActions.push(`Google discovery cycle failed: ${error instanceof Error ? error.message : "unknown error"}`);
+    }
+  }
+
   await storeAuditEventLocally({
     eventType: "seo_cron_completed",
     payload: {
@@ -134,6 +145,13 @@ export async function runSeoIntelligenceCycle(): Promise<SeoCycleResult> {
       rejected: result.rejected.length,
       sourceChecks: result.sourceChecks.map((check) => ({ name: check.name, status: check.status })),
       searchConsole: result.searchConsole.status,
+      googleDiscovery: result.googleDiscovery
+        ? {
+            configured: result.googleDiscovery.configured,
+            sitemapSubmitted: result.googleDiscovery.sitemapSubmitted,
+            inspected: result.googleDiscovery.inspected.length,
+          }
+        : null,
     },
   });
 

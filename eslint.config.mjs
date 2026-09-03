@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 
 const eslintConfig = [
   {
-    ignores: [".next/**", "node_modules/**", ".agent-reach-venv/**"],
+    ignores: [".next/**", "node_modules/**", ".agent-reach-venv/**", "cloudflare/worker-configuration.d.ts"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -20,6 +20,15 @@ const eslintConfig = [
           jsx: true,
         },
       },
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    },
+  },
+  {
+    files: ["app/admin/dashboard/page.tsx"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
     },
   },
   {

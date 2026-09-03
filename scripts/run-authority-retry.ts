@@ -1,6 +1,9 @@
 import { getSeoSupabase } from "@/lib/seo/db";
+import { skipScheduledAutonomy } from "./scheduled-autonomy-gate";
 
 async function main() {
+  const service = "kodex-authority-retry";
+  if (await skipScheduledAutonomy(service)) return;
   const supabase = getSeoSupabase();
   let marked = 0;
 
@@ -19,7 +22,7 @@ async function main() {
   }
 
   console.log(JSON.stringify({
-    service: "kodex-authority-retry",
+    service,
     status: supabase ? "completed" : "database-unavailable",
     retried: marked,
   }));

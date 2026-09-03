@@ -1,9 +1,8 @@
 import "server-only";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { apiError } from "./api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isAdminRole } from "@/lib/supabase/config";
 
 export interface AuthorityAdmin {
   id: string;
@@ -12,29 +11,36 @@ export interface AuthorityAdmin {
   fullName?: string | null;
 }
 
-export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | null; supabase: SupabaseClient | null; reason?: string }> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return { user: null, supabase: null, reason: "Supabase auth is not configured." };
+type AuthorityApiResult =
+  | { ok: true; actor: string; role: string }
+  | { ok: false; response: Response };
 
-  const cookieStore = await cookies();
-  const supabase = createServerClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(setCookies) {
-        try {
-          setCookies.forEach((cookie) => cookieStore.set(cookie.name, cookie.value, cookie.options));
-        } catch {
-          // Server components cannot always write cookies; middleware or route handlers refresh them on the next request.
-        }
-      },
-    },
-  });
+export type AuthoritySessionReason =
+  | "auth-unavailable"
+  | "signin-required"
+  | "not-authorized";
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) return { user: null, supabase, reason: "Unauthenticated." };
+export interface AuthoritySession {
+  user: AuthorityAdmin | null;
+  supabase: SupabaseClient | null;
+  reason?: AuthoritySessionReason;
+}
+
+/**
+ * Resolves the current Authority administrator.
+ *
+ * Fails closed in every branch: a missing Supabase configuration, an anonymous
+ * visitor, or an authenticated non-admin all resolve to `user: null`. There is
+ * no anonymous viewer fallback.
+ */
+export async function getAuthoritySession(): Promise<AuthoritySession> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { user: null, supabase: null, reason: "auth-unavailable" };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return { user: null, supabase, reason: "signin-required" };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -42,8 +48,10 @@ export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | nu
     .eq("id", user.id)
     .maybeSingle();
 
-  const role = String(profile?.role ?? user.user_metadata?.role ?? "member");
-  if (!isAuthorityAdmin(role)) return { user: null, supabase, reason: "Forbidden." };
+  // Role comes from the profiles table. user_metadata is client-writable at
+  // signup and must never be trusted for authorization.
+  const role = String(profile?.role ?? "member");
+  if (!isAdminRole(role)) return { user: null, supabase, reason: "not-authorized" };
 
   return {
     supabase,
@@ -51,30 +59,81 @@ export async function getAuthoritySession(): Promise<{ user: AuthorityAdmin | nu
       id: user.id,
       email: user.email,
       role,
-      fullName: typeof profile?.full_name === "string" ? profile.full_name : user.user_metadata?.full_name,
+      fullName: typeof profile?.full_name === "string" ? profile.full_name : null,
     },
   };
 }
 
-export async function requireAuthorityPage(nextPath = "/admin/authority") {
+/**
+ * Page guard. Redirects instead of returning, so a page body can never render
+ * for an unauthorized visitor.
+ */
+export async function requireAuthorityPage(nextPath = "/admin/authority"): Promise<AuthorityAdmin> {
   const session = await getAuthoritySession();
-  const next = encodeURIComponent(nextPath);
-  if (session.reason === "Unauthenticated.") redirect(`/auth/login?next=${next}`);
-  if (!session.user) redirect(`/auth/login?next=${next}&error=admin-required`);
-  return session.user;
+  if (session.user) return session.user;
+
+  const params = new URLSearchParams({
+    next: nextPath,
+    reason: session.reason ?? "signin-required",
+  });
+  redirect(`/auth/login?${params.toString()}`);
 }
 
-export async function requireAuthorityApi(request: Request, options: { allowCron?: boolean } = {}) {
-  if (options.allowCron && process.env.CRON_SECRET && request.headers.get("authorization") === `Bearer ${process.env.CRON_SECRET}`) {
-    return { ok: true as const, actor: "render-cron", role: "system" };
+/**
+ * API guard. `allowCron` permits Render's scheduled jobs to authenticate with
+ * CRON_SECRET — server-to-server automation only. Browser callers must present
+ * a real authenticated admin session.
+ */
+export async function requireAuthorityApi(
+  request: Request,
+  options: { allowCron?: boolean } = {},
+): Promise<AuthorityApiResult> {
+  if (options.allowCron && isCronRequest(request)) {
+    return { ok: true, actor: "render-cron", role: "system" };
   }
 
   const session = await getAuthoritySession();
-  if (session.reason === "Unauthenticated.") return { ok: false as const, response: apiError("Authentication required.", 401) };
-  if (!session.user) return { ok: false as const, response: apiError(session.reason ?? "Forbidden.", 403) };
-  return { ok: true as const, actor: session.user.email, role: session.user.role };
+  if (session.user) {
+    return { ok: true, actor: session.user.email, role: session.user.role };
+  }
+
+  const unauthenticated = session.reason !== "not-authorized";
+  return {
+    ok: false,
+    response: Response.json(
+      {
+        status: "error",
+        error: unauthenticated
+          ? "Sign in as a Kodex administrator to perform this action."
+          : "This account is not authorized for Authority Engine actions.",
+        code: unauthenticated ? "AUTHENTICATION_REQUIRED" : "ADMIN_ROLE_REQUIRED",
+      },
+      { status: unauthenticated ? 401 : 403 },
+    ),
+  };
+}
+
+/**
+ * Server automation check. CRON_SECRET is only ever presented by Render cron
+ * jobs and workers; it is never exposed to the browser.
+ */
+export function isCronRequest(request: Request): boolean {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false;
+  const header = request.headers.get("authorization");
+  if (!header) return false;
+  return timingSafeEqual(header, `Bearer ${secret}`);
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let index = 0; index < a.length; index += 1) {
+    mismatch |= a.charCodeAt(index) ^ b.charCodeAt(index);
+  }
+  return mismatch === 0;
 }
 
 export function isAuthorityAdmin(role: string): boolean {
-  return ["admin", "administrator", "owner", "founder"].includes(role.toLowerCase());
+  return isAdminRole(role);
 }

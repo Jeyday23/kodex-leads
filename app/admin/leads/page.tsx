@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { listAdminLeads } from "@/lib/seo/leads";
 import { displayFramework } from "@/lib/seo/config";
-import { listDiscoveredLeads } from "@/lib/seo/local-store";
+import { listDiscoveredLeads, type LeadTriggerCategory } from "@/lib/seo/local-store";
 
 export const metadata: Metadata = {
   title: "Lead Inbox",
@@ -9,23 +9,35 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const triggerLabels: Record<LeadTriggerCategory, string> = {
+  enforcement_fine: "Enforcement / fine",
+  regulatory_exposure: "Regulatory exposure",
+  new_company: "New company",
+  compliance_hiring: "Compliance hiring",
+  funding: "Funding",
+  ai_product: "AI product",
+};
+
 export default async function AdminLeadsPage() {
   const leads = await listAdminLeads();
-  const discoveredLeads = await listDiscoveredLeads();
+  const discoveredLeads = await listDiscoveredLeads(80);
+  const fined = discoveredLeads.filter((lead) => lead.triggerCategory === "enforcement_fine").length;
+  const newCompanies = discoveredLeads.filter((lead) => lead.triggerCategory === "new_company").length;
+  const buyersFound = discoveredLeads.filter((lead) => Boolean(lead.decisionMakerName || lead.contactEmail)).length;
 
   return (
     <main className="main">
       <section className="hero">
-        <p className="eyebrow">Admin</p>
+        <p className="eyebrow">Lead intelligence</p>
         <h1>Lead Inbox</h1>
         <p className="summary">
-          Review captured leads, live discovery candidates, qualification scores, attribution and routing status from Kodex acquisition journeys.
+          Prioritize evidence-backed enforcement events, regulatory-exposure signals, new GmbH/UG registrations, compliance hiring, funding and AI-product activity—then identify the person most likely to own the compliance decision.
         </p>
       </section>
 
       <section className="dashboard-grid" aria-label="Lead summary">
         <div className="metric-tile">
-          <span>Total leads</span>
+          <span>Captured leads</span>
           <strong>{leads.length}</strong>
         </div>
         <div className="metric-tile">
@@ -33,56 +45,99 @@ export default async function AdminLeadsPage() {
           <strong>{discoveredLeads.length}</strong>
         </div>
         <div className="metric-tile">
+          <span>Enforcement / fines</span>
+          <strong>{fined}</strong>
+        </div>
+        <div className="metric-tile">
+          <span>New GmbH / UG</span>
+          <strong>{newCompanies}</strong>
+        </div>
+        <div className="metric-tile">
+          <span>Buyer identified</span>
+          <strong>{buyersFound}</strong>
+        </div>
+        <div className="metric-tile">
           <span>Sales-ready</span>
           <strong>{leads.filter((lead) => lead.score.grade === "sales-ready").length}</strong>
         </div>
-        <div className="metric-tile">
-          <span>Local storage</span>
-          <strong>{leads.filter((lead) => lead.storage === "local").length}</strong>
-        </div>
+      </section>
+
+      <section className="kx-lead-notice" aria-label="Lead intelligence policy">
+        <strong>Evidence rule</strong>
+        <p>
+          “Enforcement / fine” is used only when a public source supports it. “Regulatory exposure” means a company shows a relevant business or technology signal; it is not a claim that the company is noncompliant, under investigation or certain to be fined.
+        </p>
       </section>
 
       <section className="discovery-results" aria-label="Discovered lead candidates">
         <div className="result-heading">
           <div>
             <p className="eyebrow">Autonomous discovery</p>
-            <h2>Lead Candidates</h2>
+            <h2>Regulatory-trigger candidates</h2>
           </div>
-          <a className="secondary-link" href="/admin/seo">Run discovery</a>
+          <a className="secondary-link" href="/admin/authority/settings">Run controlled discovery</a>
         </div>
         {discoveredLeads.length === 0 ? (
-          <p className="empty-state">No discovered leads yet. Run discovery from the command center.</p>
+          <p className="empty-state">No discovered leads yet. Keep autonomy in Draft only, then run one controlled cycle from Authority Settings.</p>
         ) : (
           <div className="lead-cards">
             {discoveredLeads.map((lead) => (
-              <article className="lead-card" key={lead.id}>
-                <div>
-                  <span>{lead.source} / {lead.segment}</span>
-                  <strong>{lead.companyName}</strong>
+              <article className="lead-card kx-intel-lead" key={lead.id}>
+                <div className="kx-lead-head">
+                  <div>
+                    <span>{lead.source} / {lead.segment}</span>
+                    <strong>{lead.companyName}</strong>
+                  </div>
+                  <span className={`kx-trigger-badge ${lead.triggerCategory === "enforcement_fine" ? "critical" : ""}`}>
+                    {lead.triggerCategory ? triggerLabels[lead.triggerCategory] : "Signal"}
+                  </span>
                 </div>
+
                 <p>{lead.fitReason}</p>
+
                 <dl>
                   <div>
-                    <dt>Intent</dt>
-                    <dd>{lead.suggestedSearchIntent}</dd>
+                    <dt>Framework</dt>
+                    <dd>{lead.regulatoryFramework ?? "Needs classification"}</dd>
+                  </div>
+                  {lead.fineAmount ? (
+                    <div>
+                      <dt>Published fine</dt>
+                      <dd>{lead.fineAmount}</dd>
+                    </div>
+                  ) : null}
+                  <div>
+                    <dt>Decision maker</dt>
+                    <dd>{lead.decisionMakerName ?? "Name not resolved"}</dd>
                   </div>
                   <div>
-                    <dt>Page</dt>
-                    <dd>{lead.suggestedLandingPage}</dd>
+                    <dt>Likely owner</dt>
+                    <dd>{lead.decisionMakerTitle ?? "Compliance / Privacy / Legal"}</dd>
                   </div>
                   <div>
-                    <dt>Verified source</dt>
-                    <dd><a href={lead.sourceUrl}>{lead.retrievedAt}</a></dd>
-                  </div>
-                  <div>
-                    <dt>Email</dt>
-                    <dd>{lead.contactEmail ?? "Not enriched"}</dd>
+                    <dt>Professional email</dt>
+                    <dd>{lead.contactEmail ? <a href={`mailto:${lead.contactEmail}`}>{lead.contactEmail}</a> : "Not enriched"}</dd>
                   </div>
                   <div>
                     <dt>Confidence</dt>
-                    <dd>{lead.confidence}</dd>
+                    <dd>{lead.confidence} / 100</dd>
+                  </div>
+                  <div>
+                    <dt>Verified source</dt>
+                    <dd><a href={lead.sourceUrl} target="_blank" rel="noreferrer">Open source ↗</a></dd>
+                  </div>
+                  <div>
+                    <dt>Retrieved</dt>
+                    <dd>{new Date(lead.retrievedAt).toLocaleString("en-GB")}</dd>
                   </div>
                 </dl>
+
+                {lead.outreachAngle ? (
+                  <div className="kx-outreach-angle">
+                    <strong>Recommended angle</strong>
+                    <p>{lead.outreachAngle}</p>
+                  </div>
+                ) : null}
               </article>
             ))}
           </div>
@@ -98,7 +153,7 @@ export default async function AdminLeadsPage() {
           <span>Routing</span>
         </div>
         {leads.length === 0 ? (
-          <p className="empty-state">No captured leads yet.</p>
+          <p className="empty-state">No captured inbound leads yet.</p>
         ) : (
           leads.map((lead) => (
             <article className="queue-row lead-row" key={lead.id}>

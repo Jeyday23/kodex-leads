@@ -1,0 +1,55 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kodex-leads-edge",
+  "main": "cloudflare/src/index.ts",
+  "compatibility_date": "2026-08-29",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+
+  // Top level is only a fallback for a bare `wrangler deploy`. Always deploy with
+  // an explicit environment (`npm run cf:deploy:staging` / `cf:deploy:production`).
+  // This intentionally holds the production placeholder rather than the staging
+  // origin, so an un-targeted deploy fails loudly instead of silently proxying
+  // public traffic into staging.
+  "vars": {
+    // PLACEHOLDER - replace with the real production Render hostname.
+    "ORIGIN_BASE_URL": "https://REPLACE-WITH-PRODUCTION-ORIGIN.onrender.com"
+  },
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true
+    }
+  },
+  "env": {
+    // Fronts the `kodex-leads-staging` Render web service (branch: staging).
+    "staging": {
+      "name": "kodex-leads-edge-staging",
+      "vars": {
+        "ORIGIN_BASE_URL": "https://kodex-leads-it6d.onrender.com"
+      },
+      "triggers": {
+        "crons": ["*/15 * * * *"]
+      }
+    },
+    // Fronts the `kodex-leads-production` Render web service (branch: main).
+    // That service has never been deployed, so its hostname is not known yet.
+    "production": {
+      "name": "kodex-leads-edge",
+      "vars": {
+        // PLACEHOLDER - replace with the real production Render hostname
+        // (Render dashboard -> kodex-leads-production -> URL) before running
+        // `npm run cf:deploy:production`. Never point this at the staging origin.
+        "ORIGIN_BASE_URL": "https://REPLACE-WITH-PRODUCTION-ORIGIN.onrender.com"
+      },
+      "triggers": {
+        "crons": ["*/15 * * * *"]
+      }
+    }
+  }
+}

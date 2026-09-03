@@ -229,6 +229,11 @@ input {
   padding: 28px 20px 16px;
 }
 
+/* Let the scrollable nav row shrink instead of forcing the footer out of view. */
+.authority-nav {
+  min-height: 0;
+}
+
 .authority-brand {
   align-items: center;
   display: flex;
@@ -1759,4 +1764,25 @@ body {
 
 main.organism-page {
   min-height: 100vh;
+}
+
+.authority-signout {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 150ms ease, background-color 150ms ease;
+}
+
+.authority-signout:hover,
+.authority-signout:focus-visible {
+  opacity: 1;
+  background: rgba(127, 127, 127, 0.12);
 }

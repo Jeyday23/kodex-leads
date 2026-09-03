@@ -10,6 +10,7 @@ const nav = [
   ["Opportunities", "/admin/authority/opportunities", "◎"],
   ["Editorial", "/admin/authority/editorial", "▦"],
   ["Content", "/admin/authority/content", "▤"],
+  ["Media", "/admin/authority/media", "▣"],
   ["Knowledge", "/admin/authority/knowledge", "◇"],
   ["Observatory", "/admin/authority/observatory", "◉"],
   ["Publications", "/admin/authority/publications", "↗"],
@@ -45,6 +46,9 @@ export default async function AuthorityLayout({ children }: { children: ReactNod
             <span>{initials(user.fullName ?? user.email)}</span>
             <strong>{user.fullName ?? user.email}<small>{user.role}</small></strong>
           </div>
+          <form action="/auth/signout" method="post">
+            <button className="authority-signout" type="submit">Sign out</button>
+          </form>
         </div>
       </aside>
       <div className="authority-workspace">{children}</div>

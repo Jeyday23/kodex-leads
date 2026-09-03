@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   const auth = await requireAuthorityApi(request);
   if (!auth.ok) return auth.response;
-  const parsed = schema.safeParse(await request.json());
+  const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return apiError("Invalid autopilot mode.", 400);
   const result = await updateAutopilotMode(parsed.data.mode, auth.actor);
   if (!result.ok) return apiError(result.error ?? "Mode update failed.", 400);
