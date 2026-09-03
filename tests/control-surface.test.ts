@@ -19,7 +19,7 @@ test("direct lead discovery requires an authenticated admin or Render cron", () 
 test("every admin surface is private and fails closed", () => {
   const auth = read("lib/authority/auth.ts");
   const actions = read("app/admin/authority/AuthorityActions.tsx");
-  const middleware = read("middleware.ts");
+  const middleware = read("proxy.ts");
   const adminLayout = read("app/admin/layout.tsx");
 
   // No anonymous viewer fallback may exist. This is the regression that made

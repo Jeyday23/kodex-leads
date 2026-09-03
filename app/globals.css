@@ -229,6 +229,11 @@ input {
   padding: 28px 20px 16px;
 }
 
+/* Let the scrollable nav row shrink instead of forcing the footer out of view. */
+.authority-nav {
+  min-height: 0;
+}
+
 .authority-brand {
   align-items: center;
   display: flex;

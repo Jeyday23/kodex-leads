@@ -20,7 +20,7 @@ function loginRedirect(request: NextRequest, reason: string): NextResponse {
   return NextResponse.redirect(url);
 }
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const protectedPath = isProtectedPath(pathname);
   const config = getSupabaseAuthConfig();

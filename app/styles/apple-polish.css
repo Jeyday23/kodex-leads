@@ -119,6 +119,11 @@ textarea:focus-visible {
   top: 0;
   height: 100vh;
   min-height: 100vh;
+  /* The sidebar is pinned to the viewport, so its own content must scroll.
+     Without this the footer (system status, account, sign out) is pushed
+     off-screen and unreachable on short viewports. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 24px 16px 16px;
   background:
     radial-gradient(circle at 20% -10%, rgba(101, 255, 211, 0.11), transparent 32%),
