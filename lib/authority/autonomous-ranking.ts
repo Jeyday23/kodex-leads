@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { getSeoSupabase } from "@/lib/seo/db";
+import { getSeoSupabase, getSeoSupabaseState } from "@/lib/seo/db";
 import { getAllSeoPages } from "@/lib/seo/content";
 import { getSiteUrl, normalizeFramework } from "@/lib/seo/config";
 import { checkApprovedSources, getApprovedSourceList, searchConsoleStatus } from "@/lib/seo/source-intelligence";
@@ -151,9 +151,21 @@ export function shouldPlanRevision(input: { impressions?: number; ctr?: number; 
   return false;
 }
 
-export async function getAutopilotStatus() {
+export interface AutopilotStatus {
+  mode: AutopilotMode;
+  maxNewPagesPerDay: number;
+  maxRevisionsPerDay: number;
+  pilotCompleted: boolean;
+  changedAt: string | null;
+  databaseConfigured: boolean;
+  /** Set when the privileged Supabase client is unavailable or the read failed. */
+  databaseError?: string;
+  searchConsole: ReturnType<typeof searchConsoleStatus>;
+}
+
+export async function getAutopilotStatus(): Promise<AutopilotStatus> {
   const supabase = getSeoSupabase();
-  const fallback = {
+  const fallback: AutopilotStatus = {
     mode: "draft_only" as AutopilotMode,
     maxNewPagesPerDay: dailyDefaults.newPages,
     maxRevisionsPerDay: dailyDefaults.revisions,
@@ -162,7 +174,10 @@ export async function getAutopilotStatus() {
     databaseConfigured: false,
     searchConsole: searchConsoleStatus(),
   };
-  if (!supabase) return fallback;
+  if (!supabase) {
+    const state = getSeoSupabaseState();
+    return state.ok ? fallback : { ...fallback, databaseError: state.reason };
+  }
   const { data, error } = await supabase
     .from("authority_automation_settings")
     .select("mode,max_new_pages_per_day,max_revisions_per_day,pilot_completed,changed_at")
@@ -171,7 +186,9 @@ export async function getAutopilotStatus() {
   if (error) {
     return {
       ...fallback,
-      databaseError: "Autonomy settings could not be read from Supabase.",
+      // Surface the Postgres error: an RLS denial and a missing migration read
+      // very differently, and the operator needs to tell them apart.
+      databaseError: `Autonomy settings could not be read from Supabase: ${error.message}`,
     };
   }
   return {

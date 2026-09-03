@@ -17,7 +17,8 @@
     "cf:dev": "wrangler dev --env staging",
     "cf:check": "npm run cf:typecheck && wrangler deploy --dry-run --env staging",
     "cf:deploy:staging": "wrangler deploy --env staging",
-    "cf:deploy:production": "wrangler deploy --env production"
+    "cf:deploy:production": "wrangler deploy --env production",
+    "verify:supabase": "tsx scripts/verify-supabase.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -22,7 +22,9 @@ export async function runAutonomyPreflight() {
       label: "Autonomy settings database",
       ok: status.databaseConfigured,
       required: true,
-      detail: status.databaseConfigured ? "Supabase-backed autonomy settings are available." : "Supabase-backed autonomy settings are unavailable.",
+      detail: status.databaseConfigured
+        ? "Supabase-backed autonomy settings are available."
+        : status.databaseError ?? "Supabase-backed autonomy settings are unavailable.",
     },
     {
       id: "admin-authentication",
