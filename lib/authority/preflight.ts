@@ -1,5 +1,6 @@
 import { getAutopilotStatus } from "./autonomous-ranking";
 import { getProviderStatuses } from "./providers";
+import { getSupabaseAuthConfig } from "@/lib/supabase/config";
 
 export interface AutonomyPreflightCheck {
   id: string;
@@ -13,6 +14,7 @@ export async function runAutonomyPreflight() {
   const status = await getAutopilotStatus();
   const providers = getProviderStatuses();
   const configuredProviders = providers.filter((provider) => provider.configured);
+  const adminAuthConfigured = getSupabaseAuthConfig() !== null;
 
   const checks: AutonomyPreflightCheck[] = [
     {
@@ -23,11 +25,22 @@ export async function runAutonomyPreflight() {
       detail: status.databaseConfigured ? "Supabase-backed autonomy settings are available." : "Supabase-backed autonomy settings are unavailable.",
     },
     {
-      id: "control-secret",
-      label: "Private control key",
-      ok: Boolean(process.env.AUTOPILOT_CONTROL_SECRET),
+      id: "admin-authentication",
+      label: "Administrator authentication",
+      ok: adminAuthConfigured,
       required: true,
-      detail: process.env.AUTOPILOT_CONTROL_SECRET ? "Private control key is configured server-side." : "AUTOPILOT_CONTROL_SECRET is missing.",
+      detail: adminAuthConfigured
+        ? "Privileged actions are authorized by the signed-in administrator account."
+        : "Supabase auth is not configured, so no administrator can be authenticated.",
+    },
+    {
+      id: "automation-secret",
+      label: "Server automation secret",
+      ok: Boolean(process.env.CRON_SECRET),
+      required: false,
+      detail: process.env.CRON_SECRET
+        ? "CRON_SECRET is configured for Render scheduled jobs."
+        : "CRON_SECRET is missing. Scheduled jobs cannot authenticate.",
     },
     {
       id: "llm-provider",

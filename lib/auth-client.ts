@@ -1,29 +1,20 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 function getSiteUrl() {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin).replace(/\/+$/, "");
 }
 
-function getSupabase() {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase auth is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
-  }
-
-  return createClient(supabaseUrl, supabaseAnonKey);
-}
-
 export async function signUp(email: string, password: string, fullName: string) {
-  const supabase = getSupabase();
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${getSiteUrl()}/auth/login?message=Email confirmed. You can sign in now.`,
+      // Confirmation links land on the callback route, which exchanges the code
+      // for a cookie session before redirecting.
+      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/auth/login`,
       data: { full_name: fullName },
     },
   });
@@ -33,7 +24,7 @@ export async function signUp(email: string, password: string, fullName: string) 
 }
 
 export async function signIn(email: string, password: string) {
-  const supabase = getSupabase();
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) throw error;
@@ -41,9 +32,9 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function resetPassword(email: string) {
-  const supabase = getSupabase();
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${getSiteUrl()}/auth/reset-password-confirm`,
+    redirectTo: `${getSiteUrl()}/auth/callback?next=/auth/reset-password-confirm`,
   });
 
   if (error) throw error;
@@ -51,7 +42,7 @@ export async function resetPassword(email: string) {
 }
 
 export async function updatePassword(newPassword: string) {
-  const supabase = getSupabase();
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.auth.updateUser({ password: newPassword });
 
   if (error) throw error;

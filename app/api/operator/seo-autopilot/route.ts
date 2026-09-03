@@ -1,3 +1,4 @@
+import { requireAuthorityApi } from "@/lib/authority/auth";
 import { runAutopilot } from "@/lib/authority/autonomous-ranking";
 import { planRevisionsFromMetrics, repairTechnicalSeo, syncSearchConsole } from "@/lib/authority/autonomous-ranking";
 import { runLlmPlacementCycle } from "@/lib/seo/llm-automation";
@@ -11,13 +12,10 @@ type StepResult = {
 };
 
 export async function POST(request: Request) {
-  if (!process.env.CRON_SECRET) {
-    return Response.json({ error: "CRON_SECRET is not configured" }, { status: 503 });
-  }
-
-  if (request.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // Signed-in administrators, or Render cron jobs presenting CRON_SECRET.
+  // CRON_SECRET is server-to-server only and is never entered in a browser.
+  const auth = await requireAuthorityApi(request, { allowCron: true });
+  if (!auth.ok) return auth.response;
 
   const startedAt = new Date().toISOString();
   const steps: StepResult[] = [];

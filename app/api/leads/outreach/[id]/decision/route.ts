@@ -1,14 +1,10 @@
+import { requireAuthorityApi } from "@/lib/authority/auth";
 import { decideLeadWorkPackage } from "@/lib/seo/lead-work-packages";
 
-function hasApprovalControl(request: Request): boolean {
-  const controlSecret = process.env.AUTOPILOT_CONTROL_SECRET;
-  return Boolean(controlSecret && request.headers.get("x-kodex-control-secret") === controlSecret);
-}
-
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
-  if (!hasApprovalControl(request)) {
-    return Response.json({ status: "error", error: "Private approval key required." }, { status: 403 });
-  }
+  // Outreach approval is a founder decision and is never automated.
+  const auth = await requireAuthorityApi(request);
+  if (!auth.ok) return auth.response;
 
   const { id } = await context.params;
   try {
@@ -17,7 +13,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       return Response.json({ status: "error", error: "decision must be approved or rejected" }, { status: 400 });
     }
 
-    const item = await decideLeadWorkPackage(id, body.decision, "founder-approval");
+    const item = await decideLeadWorkPackage(id, body.decision, auth.actor);
     return Response.json({ status: "ok", item });
   } catch (error) {
     return Response.json({

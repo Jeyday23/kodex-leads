@@ -25,7 +25,6 @@ export default async function AuthoritySettingsPage() {
   const providers = getProviderStatuses();
   const autopilot = await getAutopilotStatus();
   const scheduleEnabled = process.env.AUTOPILOT_SCHEDULE_ENABLED === "true";
-  const controlSecretConfigured = Boolean(process.env.AUTOPILOT_CONTROL_SECRET);
   const supabaseEnvironmentConfigured = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL
     && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
@@ -45,12 +44,12 @@ export default async function AuthoritySettingsPage() {
           : "Add in Render: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY).",
     },
     {
-      name: "control-secret",
-      label: "Private control",
+      name: "admin-session",
+      label: "Administrator sign-in",
       purpose: "Authorizes manual mode changes, preflight and runs.",
-      configured: controlSecretConfigured,
+      configured: true,
       required: true,
-      detail: controlSecretConfigured ? "Server-side setting detected." : "Add in Render: AUTOPILOT_CONTROL_SECRET.",
+      detail: "Actions are authorized by the signed-in administrator account. No shared key is used.",
     },
     ...providers.map((provider) => ({
       ...provider,
@@ -106,7 +105,6 @@ export default async function AuthoritySettingsPage() {
         maxNewPagesPerDay={autopilot.maxNewPagesPerDay}
         maxRevisionsPerDay={autopilot.maxRevisionsPerDay}
         changedAt={autopilot.changedAt}
-        controlSecretConfigured={controlSecretConfigured}
       />
 
       <section className="kx-integrations" aria-labelledby="integrations-heading">
@@ -121,7 +119,7 @@ export default async function AuthoritySettingsPage() {
 
         <div className="kx-key-guidance">
           <strong>Provider keys are not entered on this page.</strong>
-          <span>Add them to the Render web service environment, save changes and wait for the service to redeploy. Never paste a North Data or LLM key into the private control field.</span>
+          <span>Add them to the Render web service environment, save changes and wait for the service to redeploy. This screen never accepts a provider key.</span>
         </div>
 
         <div className="kx-integration-grid">

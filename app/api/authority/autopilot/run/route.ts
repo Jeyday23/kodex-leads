@@ -9,18 +9,8 @@ import { createLeadWorkPackages } from "@/lib/seo/lead-work-packages";
 
 const schema = z.object({ preflight: z.boolean().optional() });
 
-function hasManualControlAccess(request: Request): boolean {
-  const configured = process.env.AUTOPILOT_CONTROL_SECRET;
-  if (!configured) return false;
-  return request.headers.get("x-kodex-control-secret") === configured;
-}
-
 export async function POST(request: Request) {
-  const isCron = Boolean(process.env.CRON_SECRET && request.headers.get("authorization") === `Bearer ${process.env.CRON_SECRET}`);
-  if (!isCron && !hasManualControlAccess(request)) {
-    return apiError("Private autopilot control key required.", 403);
-  }
-
+  // Signed-in administrators, or Render cron jobs presenting CRON_SECRET.
   const auth = await requireAuthorityApi(request, { allowCron: true });
   if (!auth.ok) return auth.response;
   const limit = rateLimit(`autopilot:${auth.actor}`, 2, 10 * 60_000);

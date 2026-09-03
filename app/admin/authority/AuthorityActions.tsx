@@ -2,23 +2,10 @@
 
 import { useState } from "react";
 
-const CONTROL_KEY_SESSION = "kodex-founder-control-secret";
-
-function readControlKey(): string {
-  if (typeof window === "undefined") return "";
-  return window.sessionStorage.getItem(CONTROL_KEY_SESSION)?.trim() ?? "";
-}
-
-function requestControlKey(): string {
-  const existing = readControlKey();
-  if (existing) return existing;
-  const supplied = window.prompt("Enter the private founder control key from Render to authorize this action.")?.trim() ?? "";
-  if (supplied) window.sessionStorage.setItem(CONTROL_KEY_SESSION, supplied);
-  return supplied;
-}
-
-function clearControlKey() {
-  if (typeof window !== "undefined") window.sessionStorage.removeItem(CONTROL_KEY_SESSION);
+function authorizationError(status: number): string | null {
+  if (status === 401) return "Your session is not signed in. Sign in as a Kodex administrator at /auth/login and try again.";
+  if (status === 403) return "This account is not authorized. Sign in with a Kodex administrator account to run this action.";
+  return null;
 }
 
 function errorMessage(payload: unknown, fallback: string): string {
@@ -42,13 +29,6 @@ export function AuthorityActionButton({ endpoint, label, method = "POST", body, 
   const [message, setMessage] = useState("");
 
   async function run() {
-    const controlKey = requestControlKey();
-    if (!controlKey) {
-      setState("failed");
-      setMessage("Private founder authorization is required. No action was run.");
-      return;
-    }
-
     setState("running");
     setMessage("");
     try {
@@ -56,15 +36,14 @@ export function AuthorityActionButton({ endpoint, label, method = "POST", body, 
         method,
         headers: {
           "content-type": "application/json",
-          "x-kodex-control-secret": controlKey,
         },
+        credentials: "same-origin",
         body: body ? JSON.stringify(body) : undefined,
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        if (response.status === 403) clearControlKey();
         setState("failed");
-        setMessage(errorMessage(payload, `Action failed with HTTP ${response.status}.`));
+        setMessage(authorizationError(response.status) ?? errorMessage(payload, `Action failed with HTTP ${response.status}.`));
         return;
       }
       setState("done");
@@ -84,7 +63,7 @@ export function AuthorityActionButton({ endpoint, label, method = "POST", body, 
         onClick={run}
         disabled={state === "running"}
         aria-live="polite"
-        title="Protected founder action. You will be asked for the private control key if this browser tab has not been authorized."
+        title="Protected action. It runs as the signed-in Kodex administrator."
       >
         {state === "running" ? "Running…" : state === "done" ? "Completed" : state === "failed" ? "Try again" : label}
       </button>
@@ -108,13 +87,6 @@ export function NewOpportunityForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const controlKey = requestControlKey();
-    if (!controlKey) {
-      setState("failed");
-      setMessage("Private founder authorization is required. Nothing was saved.");
-      return;
-    }
-
     setState("saving");
     setMessage("");
     try {
@@ -122,8 +94,8 @@ export function NewOpportunityForm() {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-kodex-control-secret": controlKey,
         },
+        credentials: "same-origin",
         body: JSON.stringify({ query, framework, country: "DE", language: "en" }),
       });
       const payload = await response.json().catch(() => null);
@@ -131,9 +103,8 @@ export function NewOpportunityForm() {
         window.location.reload();
         return;
       }
-      if (response.status === 403) clearControlKey();
       setState("failed");
-      setMessage(errorMessage(payload, `Could not save opportunity (HTTP ${response.status}).`));
+      setMessage(authorizationError(response.status) ?? errorMessage(payload, `Could not save opportunity (HTTP ${response.status}).`));
     } catch {
       setState("failed");
       setMessage("Could not reach the service. Check deployment health and try again.");

@@ -46,24 +46,27 @@ const thinkingSteps = [
 
 export function SeoCommandCenter() {
   const [isRunning, setIsRunning] = useState(false);
-  const [secret, setSecret] = useState("");
   const [result, setResult] = useState<DiscoveryResponse["result"] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function runDiscovery() {
-    if (!secret.trim()) {
-      setError("Enter the private control key before running lead discovery.");
-      return;
-    }
     setIsRunning(true);
     setError(null);
     setResult(null);
     const response = await fetch("/api/leads/discover", {
       method: "POST",
-      headers: { "x-kodex-control-secret": secret },
+      credentials: "same-origin",
     });
     const body = await response.json().catch(() => ({}));
     setIsRunning(false);
+    if (response.status === 401) {
+      setError("Your session is not signed in. Sign in as a Kodex administrator at /auth/login and try again.");
+      return;
+    }
+    if (response.status === 403) {
+      setError("This account is not authorized. Sign in with a Kodex administrator account to run lead discovery.");
+      return;
+    }
     if (!response.ok) {
       const details = Array.isArray(body.errors) && body.errors.length > 0 ? ` ${body.errors.join(" ")}` : "";
       setError(`${body.error ?? "Lead discovery returned no live leads."}${details}`);
@@ -84,14 +87,7 @@ export function SeoCommandCenter() {
           </p>
         </div>
         <div className="kx-command-control">
-          <input
-            type="password"
-            value={secret}
-            onChange={(event) => setSecret(event.target.value)}
-            placeholder="Private control key"
-            aria-label="Private lead discovery control key"
-            autoComplete="off"
-          />
+          <p>Runs as the signed-in administrator.</p>
           <button className="cta command-button" type="button" onClick={runDiscovery} disabled={isRunning}>
             {isRunning ? "Running…" : "Run Lead Discovery"}
           </button>

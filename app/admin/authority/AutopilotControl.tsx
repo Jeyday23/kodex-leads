@@ -14,7 +14,6 @@ interface AutopilotControlProps {
   maxNewPagesPerDay: number;
   maxRevisionsPerDay: number;
   changedAt?: string | null;
-  controlSecretConfigured: boolean;
 }
 
 const modeOrder: Mode[] = ["off", "draft_only", "guarded", "controlled"];
@@ -52,6 +51,12 @@ function responseError(payload: unknown, fallback: string): string {
   return fallback;
 }
 
+function authorizationError(status: number): string | null {
+  if (status === 401) return "Your session is not signed in. Sign in as a Kodex administrator at /auth/login and try again.";
+  if (status === 403) return "This account is not authorized. Sign in with a Kodex administrator account to run this action.";
+  return null;
+}
+
 function formatChangedAt(value?: string | null) {
   if (!value) return "No saved change recorded";
   const date = new Date(value);
@@ -66,12 +71,9 @@ export function AutopilotControl({
   maxNewPagesPerDay,
   maxRevisionsPerDay,
   changedAt,
-  controlSecretConfigured,
 }: AutopilotControlProps) {
   const [mode, setMode] = useState<Mode>(currentMode);
   const [selectedMode, setSelectedMode] = useState<Mode>(currentMode);
-  const [secret, setSecret] = useState("");
-  const [showSecret, setShowSecret] = useState(false);
   const [state, setState] = useState<ControlState>("idle");
   const [message, setMessage] = useState("");
   const [preflightChecks, setPreflightChecks] = useState<PreflightCheck[]>([]);
@@ -79,18 +81,9 @@ export function AutopilotControl({
   const [lastRunSummary, setLastRunSummary] = useState<string | null>(null);
 
   const busy = state === "saving" || state === "running" || state === "testing";
-  const hasSecret = secret.trim().length > 0;
   const modeChanged = selectedMode !== mode;
 
-  function requireSecret(): boolean {
-    if (hasSecret) return true;
-    setState("failed");
-    setMessage("Enter AUTOPILOT_CONTROL_SECRET from Render to authorize this action.");
-    return false;
-  }
-
   async function saveMode() {
-    if (!requireSecret()) return;
     if (!modeChanged) {
       setState("done");
       setMessage(`${labels[mode].title} is already the active mode.`);
@@ -103,13 +96,14 @@ export function AutopilotControl({
     try {
       const response = await fetch("/api/authority/autopilot/status", {
         method: "PATCH",
-        headers: { "content-type": "application/json", "x-kodex-control-secret": secret.trim() },
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ mode: selectedMode }),
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
         setState("failed");
-        setMessage(responseError(payload, "Could not change autonomy mode."));
+        setMessage(authorizationError(response.status) ?? responseError(payload, "Could not change autonomy mode."));
         return;
       }
       setMode(selectedMode);
@@ -122,7 +116,6 @@ export function AutopilotControl({
   }
 
   async function runNow() {
-    if (!requireSecret()) return;
     if (mode === "off") {
       setState("failed");
       setMessage("Autonomy is off. Select another mode and save it before running.");
@@ -140,7 +133,8 @@ export function AutopilotControl({
     try {
       const response = await fetch("/api/authority/autopilot/run", {
         method: "POST",
-        headers: { "content-type": "application/json", "x-kodex-control-secret": secret.trim() },
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({}),
       });
       const payload = await response.json().catch(() => null) as {
@@ -148,7 +142,7 @@ export function AutopilotControl({
       } | null;
       if (!response.ok) {
         setState("failed");
-        setMessage(responseError(payload, "Autopilot run failed."));
+        setMessage(authorizationError(response.status) ?? responseError(payload, "Autopilot run failed."));
         return;
       }
       const leadCount = Array.isArray(payload?.data?.leadDiscovery?.leads) ? payload.data.leadDiscovery.leads.length : 0;
@@ -165,7 +159,6 @@ export function AutopilotControl({
   }
 
   async function runSafetyTest() {
-    if (!requireSecret()) return;
     setState("testing");
     setMessage("");
     setPreflightChecks([]);
@@ -173,13 +166,14 @@ export function AutopilotControl({
     try {
       const response = await fetch("/api/authority/autopilot/run", {
         method: "POST",
-        headers: { "content-type": "application/json", "x-kodex-control-secret": secret.trim() },
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ preflight: true }),
       });
       const payload = await response.json().catch(() => null) as { data?: { ok?: boolean; checks?: PreflightCheck[] } } | null;
       if (!response.ok) {
         setState("failed");
-        setMessage(responseError(payload, "Preflight failed."));
+        setMessage(authorizationError(response.status) ?? responseError(payload, "Preflight failed."));
         return;
       }
       const checks = Array.isArray(payload?.data?.checks) ? payload.data.checks : [];
@@ -196,7 +190,6 @@ export function AutopilotControl({
   }
 
   function requestRun() {
-    if (!requireSecret()) return;
     if (mode === "off") {
       setState("failed");
       setMessage("Autonomy is off. Select another mode and save it before running.");
@@ -275,41 +268,23 @@ export function AutopilotControl({
         <div className="kx-step-heading">
           <span>2</span>
           <div>
-            <h3>Authorize private controls</h3>
+            <h3>Save the selected mode</h3>
             <p>
-              Use <code>AUTOPILOT_CONTROL_SECRET</code> from Render. This field does not configure or save provider API keys.
-              <span className="kx-info" tabIndex={0} aria-label="Control key help">?
+              Every action on this page runs as the signed-in administrator. Provider API keys are not configured here.
+              <span className="kx-info" tabIndex={0} aria-label="Provider key help">?
                 <span role="tooltip">North Data, OpenAI, Anthropic, Perplexity, Hunter and Apollo keys belong in the Render environment.</span>
               </span>
             </p>
           </div>
         </div>
         <div className="kx-secret-row">
-          <label htmlFor="autopilot-control-secret">Render control key</label>
-          <div className="kx-secret-input">
-            <input
-              id="autopilot-control-secret"
-              type={showSecret ? "text" : "password"}
-              value={secret}
-              onChange={(event) => {
-                setSecret(event.target.value);
-                setMessage("");
-              }}
-              placeholder={controlSecretConfigured ? "Paste AUTOPILOT_CONTROL_SECRET" : "Not configured on the server"}
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button type="button" onClick={() => setShowSecret((value) => !value)} aria-label={showSecret ? "Hide control key" : "Show control key"}>
-              {showSecret ? "Hide" : "Show"}
-            </button>
-          </div>
-          <p>The value stays in this browser tab and is sent only with the action you authorize. Kodex does not save it.</p>
+          <p>Your administrator session authorizes this change. Nothing is stored in the browser.</p>
         </div>
         <div className="kx-control-actions">
-          <button className="kx-control-button secondary" type="button" onClick={saveMode} disabled={busy || !hasSecret || !modeChanged}>
+          <button className="kx-control-button secondary" type="button" onClick={saveMode} disabled={busy || !modeChanged}>
             {state === "saving" ? "Saving mode…" : modeChanged ? `Save ${labels[selectedMode].title}` : "Mode saved"}
           </button>
-          <span>{!hasSecret ? "Enter the Render control key to enable private actions." : modeChanged ? "Save the selected mode before running." : "Authorization ready for this tab."}</span>
+          <span>{modeChanged ? "Save the selected mode before running." : "Authorized as the signed-in administrator."}</span>
         </div>
       </div>
 
@@ -322,10 +297,10 @@ export function AutopilotControl({
           </div>
         </div>
         <div className="kx-run-actions">
-          <button className="kx-control-button secondary" type="button" onClick={runSafetyTest} disabled={busy || !hasSecret}>
+          <button className="kx-control-button secondary" type="button" onClick={runSafetyTest} disabled={busy}>
             {state === "testing" ? "Checking configuration…" : "Run safety preflight"}
           </button>
-          <button className="kx-control-button primary" type="button" onClick={requestRun} disabled={busy || !hasSecret || mode === "off" || modeChanged}>
+          <button className="kx-control-button primary" type="button" onClick={requestRun} disabled={busy || mode === "off" || modeChanged}>
             Run autonomous cycle
           </button>
         </div>

@@ -35,7 +35,6 @@ interface QueueItem {
 
 export default function ApprovalQueue({ initialItems }: { initialItems: QueueItem[] }) {
   const router = useRouter();
-  const [approvalKey, setApprovalKey] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"pending_approval" | "all">("pending_approval");
@@ -47,22 +46,24 @@ export default function ApprovalQueue({ initialItems }: { initialItems: QueueIte
 
   async function decide(packageId: string, decision: "approved" | "rejected") {
     setError(null);
-    if (!approvalKey.trim()) {
-      setError("Enter the private approval key before approving or rejecting a package.");
-      return;
-    }
     setBusy(packageId);
     try {
       const response = await fetch(`/api/leads/outreach/${encodeURIComponent(packageId)}/decision`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-kodex-control-secret": approvalKey.trim(),
         },
+        credentials: "same-origin",
         body: JSON.stringify({ decision }),
       });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error ?? "Approval update failed.");
+      const payload = await response.json().catch(() => null);
+      if (response.status === 401) {
+        throw new Error("Your session is not signed in. Sign in as a Kodex administrator at /auth/login and try again.");
+      }
+      if (response.status === 403) {
+        throw new Error("This account is not authorized. Sign in with a Kodex administrator account to approve or reject packages.");
+      }
+      if (!response.ok) throw new Error(payload?.error ?? "Approval update failed.");
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Approval update failed.");
@@ -77,7 +78,7 @@ export default function ApprovalQueue({ initialItems }: { initialItems: QueueIte
         <div className="result-heading">
           <div>
             <p className="eyebrow">Founder control</p>
-            <h2>Approval key</h2>
+            <h2>Outreach approvals</h2>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button type="button" className="secondary-link" onClick={() => setFilter("pending_approval")}>Pending</button>
@@ -85,15 +86,7 @@ export default function ApprovalQueue({ initialItems }: { initialItems: QueueIte
           </div>
         </div>
         <p>Discovery, verification, qualification, enrichment and drafting are autonomous. External sending is not.</p>
-        <input
-          aria-label="Private approval key"
-          type="password"
-          autoComplete="off"
-          value={approvalKey}
-          onChange={(event) => setApprovalKey(event.target.value)}
-          placeholder="Enter AUTOPILOT_CONTROL_SECRET to approve/reject"
-          style={{ width: "100%", maxWidth: 560, padding: 12, borderRadius: 10 }}
-        />
+        <p>Approvals and rejections are recorded against your signed-in administrator account.</p>
         {error ? <p role="alert" style={{ marginTop: 10 }}>{error}</p> : null}
       </section>
 

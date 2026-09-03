@@ -46,6 +46,9 @@ export default async function AuthorityLayout({ children }: { children: ReactNod
             <span>{initials(user.fullName ?? user.email)}</span>
             <strong>{user.fullName ?? user.email}<small>{user.role}</small></strong>
           </div>
+          <form action="/auth/signout" method="post">
+            <button className="authority-signout" type="submit">Sign out</button>
+          </form>
         </div>
       </aside>
       <div className="authority-workspace">{children}</div>

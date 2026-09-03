@@ -52,6 +52,19 @@ Create the token from Cloudflare's **Edit Cloudflare Workers** template and scop
 
 ## Deployment
 
+Each Wrangler environment has its own origin. They must never be the same value.
+
+| Wrangler env | Worker name | `ORIGIN_BASE_URL` |
+| --- | --- | --- |
+| `staging` | `kodex-leads-edge-staging` | `https://kodex-leads-it6d.onrender.com` |
+| `production` | `kodex-leads-edge` | `https://REPLACE-WITH-PRODUCTION-ORIGIN.onrender.com` (placeholder) |
+
+The production origin is a placeholder because the `kodex-leads-production` Render
+service has not been provisioned yet. Replace it — in both `env.production.vars`
+and the top-level `vars` fallback in `wrangler.jsonc` — with the real production
+Render hostname before deploying production. Do not substitute the staging origin:
+the placeholder fails loudly, a wrong origin serves staging data to the public.
+
 Deploy staging first:
 
 ```bash
@@ -65,6 +78,10 @@ npm run cf:deploy:production
 ```
 
 Only after production verification should a custom hostname be routed to the Worker. Keep the Render hostname available as the origin and rollback path.
+
+Render-side environment configuration — which env var group holds which key, and
+which values the operator must supply per environment — is in
+[ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md).
 
 ## Future full migration
 

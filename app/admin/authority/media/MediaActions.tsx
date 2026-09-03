@@ -3,16 +3,10 @@
 import { FormEvent, useState } from "react";
 import type { MediaJob } from "@/lib/media/types";
 
-function getControlSecret() {
-  if (typeof window === "undefined") return "";
-  return window.sessionStorage.getItem("kodex-control-secret") ?? "";
-}
-
-function founderHeaders() {
-  const existing = getControlSecret();
-  const secret = existing || window.prompt("Founder control key") || "";
-  if (secret) window.sessionStorage.setItem("kodex-control-secret", secret);
-  return { "Content-Type": "application/json", "x-kodex-control-secret": secret };
+function authorizationError(status: number): string | null {
+  if (status === 401) return "Your session is not signed in. Sign in as a Kodex administrator at /auth/login and try again.";
+  if (status === 403) return "This account is not authorized. Sign in with a Kodex administrator account to run this action.";
+  return null;
 }
 
 export default function MediaActions({ initialJobs }: { initialJobs: MediaJob[] }) {
@@ -34,11 +28,12 @@ export default function MediaActions({ initialJobs }: { initialJobs: MediaJob[] 
     };
     const response = await fetch("/api/media/jobs", {
       method: "POST",
-      headers: founderHeaders(),
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(payload),
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) setMessage(data.error ?? "Media job could not be created.");
+    if (!response.ok) setMessage(authorizationError(response.status) ?? data.error ?? "Media job could not be created.");
     else {
       setJobs((current) => [data.job, ...current.filter((job) => job.id !== data.job.id)]);
       setMessage(data.job.status === "pending_generation" ? "Media brief queued for generation." : "Generation job created.");
@@ -56,11 +51,12 @@ export default function MediaActions({ initialJobs }: { initialJobs: MediaJob[] 
   async function decide(id: string, decision: "approve" | "reject") {
     const response = await fetch(`/api/media/jobs/${id}/decision`, {
       method: "POST",
-      headers: founderHeaders(),
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ decision }),
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) return setMessage(data.error ?? "Decision failed.");
+    if (!response.ok) return setMessage(authorizationError(response.status) ?? data.error ?? "Decision failed.");
     setJobs((current) => current.map((job) => job.id === id ? data.job : job));
   }
 
