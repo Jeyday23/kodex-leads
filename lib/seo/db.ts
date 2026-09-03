@@ -1,4 +1,9 @@
-import "server-only";
+// Intentionally NOT marked "server-only": this module is shared with the Render
+// cron jobs and workers in scripts/ and workers/, which run under plain tsx.
+// The "server-only" package throws outside a React Server Component bundler, so
+// importing it here breaks every scheduled job. Client leakage is prevented
+// instead by never reading a NEXT_PUBLIC_ credential here, and asserted by
+// tests/server-module-boundaries.test.ts.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export type SeoSupabaseState =
