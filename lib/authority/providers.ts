@@ -1,4 +1,5 @@
 import type { AuthorityProviderId, MonitoringProvider, MonitoringProviderInput, MonitoringProviderResult } from "./types";
+import { getBedrockConfig, bedrockMessage } from "@/lib/llm/bedrock";
 
 export function getAuthorityProviders(): MonitoringProvider[] {
   return [
@@ -47,16 +48,31 @@ function createOpenAIProvider(): MonitoringProvider {
 }
 
 function createAnthropicProvider(): MonitoringProvider {
+  const bedrock = getBedrockConfig();
   const key = process.env.ANTHROPIC_API_KEY;
-  const model = process.env.CLAUDE_MODEL;
+  const model = bedrock ? bedrock.model : process.env.CLAUDE_MODEL;
   return {
     name: "anthropic",
-    label: "Claude / Anthropic",
-    configured: Boolean(key && model),
-    missing: missing(["ANTHROPIC_API_KEY", "CLAUDE_MODEL"]),
+    label: bedrock ? "Claude / Bedrock (EU)" : "Claude / Anthropic",
+    configured: Boolean(bedrock) || Boolean(key && model),
+    missing: bedrock ? [] : missing(["ANTHROPIC_API_KEY", "CLAUDE_MODEL"]),
     async execute(input) {
-      if (!key || !model) return skippedResult("anthropic", "CLAUDE_MODEL");
       const started = Date.now();
+      if (bedrock) {
+        const data = await bedrockMessage(bedrock, {
+          system: systemPrompt(input),
+          prompt: input.prompt,
+          maxTokens: 900,
+        });
+        return {
+          answer: extractAnthropicText(data),
+          citations: [],
+          model: bedrock.model,
+          rawResponse: data,
+          latencyMs: Date.now() - started,
+        };
+      }
+      if (!key || !model) return skippedResult("anthropic", "CLAUDE_MODEL");
       const response = await fetchWithRetry("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {

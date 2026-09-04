@@ -1,3 +1,4 @@
+import { getBedrockConfig, bedrockMessage } from "@/lib/llm/bedrock";
 
 export type AiProviderId = "openai" | "anthropic" | "perplexity";
 
@@ -35,8 +36,8 @@ export function getAiProviderStatuses(): AiProviderStatus[] {
     {
       id: "anthropic",
       label: "Claude / Anthropic",
-      configured: Boolean(process.env.ANTHROPIC_API_KEY && process.env.CLAUDE_MODEL),
-      missing: missing(["ANTHROPIC_API_KEY", "CLAUDE_MODEL"]),
+      configured: Boolean(getBedrockConfig()) || Boolean(process.env.ANTHROPIC_API_KEY && process.env.CLAUDE_MODEL),
+      missing: getBedrockConfig() ? [] : missing(["ANTHROPIC_API_KEY", "CLAUDE_MODEL"]),
       endpoint: "https://api.anthropic.com/v1/messages",
     },
     {
@@ -86,6 +87,20 @@ async function generateWithOpenAI(request: AiGenerationRequest): Promise<AiGener
 }
 
 async function generateWithAnthropic(request: AiGenerationRequest): Promise<AiGenerationResult> {
+  const bedrock = getBedrockConfig();
+  if (bedrock) {
+    try {
+      const data = await bedrockMessage(bedrock, {
+        system: request.system,
+        prompt: request.prompt,
+        maxTokens: request.maxTokens ?? 900,
+      });
+      return { provider: "anthropic", status: "generated", model: bedrock.model, text: extractAnthropicText(data) };
+    } catch (error) {
+      return failed("anthropic", bedrock.model, error instanceof Error ? error.message : "Unknown Bedrock error.");
+    }
+  }
+
   const key = process.env.ANTHROPIC_API_KEY;
   const model = process.env.CLAUDE_MODEL;
   if (!key || !model) return skipped("anthropic", "Set ANTHROPIC_API_KEY and CLAUDE_MODEL.");
