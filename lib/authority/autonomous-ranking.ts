@@ -10,6 +10,7 @@ import { runOpportunityDiscovery, listOpportunities, createOpportunity } from ".
 import { apiSuccess } from "./api";
 import { calculateQualityScore, qualityBlockers } from "@/lib/seo/quality-gate";
 import type { SeoContentBody, SeoContentPage, SeoPageType, SeoSource } from "@/lib/seo/types";
+import { AUTOPILOT_DAILY_DEFAULTS, resolveStoredAutopilotSettings } from "./autonomous-ranking-policy";
 
 export type AutopilotMode = "off" | "draft_only" | "guarded" | "controlled";
 export type ClaimCategory =
@@ -94,7 +95,7 @@ interface VersionRow {
   created_at?: string | null;
 }
 
-const dailyDefaults = { newPages: 3, revisions: 10 };
+const dailyDefaults = AUTOPILOT_DAILY_DEFAULTS;
 
 const clusterLinks = [
   { href: "/deadlines/eu-ai-act", label: "EU AI Act deadlines", relationship: "cluster" },
@@ -183,21 +184,11 @@ export async function getAutopilotStatus(): Promise<AutopilotStatus> {
     .select("mode,max_new_pages_per_day,max_revisions_per_day,pilot_completed,changed_at")
     .eq("id", "global")
     .maybeSingle();
-  if (error) {
-    return {
-      ...fallback,
-      // Surface the Postgres error: an RLS denial and a missing migration read
-      // very differently, and the operator needs to tell them apart.
-      databaseError: `Autonomy settings could not be read from Supabase: ${error.message}`,
-    };
-  }
+  // resolveStoredAutopilotSettings fails closed for both a read error and a
+  // missing singleton row, so an empty settings table stops scheduled jobs
+  // instead of running them under an unstored default.
   return {
-    mode: (data?.mode ?? "draft_only") as AutopilotMode,
-    maxNewPagesPerDay: Number(data?.max_new_pages_per_day ?? dailyDefaults.newPages),
-    maxRevisionsPerDay: Number(data?.max_revisions_per_day ?? dailyDefaults.revisions),
-    pilotCompleted: Boolean(data?.pilot_completed),
-    changedAt: data?.changed_at,
-    databaseConfigured: true,
+    ...resolveStoredAutopilotSettings(data, error),
     searchConsole: searchConsoleStatus(),
   };
 }

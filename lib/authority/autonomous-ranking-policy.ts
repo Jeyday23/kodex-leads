@@ -62,3 +62,76 @@ export function shouldPlanRevision(input: { impressions?: number; ctr?: number; 
 function normalizeText(value: string) {
   return value.toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
 }
+
+/** Defaults used only to describe an unreadable settings row, never to run under. */
+export const AUTOPILOT_DAILY_DEFAULTS = { newPages: 3, revisions: 10 };
+
+/** Shape of the `authority_automation_settings` singleton (migration 014). */
+export interface StoredAutopilotSettingsRow {
+  mode?: string | null;
+  max_new_pages_per_day?: number | string | null;
+  max_revisions_per_day?: number | string | null;
+  pilot_completed?: boolean | null;
+  changed_at?: string | null;
+}
+
+export interface ResolvedAutopilotSettings {
+  mode: AutopilotMode;
+  maxNewPagesPerDay: number;
+  maxRevisionsPerDay: number;
+  pilotCompleted: boolean;
+  changedAt: string | null;
+  databaseConfigured: boolean;
+  databaseError?: string;
+}
+
+/**
+ * Turns a raw `authority_automation_settings` read into the autonomy status.
+ *
+ * Fails closed in both failure branches. A read error and a MISSING singleton
+ * row both resolve to `databaseConfigured: false`, which every scheduled job
+ * treats as "skip". Reporting a default mode for a row that does not exist
+ * would let the pipeline run under a policy nobody stored, so the absent row is
+ * an unavailable settings database, not an implicit `draft_only`.
+ */
+export function resolveStoredAutopilotSettings(
+  row: StoredAutopilotSettingsRow | null | undefined,
+  readError?: { message: string } | null,
+): ResolvedAutopilotSettings {
+  const unavailable: ResolvedAutopilotSettings = {
+    mode: "draft_only",
+    maxNewPagesPerDay: AUTOPILOT_DAILY_DEFAULTS.newPages,
+    maxRevisionsPerDay: AUTOPILOT_DAILY_DEFAULTS.revisions,
+    pilotCompleted: false,
+    changedAt: null,
+    databaseConfigured: false,
+  };
+
+  if (readError) {
+    return {
+      ...unavailable,
+      // Surface the Postgres error: an RLS denial and a missing migration read
+      // very differently, and the operator needs to tell them apart.
+      databaseError: `Autonomy settings could not be read from Supabase: ${readError.message}`,
+    };
+  }
+
+  if (!row) {
+    return {
+      ...unavailable,
+      databaseError:
+        "Autonomy settings are empty: authority_automation_settings has no 'global' row. "
+        + "Re-apply supabase/migrations/014_autonomous_ranking_engine.sql, or save a mode on "
+        + "/admin/authority/settings as a signed-in administrator.",
+    };
+  }
+
+  return {
+    mode: (row.mode ?? "draft_only") as AutopilotMode,
+    maxNewPagesPerDay: Number(row.max_new_pages_per_day ?? AUTOPILOT_DAILY_DEFAULTS.newPages),
+    maxRevisionsPerDay: Number(row.max_revisions_per_day ?? AUTOPILOT_DAILY_DEFAULTS.revisions),
+    pilotCompleted: Boolean(row.pilot_completed),
+    changedAt: row.changed_at ?? null,
+    databaseConfigured: true,
+  };
+}
