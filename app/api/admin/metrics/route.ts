@@ -1,19 +1,25 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireAuthorityApi } from "@/lib/authority/auth";
+import { getSeoSupabase } from "@/lib/seo/db";
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Lead data is not public. Signed-in administrators only; this route is not
+  // part of any cron path, so CRON_SECRET is deliberately not accepted here.
+  const auth = await requireAuthorityApi(request);
+  if (!auth.ok) return auth.response;
+
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // Server-side service-role client. The anon key is published to the
+    // browser by Next.js, so it must never be the credential used to read
+    // lead records.
+    const supabase = getSeoSupabase();
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabase) {
       return NextResponse.json(
         { error: "Supabase environment is not configured" },
         { status: 503 }
       );
     }
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Get total leads count
     const { count: totalLeads } = await supabase
