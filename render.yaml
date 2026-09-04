@@ -28,12 +28,11 @@ services:
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-automation-secrets
-      - kodex-leads-staging-integrations
-      - kodex-leads-staging-founder-ops
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-automation-secrets
+      - fromGroup: kodex-leads-staging-integrations
+      - fromGroup: kodex-leads-staging-founder-ops
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
@@ -48,10 +47,9 @@ services:
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx workers/monitoring-worker.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
@@ -62,11 +60,10 @@ services:
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx workers/autopilot-worker.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-automation-secrets
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-automation-secrets
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
@@ -81,12 +78,11 @@ services:
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-automation-secrets
-      - kodex-leads-production-integrations
-      - kodex-leads-production-founder-ops
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-automation-secrets
+      - fromGroup: kodex-leads-production-integrations
+      - fromGroup: kodex-leads-production-founder-ops
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
       - key: SEO_SOURCE_FETCH_ENABLED
@@ -101,10 +97,9 @@ services:
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx workers/monitoring-worker.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
@@ -115,378 +110,377 @@ services:
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx workers/autopilot-worker.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-automation-secrets
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-automation-secrets
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
       - key: SEO_SOURCE_FETCH_ENABLED
         value: "false"
 
-cronJobs:
+  # ============================== scheduled jobs (cron services)
   # ---------------------------------------------------------------- staging
-  - name: kodex-lead-intelligence-staging
+  - type: cron
+    name: kodex-lead-intelligence-staging
     runtime: node
     schedule: "30 5 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-lead-intelligence.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
       - key: LEAD_AUTOMATION_ENABLED
         value: "true"
 
-  - name: kodex-authority-search-console-sync-staging
+  - type: cron
+    name: kodex-authority-search-console-sync-staging
     runtime: node
     schedule: "0 4 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-search-console-sync.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-autonomous-planning-staging
+  - type: cron
+    name: kodex-authority-autonomous-planning-staging
     runtime: node
     schedule: "0 5 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-autopilot.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-automation-secrets
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-automation-secrets
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
 
-  - name: kodex-authority-research-and-drafting-staging
+  - type: cron
+    name: kodex-authority-research-and-drafting-staging
     runtime: node
     schedule: "0 6 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-research-and-drafting.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
 
-  - name: kodex-authority-quality-gates-staging
+  - type: cron
+    name: kodex-authority-quality-gates-staging
     runtime: node
     schedule: "0 7 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-quality-gates.ts
-    envVarGroups:
-      - kodex-leads-staging-core
     envVars:
+      - fromGroup: kodex-leads-staging-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-publication-queue-staging
+  - type: cron
+    name: kodex-authority-publication-queue-staging
     runtime: node
     schedule: "0 8 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-publication.ts
-    envVarGroups:
-      - kodex-leads-staging-core
     envVars:
+      - fromGroup: kodex-leads-staging-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-technical-audit-staging
+  - type: cron
+    name: kodex-authority-technical-audit-staging
     runtime: node
     schedule: "0 9 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-technical-audit.ts
-    envVarGroups:
-      - kodex-leads-staging-core
     envVars:
+      - fromGroup: kodex-leads-staging-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-daily-discovery-staging
+  - type: cron
+    name: kodex-authority-daily-discovery-staging
     runtime: node
     schedule: "0 5 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: AUTHORITY_RUN_TYPE=daily-discovery npx tsx scripts/run-authority-discovery.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-weekly-discovery-refresh-staging
+  - type: cron
+    name: kodex-authority-weekly-discovery-refresh-staging
     runtime: node
     schedule: "0 6 * * 1"
     branch: staging
     buildCommand: npm ci
     startCommand: AUTHORITY_RUN_TYPE=weekly-discovery-refresh npx tsx scripts/run-authority-discovery.ts
-    envVarGroups:
-      - kodex-leads-staging-core
     envVars:
+      - fromGroup: kodex-leads-staging-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-monitoring-cron-staging
+  - type: cron
+    name: kodex-authority-monitoring-cron-staging
     runtime: node
     schedule: "0 10 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-monitoring.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-weekly-visibility-recalculation-staging
+  - type: cron
+    name: kodex-authority-weekly-visibility-recalculation-staging
     runtime: node
     schedule: "0 8 * * 1"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-monitoring.ts
-    envVarGroups:
-      - kodex-leads-staging-core
-      - kodex-leads-staging-integrations
     envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-revision-planner-staging
+  - type: cron
+    name: kodex-authority-revision-planner-staging
     runtime: node
     schedule: "30 10 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-revision-planner.ts
-    envVarGroups:
-      - kodex-leads-staging-core
     envVars:
+      - fromGroup: kodex-leads-staging-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-hourly-retry-staging
+  - type: cron
+    name: kodex-authority-hourly-retry-staging
     runtime: node
     schedule: "0 * * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-retry.ts
-    envVarGroups:
-      - kodex-leads-staging-core
     envVars:
+      - fromGroup: kodex-leads-staging-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
 
-  - name: kodex-authority-source-verification-staging
+  - type: cron
+    name: kodex-authority-source-verification-staging
     runtime: node
     schedule: "30 6 * * *"
     branch: staging
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-source-verification.ts
-    envVarGroups:
-      - kodex-leads-staging-core
     envVars:
+      - fromGroup: kodex-leads-staging-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         sync: false
       - key: SEO_SOURCE_FETCH_ENABLED
         sync: false
 
   # ---------------------------------------------------------------- production
-  - name: kodex-lead-intelligence-production
+  - type: cron
+    name: kodex-lead-intelligence-production
     runtime: node
     schedule: "30 5 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-lead-intelligence.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
       - key: LEAD_AUTOMATION_ENABLED
         value: "false"
 
-  - name: kodex-authority-search-console-sync-production
+  - type: cron
+    name: kodex-authority-search-console-sync-production
     runtime: node
     schedule: "0 4 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-search-console-sync.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-autonomous-planning-production
+  - type: cron
+    name: kodex-authority-autonomous-planning-production
     runtime: node
     schedule: "0 5 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-autopilot.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-automation-secrets
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-automation-secrets
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
       - key: SEO_SOURCE_FETCH_ENABLED
         value: "false"
 
-  - name: kodex-authority-research-and-drafting-production
+  - type: cron
+    name: kodex-authority-research-and-drafting-production
     runtime: node
     schedule: "0 6 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-research-and-drafting.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
       - key: SEO_SOURCE_FETCH_ENABLED
         value: "false"
 
-  - name: kodex-authority-quality-gates-production
+  - type: cron
+    name: kodex-authority-quality-gates-production
     runtime: node
     schedule: "0 7 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-quality-gates.ts
-    envVarGroups:
-      - kodex-leads-production-core
     envVars:
+      - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-publication-queue-production
+  - type: cron
+    name: kodex-authority-publication-queue-production
     runtime: node
     schedule: "0 8 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-publication.ts
-    envVarGroups:
-      - kodex-leads-production-core
     envVars:
+      - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-technical-audit-production
+  - type: cron
+    name: kodex-authority-technical-audit-production
     runtime: node
     schedule: "0 9 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-technical-audit.ts
-    envVarGroups:
-      - kodex-leads-production-core
     envVars:
+      - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-daily-discovery-production
+  - type: cron
+    name: kodex-authority-daily-discovery-production
     runtime: node
     schedule: "0 5 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: AUTHORITY_RUN_TYPE=daily-discovery npx tsx scripts/run-authority-discovery.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-weekly-discovery-refresh-production
+  - type: cron
+    name: kodex-authority-weekly-discovery-refresh-production
     runtime: node
     schedule: "0 6 * * 1"
     branch: main
     buildCommand: npm ci
     startCommand: AUTHORITY_RUN_TYPE=weekly-discovery-refresh npx tsx scripts/run-authority-discovery.ts
-    envVarGroups:
-      - kodex-leads-production-core
     envVars:
+      - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-monitoring-cron-production
+  - type: cron
+    name: kodex-authority-monitoring-cron-production
     runtime: node
     schedule: "0 10 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-monitoring.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-weekly-visibility-recalculation-production
+  - type: cron
+    name: kodex-authority-weekly-visibility-recalculation-production
     runtime: node
     schedule: "0 8 * * 1"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-monitoring.ts
-    envVarGroups:
-      - kodex-leads-production-core
-      - kodex-leads-production-integrations
     envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-revision-planner-production
+  - type: cron
+    name: kodex-authority-revision-planner-production
     runtime: node
     schedule: "30 10 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-revision-planner.ts
-    envVarGroups:
-      - kodex-leads-production-core
     envVars:
+      - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-hourly-retry-production
+  - type: cron
+    name: kodex-authority-hourly-retry-production
     runtime: node
     schedule: "0 * * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-retry.ts
-    envVarGroups:
-      - kodex-leads-production-core
     envVars:
+      - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
 
-  - name: kodex-authority-source-verification-production
+  - type: cron
+    name: kodex-authority-source-verification-production
     runtime: node
     schedule: "30 6 * * *"
     branch: main
     buildCommand: npm ci
     startCommand: npx tsx scripts/run-authority-source-verification.ts
-    envVarGroups:
-      - kodex-leads-production-core
     envVars:
+      - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
         value: "false"
       - key: SEO_SOURCE_FETCH_ENABLED
