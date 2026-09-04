@@ -1,0 +1,296 @@
+# Kodex Leads - Render blueprint (PRODUCTION only)
+#
+# Tracks branch `main`. Staging is deliberately NOT defined here: the
+# staging service predates this Blueprint and is managed separately, and
+# defining both stacks in one Blueprint exceeds the workspace service cap.
+#
+# Every secret is declared `sync: false` and must be filled in the Render
+# dashboard. Production never shares an env var group with staging, so a
+# staging credential can never be read by a production service.
+#
+# The authority monitoring and autopilot background workers are deliberately
+# NOT defined here. Both entrypoints (workers/monitoring-worker.ts and
+# workers/autopilot-worker.ts) are one-shot scripts that exit on completion,
+# so Render would restart them in a loop rather than run them as workers, and
+# their work is already covered by the scheduled jobs below
+# (kodex-authority-autonomous-planning and kodex-authority-monitoring-cron).
+#
+# Persistence is Supabase, not a Render-managed database. Production points
+# at its OWN Supabase project via `kodex-leads-production-core`; there is
+# deliberately no `databases:` block. See docs/ENVIRONMENT_SETUP.md.
+#
+# Production autonomy ships OFF: AUTOPILOT_SCHEDULE_ENABLED=false,
+# SEO_SOURCE_FETCH_ENABLED=false, LEAD_AUTOMATION_ENABLED=false and
+# MEDIA_PROVIDER=queue-only are pinned literals, not dashboard-editable syncs.
+# Flip them only after a manual production run has been reviewed.
+
+services:
+  # ---------------------------------------------------- web service
+  - type: web
+    name: kodex-leads-production
+    runtime: node
+    plan: starter
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-automation-secrets
+      - fromGroup: kodex-leads-production-integrations
+      - fromGroup: kodex-leads-production-founder-ops
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+      - key: SEO_SOURCE_FETCH_ENABLED
+        value: "false"
+      - key: MEDIA_PROVIDER
+        value: "queue-only"
+
+  - type: cron
+    name: kodex-lead-intelligence-production
+    runtime: node
+    schedule: "30 5 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-lead-intelligence.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
+      - key: LEAD_AUTOMATION_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-search-console-sync-production
+    runtime: node
+    schedule: "0 4 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-search-console-sync.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-autonomous-planning-production
+    runtime: node
+    schedule: "0 5 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-autopilot.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-automation-secrets
+      - fromGroup: kodex-leads-production-integrations
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+      - key: SEO_SOURCE_FETCH_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-research-and-drafting-production
+    runtime: node
+    schedule: "0 6 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-research-and-drafting.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+      - key: SEO_SOURCE_FETCH_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-quality-gates-production
+    runtime: node
+    schedule: "0 7 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-quality-gates.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-publication-queue-production
+    runtime: node
+    schedule: "0 8 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-publication.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-technical-audit-production
+    runtime: node
+    schedule: "0 9 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-technical-audit.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-daily-discovery-production
+    runtime: node
+    schedule: "0 5 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: AUTHORITY_RUN_TYPE=daily-discovery npx tsx scripts/run-authority-discovery.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-weekly-discovery-refresh-production
+    runtime: node
+    schedule: "0 6 * * 1"
+    branch: main
+    buildCommand: npm ci
+    startCommand: AUTHORITY_RUN_TYPE=weekly-discovery-refresh npx tsx scripts/run-authority-discovery.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-monitoring-cron-production
+    runtime: node
+    schedule: "0 10 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-monitoring.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-weekly-visibility-recalculation-production
+    runtime: node
+    schedule: "0 8 * * 1"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-monitoring.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - fromGroup: kodex-leads-production-integrations
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-revision-planner-production
+    runtime: node
+    schedule: "30 10 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-revision-planner.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-hourly-retry-production
+    runtime: node
+    schedule: "0 * * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-retry.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+
+  - type: cron
+    name: kodex-authority-source-verification-production
+    runtime: node
+    schedule: "30 6 * * *"
+    branch: main
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-authority-source-verification.ts
+    envVars:
+      - fromGroup: kodex-leads-production-core
+      - key: AUTOPILOT_SCHEDULE_ENABLED
+        value: "false"
+      - key: SEO_SOURCE_FETCH_ENABLED
+        value: "false"
+
+envVarGroups:
+  - name: kodex-leads-production-core
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+
+  - name: kodex-leads-production-automation-secrets
+    envVars:
+      - key: CRON_SECRET
+        sync: false
+
+  - name: kodex-leads-production-integrations
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+      - key: GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL
+        sync: false
+      - key: GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY
+        sync: false
+      - key: GOOGLE_SEARCH_CONSOLE_SITE_URL
+        sync: false
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+      - key: NORTHDATA_API_KEY
+        sync: false
+      - key: LEAD_ENRICHMENT_MAX_PER_RUN
+        sync: false
+      - key: LEAD_PACKAGE_MAX_PER_RUN
+        sync: false
+      - key: HUBSPOT_PRIVATE_APP_TOKEN
+        sync: false
+
+  - name: kodex-leads-production-founder-ops
+    envVars:
+      - key: AIRTABLE_ACCESS_TOKEN
+        sync: false
+      - key: AIRTABLE_BASE_ID
+        sync: false
+      - key: AIRTABLE_DEALS_TABLE_ID
+        sync: false
+      - key: AIRTABLE_TASKS_TABLE_ID
+        sync: false
+      - key: FOUNDER_OPS_GITHUB_REPOSITORY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
