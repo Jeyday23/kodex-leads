@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/seo/config";
 import { checkApprovedSources, searchConsoleStatus } from "@/lib/seo/source-intelligence";
 import { calculateOpportunityScore, demandLabel, normalizeQuery, recommendedDecision } from "./opportunity-scoring";
 import { getProviderStatuses } from "./providers";
+import { createNotification } from "./notifications";
 import { contentGapScore, isSemanticDuplicate } from "./opportunity-scoring";
 
 export interface AuthorityOpportunity {
@@ -540,10 +541,13 @@ async function audit(actor: string | undefined, action: string, entityType: stri
   await supabase.from("audit_logs").insert({ actor, action, entity_type: entityType, entity_id: entityId, payload });
 }
 
+/**
+ * Routed through the shared writer so this file and autonomous-ranking.ts can
+ * no longer drift on the authority_notifications column names. The result is
+ * returned rather than discarded; a failure is logged by the writer.
+ */
 async function notify(category: string, severity: string, title: string, body: string) {
-  const supabase = getSeoSupabase();
-  if (!supabase) return;
-  await supabase.from("authority_notifications").insert({ category, severity, title, body });
+  return createNotification({ category, severity, title, body });
 }
 
 interface OpportunityRow {

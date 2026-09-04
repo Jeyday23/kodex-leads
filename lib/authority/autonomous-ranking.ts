@@ -11,6 +11,7 @@ import { apiSuccess } from "./api";
 import { calculateQualityScore, qualityBlockers } from "@/lib/seo/quality-gate";
 import type { SeoContentBody, SeoContentPage, SeoPageType, SeoSource } from "@/lib/seo/types";
 import { AUTOPILOT_DAILY_DEFAULTS, resolveStoredAutopilotSettings } from "./autonomous-ranking-policy";
+import { createNotification as writeNotification, type NotificationResult } from "./notifications";
 
 export type AutopilotMode = "off" | "draft_only" | "guarded" | "controlled";
 export type ClaimCategory =
@@ -274,8 +275,8 @@ export async function createContentAsset(input: { targetQuery: string; framework
     .select("id,title,slug,route_path,content_type,framework,jurisdiction,language,target_query,status,risk_level,approval_required,selected_score,content_page_id,updated_at")
     .single();
   if (error || !data) return { ok: false, error: error?.message ?? "Asset was not created." };
-  await createNotification("content_asset_created", "info", "Authority content asset created", title);
-  return { ok: true, asset: mapAsset(data) };
+  const notification = await createNotification("content_asset_created", "info", "Authority content asset created", title);
+  return { ok: true, asset: mapAsset(data), notification };
 }
 
 export async function generateContentVersion(assetId: string, actor = "system") {
@@ -356,11 +357,11 @@ export async function generateContentVersion(assetId: string, actor = "system") 
     }
   }
 
-  await createNotification("content_ready_for_validation", "info", "Content draft ready for validation", asset.title);
-  return { ok: true, version: mapVersion(data) };
+  const notification = await createNotification("content_ready_for_validation", "info", "Content draft ready for validation", asset.title);
+  return { ok: true, version: mapVersion(data), notification };
 }
 
-export async function validateContentAsset(assetId: string, actor = "system"): Promise<{ ok: boolean; gate?: QualityGateSummary; error?: string }> {
+export async function validateContentAsset(assetId: string, actor = "system"): Promise<{ ok: boolean; gate?: QualityGateSummary; error?: string; notification?: NotificationResult }> {
   const supabase = getSeoSupabase();
   if (!supabase) return { ok: false, error: "Supabase is not configured." };
   const asset = await getBareAsset(assetId);
@@ -416,8 +417,10 @@ export async function validateContentAsset(assetId: string, actor = "system"): P
   }
   await supabase.from("authority_content_versions").update({ quality_score: score, validation_status: decision === "reject" ? "unsupported" : "verified" }).eq("id", version.id);
   await supabase.from("authority_content_assets").update({ status: decision === "reject" ? "blocked" : decision === "approval_required" ? "ready_for_approval" : "approved", updated_at: new Date().toISOString() }).eq("id", asset.id);
-  if (decision === "approval_required") await ensureApprovalRequest(asset.id, version.id, actor);
-  return { ok: true, gate: { score, decision, blockers, gates } };
+  const notification = decision === "approval_required"
+    ? await ensureApprovalRequest(asset.id, version.id, actor)
+    : undefined;
+  return { ok: true, gate: { score, decision, blockers, gates }, notification };
 }
 
 export async function approveContentAsset(assetId: string, actor: string, note?: string) {
@@ -590,7 +593,7 @@ export async function runAutopilot(options: { actor?: string; modeOverride?: Aut
   const status = await getAutopilotStatus();
   const mode = options.modeOverride ?? status.mode;
   const startedAt = new Date().toISOString();
-  if (mode === "off") return { status: "off", startedAt, completedAt: new Date().toISOString(), actions: [] };
+  if (mode === "off") return { status: "off", startedAt, completedAt: new Date().toISOString(), actions: [], notificationFailures: [] };
   const discovery = await runOpportunityDiscovery({ actor, runType: options.acceptance ? "controlled-acceptance" : "autopilot" });
   const opportunities = await listOpportunities({ status: "active", limit: 10 });
   const pages = await getAllSeoPages();
@@ -604,6 +607,15 @@ export async function runAutopilot(options: { actor?: string; modeOverride?: Aut
     .sort((a, b) => b.selectorScore - a.selectorScore)
     .slice(0, status.maxNewPagesPerDay);
   const actions: Array<Record<string, unknown>> = [{ stage: "discover", discovery }];
+  // A notification that could not be stored is reported in the run result. The
+  // run itself still completes: the draft is the deliverable, the notification
+  // is the alert about it. Silently dropping both is what hid the broken
+  // authority_notifications insert.
+  const notificationFailures: Array<{ stage: string; error: string }> = [];
+  const recordNotification = (stage: string, value: unknown) => {
+    const notification = (value as { notification?: NotificationResult } | undefined)?.notification;
+    if (notification && !notification.ok) notificationFailures.push({ stage, error: notification.error });
+  };
   for (const candidate of candidates) {
     const created = await createContentAsset({
       targetQuery: candidate.opportunity.query,
@@ -616,10 +628,13 @@ export async function runAutopilot(options: { actor?: string; modeOverride?: Aut
       actions.push({ stage: "select", ok: false, error: created.error });
       continue;
     }
+    recordNotification("select", created);
     actions.push({ stage: "select", asset: created.asset.id, score: candidate.selectorScore });
     const generated = await generateContentVersion(created.asset.id, actor);
+    recordNotification("draft", generated);
     actions.push({ stage: "draft", result: generated });
     const validated = await validateContentAsset(created.asset.id, actor);
+    recordNotification("validate", validated);
     actions.push({ stage: "validate", result: validated });
     if (options.acceptance || mode === "controlled") {
       await approveContentAsset(created.asset.id, actor, "Controlled acceptance approval.");
@@ -638,7 +653,14 @@ export async function runAutopilot(options: { actor?: string; modeOverride?: Aut
     }
   }
   await planRevisionsFromMetrics(actor);
-  return { status: "completed", mode, startedAt, completedAt: new Date().toISOString(), actions };
+  return {
+    status: "completed",
+    mode,
+    startedAt,
+    completedAt: new Date().toISOString(),
+    actions,
+    notificationFailures,
+  };
 }
 
 export async function syncSearchConsole(options: { actor?: string } = {}) {
@@ -998,9 +1020,9 @@ function buildGateResults(input: Record<string, unknown>, blockers: string[]): Q
   ];
 }
 
-async function ensureApprovalRequest(assetId: string, versionId: string, actor: string) {
+async function ensureApprovalRequest(assetId: string, versionId: string, actor: string): Promise<NotificationResult | undefined> {
   const supabase = getSeoSupabase();
-  if (!supabase) return;
+  if (!supabase) return undefined;
   const { data: policy } = await supabase.from("authority_approval_policies").select("id").eq("policy_key", "new_legal_page").maybeSingle();
   await supabase.from("authority_approval_requests").insert({
     asset_id: assetId,
@@ -1008,7 +1030,7 @@ async function ensureApprovalRequest(assetId: string, versionId: string, actor: 
     policy_id: policy?.id,
     requested_by: actor,
   });
-  await createNotification("content_ready_for_approval", "warning", "Content ready for approval", `Asset ${assetId} requires admin approval.`);
+  return createNotification("content_ready_for_approval", "warning", "Content ready for approval", `Asset ${assetId} requires admin approval.`);
 }
 
 async function markAsset(assetId: string, status: string, actor: string) {
@@ -1033,11 +1055,18 @@ async function markPublication(jobId: string | undefined, assetId: string, versi
   if (jobId) await supabase.from("authority_publication_jobs").update({ status: eventType === "published" ? "completed" : "failed", error: typeof result.error === "string" ? result.error : null, updated_at: new Date().toISOString() }).eq("id", jobId);
 }
 
-async function createNotification(type: string, severity: string, title: string, message: string) {
-  const supabase = getSeoSupabase();
-  if (supabase) {
-    await supabase.from("authority_notifications").insert({ notification_type: type, severity, title, message, payload: {} });
-  }
+/**
+ * Writes a notification through the single shared writer and mirrors it to
+ * Slack when a webhook is configured.
+ *
+ * The previous local implementation inserted notification_type/message/payload,
+ * columns that do not exist on authority_notifications, and threw the Postgres
+ * error away. Callers now receive the outcome so a failed write can reach the
+ * job result instead of being lost under a successful-looking run.
+ */
+async function createNotification(type: string, severity: string, title: string, message: string): Promise<NotificationResult> {
+  const result = await writeNotification({ category: type, severity, title, body: message });
+
   if (process.env.SLACK_WEBHOOK_URL) {
     try {
       await fetch(process.env.SLACK_WEBHOOK_URL, {
@@ -1046,9 +1075,12 @@ async function createNotification(type: string, severity: string, title: string,
         body: JSON.stringify({ text: `${title}: ${message}` }),
       });
     } catch {
-      // Slack notification failure must not fail the underlying job.
+      // Slack delivery is best-effort and must not fail the underlying job.
+      // The durable record is the database row reported above.
     }
   }
+
+  return result;
 }
 
 function mapAsset(row: AssetRow): ContentAsset {
