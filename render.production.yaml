@@ -19,6 +19,10 @@
 # at its OWN Supabase project via `kodex-leads-production-core`; there is
 # deliberately no `databases:` block. See docs/ENVIRONMENT_SETUP.md.
 #
+# All services run in Frankfurt to sit beside the production Supabase project
+# (eu-central-1) and keep EU personal data on EU infrastructure. Render cannot
+# change a service's region after creation, so this must be set before sync.
+#
 # Production autonomy ships OFF: AUTOPILOT_SCHEDULE_ENABLED=false,
 # SEO_SOURCE_FETCH_ENABLED=false, LEAD_AUTOMATION_ENABLED=false and
 # MEDIA_PROVIDER=queue-only are pinned literals, not dashboard-editable syncs.
@@ -29,6 +33,7 @@ services:
   - type: web
     name: kodex-leads-production
     runtime: node
+    region: frankfurt
     plan: starter
     branch: main
     buildCommand: npm ci && npm run build
@@ -49,6 +54,7 @@ services:
   - type: cron
     name: kodex-lead-intelligence-production
     runtime: node
+    region: frankfurt
     schedule: "30 5 * * *"
     branch: main
     buildCommand: npm ci
@@ -62,6 +68,7 @@ services:
   - type: cron
     name: kodex-authority-search-console-sync-production
     runtime: node
+    region: frankfurt
     schedule: "0 4 * * *"
     branch: main
     buildCommand: npm ci
@@ -75,6 +82,7 @@ services:
   - type: cron
     name: kodex-authority-autonomous-planning-production
     runtime: node
+    region: frankfurt
     schedule: "0 5 * * *"
     branch: main
     buildCommand: npm ci
@@ -91,6 +99,7 @@ services:
   - type: cron
     name: kodex-authority-research-and-drafting-production
     runtime: node
+    region: frankfurt
     schedule: "0 6 * * *"
     branch: main
     buildCommand: npm ci
@@ -106,6 +115,7 @@ services:
   - type: cron
     name: kodex-authority-quality-gates-production
     runtime: node
+    region: frankfurt
     schedule: "0 7 * * *"
     branch: main
     buildCommand: npm ci
@@ -118,6 +128,7 @@ services:
   - type: cron
     name: kodex-authority-publication-queue-production
     runtime: node
+    region: frankfurt
     schedule: "0 8 * * *"
     branch: main
     buildCommand: npm ci
@@ -130,6 +141,7 @@ services:
   - type: cron
     name: kodex-authority-technical-audit-production
     runtime: node
+    region: frankfurt
     schedule: "0 9 * * *"
     branch: main
     buildCommand: npm ci
@@ -142,6 +154,7 @@ services:
   - type: cron
     name: kodex-authority-daily-discovery-production
     runtime: node
+    region: frankfurt
     schedule: "0 5 * * *"
     branch: main
     buildCommand: npm ci
@@ -155,6 +168,7 @@ services:
   - type: cron
     name: kodex-authority-weekly-discovery-refresh-production
     runtime: node
+    region: frankfurt
     schedule: "0 6 * * 1"
     branch: main
     buildCommand: npm ci
@@ -167,6 +181,7 @@ services:
   - type: cron
     name: kodex-authority-monitoring-cron-production
     runtime: node
+    region: frankfurt
     schedule: "0 10 * * *"
     branch: main
     buildCommand: npm ci
@@ -180,6 +195,7 @@ services:
   - type: cron
     name: kodex-authority-weekly-visibility-recalculation-production
     runtime: node
+    region: frankfurt
     schedule: "0 8 * * 1"
     branch: main
     buildCommand: npm ci
@@ -193,6 +209,7 @@ services:
   - type: cron
     name: kodex-authority-revision-planner-production
     runtime: node
+    region: frankfurt
     schedule: "30 10 * * *"
     branch: main
     buildCommand: npm ci
@@ -205,6 +222,7 @@ services:
   - type: cron
     name: kodex-authority-hourly-retry-production
     runtime: node
+    region: frankfurt
     schedule: "0 * * * *"
     branch: main
     buildCommand: npm ci
@@ -217,6 +235,7 @@ services:
   - type: cron
     name: kodex-authority-source-verification-production
     runtime: node
+    region: frankfurt
     schedule: "30 6 * * *"
     branch: main
     buildCommand: npm ci
