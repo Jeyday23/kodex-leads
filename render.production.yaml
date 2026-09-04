@@ -27,10 +27,21 @@
 # (AWS_BEDROCK_*), kept deliberately separate from the general AWS IAM pair.
 # BEDROCK_BALANCED_MODEL_ID holds the EU inference profile id.
 #
-# Production autonomy ships OFF: AUTOPILOT_SCHEDULE_ENABLED=false,
-# SEO_SOURCE_FETCH_ENABLED=false, LEAD_AUTOMATION_ENABLED=false and
-# MEDIA_PROVIDER=queue-only are pinned literals, not dashboard-editable syncs.
-# Flip them only after a manual production run has been reviewed.
+# Autonomy activated 2026-09-04 after a manual Bedrock invocation succeeded
+# from the production container (Claude via EU inference profile returned OK).
+# AUTOPILOT_SCHEDULE_ENABLED=true and SEO_SOURCE_FETCH_ENABLED=true.
+#
+# Scheduled work still requires a second gate: skipScheduledAutonomy() also
+# reads authority_automation_settings and skips while the stored mode is off
+# or the settings row is absent. The flag makes jobs eligible, not running.
+#
+# LEAD_AUTOMATION_ENABLED=false and MEDIA_PROVIDER=queue-only stay off.
+# queue-only is deliberate: the only other accepted value is
+# higgsfield-api-compat, which requires HF_API_KEY_ID and HF_API_KEY_SECRET
+# and would fail without them. There is no Bedrock media provider.
+#
+# These are pinned literals, so the blueprint is the single source of truth;
+# service-level values override linked env groups on Render.
 
 services:
   # ---------------------------------------------------- web service
@@ -49,9 +60,9 @@ services:
       - fromGroup: kodex-leads-production-integrations
       - fromGroup: kodex-leads-production-founder-ops
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
       - key: SEO_SOURCE_FETCH_ENABLED
-        value: "false"
+        value: "true"
       - key: MEDIA_PROVIDER
         value: "queue-only"
 
@@ -81,7 +92,7 @@ services:
       - fromGroup: kodex-leads-production-core
       - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-autonomous-planning-production
@@ -96,9 +107,9 @@ services:
       - fromGroup: kodex-leads-production-automation-secrets
       - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
       - key: SEO_SOURCE_FETCH_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-research-and-drafting-production
@@ -112,9 +123,9 @@ services:
       - fromGroup: kodex-leads-production-core
       - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
       - key: SEO_SOURCE_FETCH_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-quality-gates-production
@@ -127,7 +138,7 @@ services:
     envVars:
       - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-publication-queue-production
@@ -140,7 +151,7 @@ services:
     envVars:
       - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-technical-audit-production
@@ -153,7 +164,7 @@ services:
     envVars:
       - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-daily-discovery-production
@@ -167,7 +178,7 @@ services:
       - fromGroup: kodex-leads-production-core
       - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-weekly-discovery-refresh-production
@@ -180,7 +191,7 @@ services:
     envVars:
       - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-monitoring-cron-production
@@ -194,7 +205,7 @@ services:
       - fromGroup: kodex-leads-production-core
       - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-weekly-visibility-recalculation-production
@@ -208,7 +219,7 @@ services:
       - fromGroup: kodex-leads-production-core
       - fromGroup: kodex-leads-production-integrations
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-revision-planner-production
@@ -221,7 +232,7 @@ services:
     envVars:
       - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-hourly-retry-production
@@ -234,7 +245,7 @@ services:
     envVars:
       - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
 
   - type: cron
     name: kodex-authority-source-verification-production
@@ -247,9 +258,9 @@ services:
     envVars:
       - fromGroup: kodex-leads-production-core
       - key: AUTOPILOT_SCHEDULE_ENABLED
-        value: "false"
+        value: "true"
       - key: SEO_SOURCE_FETCH_ENABLED
-        value: "false"
+        value: "true"
 
 envVarGroups:
   - name: kodex-leads-production-core
