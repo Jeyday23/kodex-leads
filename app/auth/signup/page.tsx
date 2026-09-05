@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useState } from "react";
 import { signUp } from "@/lib/auth-client";
+import { authErrorMessage } from "@/lib/auth-error-message";
 
 export default function SignUpPage() {
   const [fullName, setFullName] = useState("");
@@ -22,7 +23,7 @@ export default function SignUpPage() {
       await signUp(email, password, fullName);
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create account.");
+      setError(authErrorMessage(err, "Could not create account."));
     } finally {
       setLoading(false);
     }

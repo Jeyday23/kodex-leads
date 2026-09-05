@@ -93,7 +93,12 @@ test("the sign-in route fails closed and stays server-side", () => {
   assert.match(route, /if \(!supabase\)/);
   assert.match(route, /reason: "auth-unavailable"[\s\S]*?status: 503/);
   // Login CSRF: a foreign origin must not be able to establish a session here.
-  assert.match(route, /request\.headers\.get\("origin"\)/);
+  // The check reads the forwarded headers, not request.nextUrl.origin, which
+  // behind Render's proxy is http://localhost:10000 and 403s every real login.
+  // The origin cases themselves are covered in tests/auth-error-surfacing.test.ts.
+  assert.match(route, /readOriginHeaders\(request\.headers\)/);
+  assert.match(route, /isTrustedRequestOrigin\(/);
+  assert.doesNotMatch(route, /origin !== request\.nextUrl\.origin/);
   assert.match(route, /status: 403/);
   // The password must reach Supabase exactly as typed.
   assert.doesNotMatch(route, /readString\(body, "password"\)\.trim\(\)/);

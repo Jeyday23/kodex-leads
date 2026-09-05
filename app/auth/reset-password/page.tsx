@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useState } from "react";
 import { resetPassword } from "@/lib/auth-client";
+import { authErrorMessage } from "@/lib/auth-error-message";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,14 @@ export default function ResetPasswordPage() {
       await resetPassword(email);
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send reset email.");
+      // Not err.message: auth-js stringifies the Response for a 5xx, which
+      // rendered as "{}" and hid a real "Error sending recovery email".
+      setError(
+        authErrorMessage(
+          err,
+          "Kodex could not send the reset email. Email delivery may not be configured for this project.",
+        ),
+      );
     } finally {
       setLoading(false);
     }

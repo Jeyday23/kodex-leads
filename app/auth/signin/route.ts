@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isAdminRole } from "@/lib/supabase/config";
+import { isTrustedRequestOrigin, readOriginHeaders } from "@/lib/request-origin";
 
 /**
  * Server-side password sign-in.
@@ -26,8 +27,13 @@ import { isAdminRole } from "@/lib/supabase/config";
 export async function POST(request: NextRequest) {
   // Login CSRF guard. A cross-site form post cannot set this content type, and
   // fetch always sends Origin, so a mismatch is never our own login form.
-  const origin = request.headers.get("origin");
-  if (origin && origin !== request.nextUrl.origin) {
+  //
+  // Compared against the forwarded headers, never request.nextUrl.origin: behind
+  // Render's proxy that is http://localhost:10000, so the previous version
+  // rejected every genuine sign-in with 403 and locked the account out of
+  // production. See lib/request-origin.ts.
+  const originHeaders = readOriginHeaders(request.headers);
+  if (!isTrustedRequestOrigin(originHeaders, request.nextUrl.origin, process.env.NEXT_PUBLIC_SITE_URL)) {
     return NextResponse.json({ error: "Could not sign in." }, { status: 403 });
   }
 
