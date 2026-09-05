@@ -23,12 +23,50 @@ export async function signUp(email: string, password: string, fullName: string) 
   return data;
 }
 
-export async function signIn(email: string, password: string) {
-  const supabase = createSupabaseBrowserClient();
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+/**
+ * Carries the machine-readable reason from /auth/signin so the form can show
+ * the same copy as a middleware or page-guard redirect for that reason.
+ */
+export class SignInError extends Error {
+  readonly reason: string | null;
 
-  if (error) throw error;
-  return data;
+  constructor(message: string, reason: string | null) {
+    super(message);
+    this.name = "SignInError";
+    this.reason = reason;
+  }
+}
+
+/**
+ * Signs in through the server route rather than the browser client.
+ *
+ * signInWithPassword() here would write the session cookies client-side, and a
+ * navigation issued straight afterwards could reach middleware before the
+ * cookie was committed — the Supabase SSR race that turned a correct password
+ * into ?reason=signin-required. /auth/signin returns the session as Set-Cookie,
+ * which the browser has applied by the time this promise resolves, so the
+ * caller may navigate immediately and the request will carry the session.
+ */
+export async function signIn(email: string, password: string) {
+  const response = await fetch("/auth/signin", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    // Send and accept the auth cookies for this origin.
+    credentials: "same-origin",
+    body: JSON.stringify({ email, password }),
+  });
+
+  const payload: unknown = await response.json().catch(() => null);
+  const record = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
+
+  if (!response.ok) {
+    throw new SignInError(
+      typeof record.error === "string" ? record.error : "Could not sign in.",
+      typeof record.reason === "string" ? record.reason : null,
+    );
+  }
+
+  return record;
 }
 
 export async function resetPassword(email: string) {

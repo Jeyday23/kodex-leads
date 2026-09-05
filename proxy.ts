@@ -54,6 +54,16 @@ export default async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // A missing user is the only thing this check can honestly report, so
+  // "signin-required" is correct here and stays. It is deliberately not a role
+  // check: the role lives in the profiles table and reading it on every
+  // /admin/* request would add a query that app/admin/layout.tsx already makes
+  // through requireAuthorityPage(), which redirects an authenticated non-admin
+  // with reason=not-authorized. The other role rejection, at sign-in time, is
+  // answered by /auth/signin. Between them the user is never told to re-enter a
+  // password over a role problem, which is what this used to do — not because
+  // the reason was computed wrongly, but because the client-side sign-in race
+  // made a freshly signed-in user look anonymous to this check.
   if (protectedPath && !user) {
     return loginRedirect(request, "signin-required");
   }
