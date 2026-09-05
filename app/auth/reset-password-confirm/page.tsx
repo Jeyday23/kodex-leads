@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useState } from "react";
 import { updatePassword } from "@/lib/auth-client";
+import { authErrorMessage } from "@/lib/auth-error-message";
 
 export default function ResetPasswordConfirmPage() {
   const [password, setPassword] = useState("");
@@ -26,7 +27,7 @@ export default function ResetPasswordConfirmPage() {
       await updatePassword(password);
       setUpdated(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update password.");
+      setError(authErrorMessage(err, "Could not update password."));
     } finally {
       setLoading(false);
     }

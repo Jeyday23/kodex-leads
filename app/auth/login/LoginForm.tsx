@@ -5,6 +5,7 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SignInError, signIn } from "@/lib/auth-client";
+import { authErrorMessage } from "@/lib/auth-error-message";
 
 const REASON_MESSAGES: Record<string, string> = {
   "signin-required": "Sign in to open the private Kodex workspace.",
@@ -107,13 +108,7 @@ function toMessage(err: unknown): string {
   if (err instanceof SignInError && err.reason && REASON_MESSAGES[err.reason]) {
     return REASON_MESSAGES[err.reason];
   }
-  if (!(err instanceof Error)) return "Could not sign in.";
-  // Supabase returns this verbatim when the account exists but is unconfirmed.
-  if (/email not confirmed/i.test(err.message)) {
-    return "Confirm your email address first. Check your inbox for the confirmation link.";
-  }
-  if (/invalid login credentials/i.test(err.message)) {
-    return "Incorrect email or password.";
-  }
-  return err.message;
+  // Everything else goes through the shared helper, which knows that auth-js
+  // reports a 5xx as the literal string "{}" and reads the status instead.
+  return authErrorMessage(err, "Could not sign in.");
 }
