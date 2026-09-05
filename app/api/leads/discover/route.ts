@@ -1,6 +1,7 @@
 import { requireAuthorityApi } from "@/lib/authority/auth";
 import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 import { discoverEuDpaEnforcementLeads } from "@/lib/seo/eu-dpa-enforcement";
+import { discoverEuTenderLeads } from "@/lib/seo/eu-tenders";
 import { createLeadWorkPackages } from "@/lib/seo/lead-work-packages";
 
 export async function POST(request: Request) {
@@ -9,18 +10,22 @@ export async function POST(request: Request) {
   if (!auth.ok) return auth.response;
 
   try {
-    const [result, euDpa] = await Promise.all([
+    const [result, euDpa, tenders] = await Promise.all([
       discoverKodexLeads(),
       discoverEuDpaEnforcementLeads(),
+      discoverEuTenderLeads(),
     ]);
-    const leads = mergeLeads(euDpa.leads, result.leads);
+    // Enforcement first: a confirmed action outranks an intent signal when the
+    // same organisation appears in both.
+    const leads = mergeLeads(euDpa.leads, tenders.leads, result.leads);
     const packages = await createLeadWorkPackages(leads);
-    const errors = [...result.errors, ...euDpa.errors, ...packages.errors];
+    const errors = [...result.errors, ...euDpa.errors, ...tenders.errors, ...packages.errors];
     const status = leads.length === 0 && errors.length > 0 ? 502 : 200;
     return Response.json({
       status: status === 200 ? "ok" : "error",
       result: { ...result, leads },
       euDpaEnforcement: euDpa.leads.length,
+      euTenders: tenders.leads.length,
       queuedForApproval: packages.queued.length,
       approvalQueue: "/admin/authority/outreach",
       errors,
