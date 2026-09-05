@@ -37,7 +37,8 @@ export default function SignUpPage() {
 
         {sent ? (
           <div className="auth-status success">
-            Account created. Check your email for the confirmation link, then sign in.
+            Account created. Check your email for the confirmation link, then sign in. New accounts have member
+            access; the Kodex operator grants administrator access to the private workspace.
           </div>
         ) : null}
 

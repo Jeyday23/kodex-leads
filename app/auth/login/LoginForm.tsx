@@ -4,11 +4,14 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signIn } from "@/lib/auth-client";
+import { SignInError, signIn } from "@/lib/auth-client";
 
 const REASON_MESSAGES: Record<string, string> = {
   "signin-required": "Sign in to open the private Kodex workspace.",
-  "not-authorized": "That account does not have administrator access.",
+  // Self-service signup creates profiles.role = "member", and no member can
+  // reach /admin. Without saying so the user retries a password forever.
+  "not-authorized":
+    "That account does not have administrator access. New accounts are created as members — ask the Kodex operator to grant you access.",
   "auth-unavailable": "Authentication is unavailable. Contact the Kodex operator.",
   "signed-out": "You have been signed out.",
   "invalid-code": "That link has expired. Sign in again to continue.",
@@ -30,12 +33,23 @@ export function LoginForm({ next, reason }: { next: string; reason: string | nul
     setLoading(true);
 
     try {
+      // Resolves only once /auth/signin has returned its Set-Cookie, so the
+      // session is already in the cookie jar on the next line. Navigating
+      // before that was what made middleware answer signin-required.
       await signIn(email, password);
-      // Server components must re-read the new cookie session.
-      router.replace(next as Route);
+      // Drop the cached server components first, then navigate, so the
+      // destination is rendered with the new session rather than the
+      // signed-out payload the router already holds.
       router.refresh();
+      router.replace(next as Route);
     } catch (err) {
       setError(toMessage(err));
+    } finally {
+      // Also on the success path. router.replace is a soft navigation, so this
+      // component instance survives it, and it survives the destination
+      // redirecting back to /auth/login. Clearing `loading` only in `catch`
+      // left the button disabled on "Signing in..." with no way back except a
+      // hard reload — the freeze users reported.
       setLoading(false);
     }
   }
@@ -88,6 +102,11 @@ export function LoginForm({ next, reason }: { next: string; reason: string | nul
 }
 
 function toMessage(err: unknown): string {
+  // A reason from the server wins: it describes what actually happened, and
+  // reuses the same copy the user would see on a redirect carrying that reason.
+  if (err instanceof SignInError && err.reason && REASON_MESSAGES[err.reason]) {
+    return REASON_MESSAGES[err.reason];
+  }
   if (!(err instanceof Error)) return "Could not sign in.";
   // Supabase returns this verbatim when the account exists but is unconfirmed.
   if (/email not confirmed/i.test(err.message)) {
