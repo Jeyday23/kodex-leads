@@ -7,6 +7,7 @@
 
 import { createHash } from "node:crypto";
 import { readWithAgentReach } from "./agent-reach";
+import { checkDomainDeliverability, type DeliverabilityResult } from "./domain-deliverability";
 import { getSeoSupabase } from "./db";
 import {
   listLocalAuditEvents,
@@ -90,7 +91,13 @@ export async function createLeadWorkPackages(
     const qualification = scoreLeadQualification(lead, true);
     if (qualification.score < 70) continue;
 
-    const workPackage = buildLeadWorkPackage(lead, evidence.summary, qualification.score, qualification.reasons);
+    // Screen the contact domain before drafting. A domain with no MX record can
+    // never receive the email, and drafting for it spends Bedrock tokens and a
+    // human decision for nothing. The result becomes a caution, not a drop:
+    // the founder approves every send and should see why a lead looks weak.
+    const deliverability = await checkDomainDeliverability(lead.contactEmail ?? lead.website);
+
+    const workPackage = buildLeadWorkPackage(lead, evidence.summary, qualification.score, qualification.reasons, deliverability);
     const persistError = await persistPackageEvent(QUEUED, workPackage);
     if (persistError) errors.push(persistError);
     queued.push(workPackage);
@@ -139,6 +146,7 @@ export function buildLeadWorkPackage(
   evidenceSummary: string,
   qualificationScore: number,
   qualificationReasons: string[],
+  deliverability?: DeliverabilityResult,
 ): LeadWorkPackage {
   const packageId = workPackageId(lead.companyName, lead.sourceUrl);
   const framework = lead.regulatoryFramework ?? "relevant EU compliance requirements";
@@ -176,6 +184,9 @@ export function buildLeadWorkPackage(
         "Use only the verified public-source facts in outreach.",
         "Do not imply additional violations, investigations or future fines.",
         "Human approval is required before any external message is sent.",
+        // Present only when the domain screen actually found something. A
+        // screening outage adds nothing rather than a misleading warning.
+        ...(deliverability?.caution ? [deliverability.caution] : []),
       ],
     },
     outreachDraft: {
