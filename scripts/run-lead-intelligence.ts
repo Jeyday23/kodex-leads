@@ -1,5 +1,6 @@
 import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 import { discoverEuDpaEnforcementLeads } from "@/lib/seo/eu-dpa-enforcement";
+import { discoverEuTenderLeads } from "@/lib/seo/eu-tenders";
 import { createLeadWorkPackages } from "@/lib/seo/lead-work-packages";
 
 async function main() {
@@ -12,19 +13,23 @@ async function main() {
     return;
   }
 
-  const [discovery, euDpa] = await Promise.all([
+  const [discovery, euDpa, tenders] = await Promise.all([
     discoverKodexLeads(),
     discoverEuDpaEnforcementLeads(),
+    discoverEuTenderLeads(),
   ]);
-  const leads = mergeLeads(euDpa.leads, discovery.leads);
+  // Enforcement first: a confirmed action outranks an intent signal when the
+  // same organisation appears in both.
+  const leads = mergeLeads(euDpa.leads, tenders.leads, discovery.leads);
   const packages = await createLeadWorkPackages(leads);
-  const discoveryErrors = [...discovery.errors, ...euDpa.errors];
+  const discoveryErrors = [...discovery.errors, ...euDpa.errors, ...tenders.errors];
 
   console.log(JSON.stringify({
     service: "kodex-lead-intelligence",
     status: leads.length > 0 ? "completed" : "no-leads",
     discovered: leads.length,
     euDpaEnforcement: euDpa.leads.length,
+    euTenders: tenders.leads.length,
     queuedForApproval: packages.queued.length,
     packageErrors: packages.errors,
     discoveryErrors,
