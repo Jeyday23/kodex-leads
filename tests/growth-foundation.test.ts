@@ -112,6 +112,60 @@ test("generateJson extracts JSON from a fenced code block", async () => {
   }
 });
 
+const ObjectionSchema = z.object({ objection: z.string(), response: z.string() });
+
+async function generateJsonWithStubbedText<Schema extends z.ZodTypeAny>(text: string, schema: Schema) {
+  process.env.ANTHROPIC_API_KEY = "test-key";
+  process.env.CLAUDE_MODEL = "test-model";
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = (async () =>
+      new Response(JSON.stringify({ content: [{ type: "text", text }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })) as typeof fetch;
+
+    return await generateJson({ system: "sys", prompt: "give me json" }, schema);
+  } finally {
+    global.fetch = originalFetch;
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.CLAUDE_MODEL;
+  }
+}
+
+test("generateJson validates a string value containing an unbalanced closing brace", async () => {
+  const text = '{"objection": "the JSON ends with } here", "response": "ok"}';
+  const result = await generateJsonWithStubbedText(text, ObjectionSchema);
+  assert.equal(result.status, "generated");
+  if (result.status === "generated") {
+    assert.deepEqual(result.value, { objection: "the JSON ends with } here", response: "ok" });
+  }
+});
+
+test("generateJson validates a string value containing an unbalanced closing bracket", async () => {
+  const text = '{"objection": "the list ends with ] here", "response": "ok"}';
+  const result = await generateJsonWithStubbedText(text, ObjectionSchema);
+  assert.equal(result.status, "generated");
+  if (result.status === "generated") {
+    assert.deepEqual(result.value, { objection: "the list ends with ] here", response: "ok" });
+  }
+});
+
+test("generateJson validates a string value with an escaped quote followed by a closing brace", async () => {
+  const text = '{"objection": "he said \\"} \\" loudly", "response": "ok"}';
+  const result = await generateJsonWithStubbedText(text, ObjectionSchema);
+  assert.equal(result.status, "generated");
+  if (result.status === "generated") {
+    assert.deepEqual(result.value, { objection: 'he said "} " loudly', response: "ok" });
+  }
+});
+
+test("generateJson still returns failed for genuinely unbalanced JSON outside any string", async () => {
+  const text = '{"objection": "fine", "response": "ok"';
+  const result = await generateJsonWithStubbedText(text, ObjectionSchema);
+  assert.equal(result.status, "failed");
+});
+
 test("renderBrainContext with channel linkedin includes linkedin voice and excludes reddit voice", () => {
   const linkedinVoice = getChannelVoice(seedBrainContextBundle, "linkedin");
   const redditVoice = getChannelVoice(seedBrainContextBundle, "reddit");

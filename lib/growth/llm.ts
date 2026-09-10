@@ -273,7 +273,9 @@ function extractOpenAiText(data: Record<string, unknown>): string {
 
 /**
  * Pulls the first JSON object or array out of free-form model text, tolerating
- * a leading ```json fence and leading prose before the JSON begins.
+ * a leading ```json fence and leading prose before the JSON begins. Tracks
+ * string state (including backslash escapes) while scanning so delimiter
+ * characters inside string values never affect bracket depth.
  */
 function extractFirstJson(text: string): unknown {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -288,10 +290,27 @@ function extractFirstJson(text: string): unknown {
 
   let depth = 0;
   let end = -1;
+  let inString = false;
+  let escaped = false;
   for (let i = start; i < trimmed.length; i += 1) {
     const char = trimmed[i];
-    if (char === opener) depth += 1;
-    else if (char === closer) {
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+    } else if (char === opener) {
+      depth += 1;
+    } else if (char === closer) {
       depth -= 1;
       if (depth === 0) {
         end = i;
