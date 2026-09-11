@@ -14,7 +14,7 @@ const MAX_INTERNAL_PAGES = 6;
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_TEXT_CHARS_PER_PAGE = 6000;
 
-const proposedBundleSchema = z.object({
+export const proposedBundleSchema = z.object({
   profile: z.object({
     name: z.string().min(1).optional(),
     oneLineDescription: z.string().min(1).optional(),
