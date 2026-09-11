@@ -32,6 +32,7 @@ export interface CreateSequenceInput {
 export interface OutreachTaskRecord {
   id: string;
   enrollmentId: string;
+  stepId: string | null;
   kind: OutreachTaskDraft["kind"];
   draftCopy: string | null;
   status: "queued" | "approved" | "done" | "skipped";
@@ -191,6 +192,7 @@ export async function createOutreachTask(
     .from("growth_outreach_tasks")
     .insert({
       enrollment_id: enrollmentId,
+      step_id: task.stepId,
       kind: task.kind,
       draft_copy: task.draftCopy,
       status: task.status,
@@ -203,11 +205,33 @@ export async function createOutreachTask(
   return { ok: true, id: data.id };
 }
 
+export async function getOutreachTask(id: string): Promise<OutreachTaskRecord | null> {
+  const supabase = getSeoSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("growth_outreach_tasks")
+    .select("id, enrollment_id, step_id, kind, draft_copy, status, due_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return {
+    id: data.id,
+    enrollmentId: data.enrollment_id,
+    stepId: data.step_id ?? null,
+    kind: data.kind,
+    draftCopy: data.draft_copy,
+    status: data.status,
+    dueAt: data.due_at,
+  };
+}
+
 export async function listOutreachTasks(status?: string): Promise<OutreachTaskRecord[]> {
   const supabase = getSeoSupabase();
   if (!supabase) return [];
 
-  let query = supabase.from("growth_outreach_tasks").select("id, enrollment_id, kind, draft_copy, status, due_at");
+  let query = supabase.from("growth_outreach_tasks").select("id, enrollment_id, step_id, kind, draft_copy, status, due_at");
   if (status) query = query.eq("status", status);
 
   const { data, error } = await query.order("due_at", { ascending: true });
@@ -216,6 +240,7 @@ export async function listOutreachTasks(status?: string): Promise<OutreachTaskRe
   return data.map((row) => ({
     id: row.id,
     enrollmentId: row.enrollment_id,
+    stepId: row.step_id ?? null,
     kind: row.kind,
     draftCopy: row.draft_copy,
     status: row.status,

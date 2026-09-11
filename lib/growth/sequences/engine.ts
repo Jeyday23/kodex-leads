@@ -46,6 +46,7 @@ export interface Enrollment {
 }
 
 export interface OutreachTaskDraft {
+  stepId: string;
   kind: SequenceStepKind;
   draftCopy: string | null;
   status: "queued";
@@ -120,6 +121,7 @@ export async function advanceEnrollment(
     return {
       enrollment: { ...enrollment, state: "awaiting_approval", timeline: [...enrollment.timeline, timelineEntry] },
       taskToCreate: {
+        stepId: step.id,
         kind: step.kind,
         draftCopy: draft.copy,
         status: "queued",
@@ -134,7 +136,7 @@ export async function advanceEnrollment(
   const timelineEntry: TimelineEntry = { stepId: step.id, kind: step.kind, status: "queued", at: now };
   return {
     enrollment: { ...enrollment, state: "active", timeline: [...enrollment.timeline, timelineEntry] },
-    taskToCreate: { kind: step.kind, draftCopy: null, status: "queued", dueAt: now },
+    taskToCreate: { stepId: step.id, kind: step.kind, draftCopy: null, status: "queued", dueAt: now },
   };
 }
 

@@ -85,6 +85,10 @@ create index if not exists growth_sequence_enrollments_sequence_state_idx on gro
 create table if not exists growth_outreach_tasks (
   id uuid primary key default gen_random_uuid(),
   enrollment_id uuid references growth_sequence_enrollments(id) on delete cascade,
+  -- Correlates back to the enrollment's timeline entry (engine.ts SequenceStep.id)
+  -- so an approval decision made against the enrollment can be reflected on
+  -- the matching task without re-deriving which step it belongs to.
+  step_id text,
   kind text not null,
   draft_copy text,
   status text not null default 'queued',
@@ -92,6 +96,8 @@ create table if not exists growth_outreach_tasks (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table growth_outreach_tasks add column if not exists step_id text;
 
 alter table growth_outreach_tasks drop constraint if exists growth_outreach_tasks_kind_check;
 alter table growth_outreach_tasks
