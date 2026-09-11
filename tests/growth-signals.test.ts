@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 
 // Delete any provider env vars up front: no test in this file may make a
 // real network or LLM call.
@@ -76,12 +76,17 @@ test("scoreLeadExplainably: factor contributions sum to confidence (partial/weak
   });
 });
 
-test("scoreLeadExplainably: empty input yields zero confidence and no positive contributions", () => {
+test("scoreLeadExplainably: empty input has no positive contribution from any factor with real data to match", () => {
   const result = scoreLeadExplainably({}, seedBrainContextBundle);
-  assert.equal(result.confidence, 0);
+  // Every factor except employer relationship requires actual data to score
+  // above zero; an unset employer relationship defaults to a small "unknown"
+  // ratio (0.3) rather than zero, since not knowing the relationship is not
+  // the same as it being disqualifying.
   for (const factor of result.factors) {
-    assert.equal(factor.contribution, 0);
+    if (factor.factor === "Employer relationship") continue;
+    assert.equal(factor.contribution, 0, `${factor.factor} should contribute 0 with no data`);
   }
+  assert.ok(result.confidence > 0 && result.confidence < 5, "only the employer-relationship default should contribute");
 });
 
 test("scoreLeadExplainably: confidence is clamped within 0 and 100", () => {
@@ -292,7 +297,7 @@ test("only signals/run/route.ts carries allowCron in the growth API tree", () =>
   walk(root);
 
   assert.deepEqual(
-    offenders.map((path) => path.replace(process.cwd(), "")),
-    [join("", "app/api/growth/signals/run/route.ts")],
+    offenders.map((path) => relative(process.cwd(), path)),
+    [join("app", "api", "growth", "signals", "run", "route.ts")],
   );
 });
