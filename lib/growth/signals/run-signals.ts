@@ -22,7 +22,7 @@ const PROVIDERS_BY_TYPE: Record<string, SignalProvider[]> = {
   // provider, so they have no entry here.
 };
 
-function dedupe(events: SignalEventDraft[]): { unique: SignalEventDraft[]; duplicateCount: number } {
+export function dedupeSignalEvents(events: SignalEventDraft[]): { unique: SignalEventDraft[]; duplicateCount: number } {
   const seen = new Map<string, SignalEventDraft>();
   let duplicateCount = 0;
   for (const event of events) {
@@ -83,7 +83,7 @@ export async function runSignals(bundle: BrainContextBundle): Promise<RunSignals
     }
   });
 
-  const { unique, duplicateCount } = dedupe(allEvents);
+  const { unique, duplicateCount } = dedupeSignalEvents(allEvents);
   const storeResult = await storeSignalEvents(unique);
 
   // Distribute the stored count back across the outcomes that actually
