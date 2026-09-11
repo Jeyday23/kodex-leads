@@ -335,13 +335,17 @@ export const seedBrainContextBundle: BrainContextBundle = {
 };
 
 /**
- * Returns the Brain context bundle. WS1 will replace this body with a
- * Supabase store read that falls back to seedBrainContextBundle when
- * unconfigured (the same pattern as lib/authority/store.ts); keep this
- * function free of "server-only" when that change lands.
+ * Returns the Brain context bundle: a store-backed read (lib/growth/brain/
+ * bundle.ts) that falls back to seedBrainContextBundle wherever Supabase is
+ * not configured or a category table is empty (the same pattern as
+ * lib/authority/store.ts). The import is deferred inside the function body,
+ * not hoisted to the top of the file, so that lib/growth/context.ts keeps
+ * working as a small, dependency-light types module for every caller that
+ * only needs the BrainContextBundle type or the seed.
  */
 export async function getBrainContextBundle(): Promise<BrainContextBundle> {
-  return seedBrainContextBundle;
+  const { loadBrainContextBundle } = await import("@/lib/growth/brain/bundle");
+  return loadBrainContextBundle();
 }
 
 export function getChannelVoice(bundle: BrainContextBundle, channel: GrowthChannel): ChannelVoice {

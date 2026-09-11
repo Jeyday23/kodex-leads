@@ -1786,3 +1786,139 @@ main.organism-page {
   opacity: 1;
   background: rgba(127, 127, 127, 0.12);
 }
+
+/* --- Growth: WS1 Brain (app/admin/authority/brain) --- */
+
+.brain-seed-row {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.brain-seed-row input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e7e2eb;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.brain-proposal {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eeeaf2;
+}
+
+.brain-proposal ul {
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+
+.brain-graph-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.brain-graph-svg {
+  width: 100%;
+  height: auto;
+  background: #fbfaf8;
+  border: 1px solid #e7e2eb;
+  border-radius: 10px;
+}
+
+.brain-edge {
+  stroke: #d8d2df;
+  stroke-width: 1.5;
+}
+
+.brain-edge-item {
+  stroke: #e6e1ea;
+  stroke-width: 1;
+}
+
+.brain-node {
+  fill: #ffffff;
+  stroke: #7a6f8a;
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: fill 150ms ease, stroke 150ms ease;
+}
+
+.brain-node-group:hover .brain-node {
+  fill: #f3effa;
+}
+
+.brain-node-center {
+  fill: #2c2438;
+  stroke: #2c2438;
+}
+
+.brain-node-item {
+  fill: #f7f5fb;
+}
+
+.brain-node-selected {
+  stroke: #6c4fd8;
+  stroke-width: 2.5;
+}
+
+.brain-node-label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #2c2438;
+  pointer-events: none;
+}
+
+.brain-node-label-center {
+  fill: #ffffff;
+}
+
+.brain-node-label-item {
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.brain-detail-panel {
+  position: sticky;
+  top: 1rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.brain-form h2,
+.brain-form h3 {
+  margin-top: 0;
+}
+
+.brain-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.brain-field {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.brain-field span {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #918996;
+  margin-bottom: 0.2rem;
+}
+
+.brain-field input,
+.brain-field textarea,
+.brain-field select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #e7e2eb;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.85rem;
+}
