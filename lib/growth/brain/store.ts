@@ -33,6 +33,7 @@ import type {
   StoreWriteResult,
 } from "@/lib/growth/brain/types";
 import { NOT_CONFIGURED_ERROR } from "@/lib/growth/brain/types";
+import type { ProposedBrainBundle } from "@/lib/growth/brain/seed-from-website";
 
 const CHANNELS: GrowthChannel[] = ["linkedin", "x", "reddit", "articles", "email"];
 const SIGNAL_TYPES: SignalConfigType[] = [
@@ -408,19 +409,83 @@ export async function upsertChannelVoice(input: ChannelVoiceInput): Promise<Stor
   const supabase = getSeoSupabase();
   if (!supabase) return { ok: false, error: NOT_CONFIGURED_ERROR };
 
-  const { error } = await supabase.from("growth_channel_voices").upsert(
-    {
-      channel: input.channel,
-      tone: input.tone,
-      rules: input.rules ?? [],
-      banned_terms: input.bannedTerms ?? [],
-      max_length: input.maxLength,
-      example: input.example,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "channel" },
-  );
+  const { data, error } = await supabase
+    .from("growth_channel_voices")
+    .upsert(
+      {
+        channel: input.channel,
+        tone: input.tone,
+        rules: input.rules ?? [],
+        banned_terms: input.bannedTerms ?? [],
+        max_length: input.maxLength,
+        example: input.example,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "channel" },
+    )
+    .select("id")
+    .single();
 
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, id: data?.id };
+}
+
+/** Row-shaped listing (with ids) for the admin UI and API, one per channel. */
+export async function listChannelVoiceRows(): Promise<Array<ChannelVoice & { id: string; channel: GrowthChannel }>> {
+  const supabase = getSeoSupabase();
+  if (!supabase) {
+    return CHANNELS.map((channel) => ({ id: `seed-${channel}`, channel, ...seedBrainContextBundle.channelVoices[channel] }));
+  }
+
+  const { data, error } = await supabase
+    .from("growth_channel_voices")
+    .select("id, channel, tone, rules, banned_terms, max_length, example");
+
+  if (error || !data) {
+    return CHANNELS.map((channel) => ({ id: `seed-${channel}`, channel, ...seedBrainContextBundle.channelVoices[channel] }));
+  }
+
+  const byChannel = new Map(data.map((row) => [row.channel as GrowthChannel, row]));
+  return CHANNELS.map((channel) => {
+    const row = byChannel.get(channel);
+    if (row) {
+      return {
+        id: row.id,
+        channel,
+        tone: row.tone,
+        rules: row.rules ?? [],
+        bannedTerms: row.banned_terms ?? [],
+        maxLength: row.max_length,
+        example: row.example,
+      };
+    }
+    return { id: `seed-${channel}`, channel, ...seedBrainContextBundle.channelVoices[channel] };
+  });
+}
+
+export async function updateChannelVoiceById(id: string, input: Partial<ChannelVoiceInput>): Promise<StoreWriteResult> {
+  const supabase = getSeoSupabase();
+  if (!supabase) return { ok: false, error: NOT_CONFIGURED_ERROR };
+
+  const updates = {
+    ...(input.tone !== undefined ? { tone: input.tone } : {}),
+    ...(input.rules !== undefined ? { rules: input.rules } : {}),
+    ...(input.bannedTerms !== undefined ? { banned_terms: input.bannedTerms } : {}),
+    ...(input.maxLength !== undefined ? { max_length: input.maxLength } : {}),
+    ...(input.example !== undefined ? { example: input.example } : {}),
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from("growth_channel_voices").update(updates).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+export async function deleteChannelVoiceById(id: string): Promise<StoreWriteResult> {
+  const supabase = getSeoSupabase();
+  if (!supabase) return { ok: false, error: NOT_CONFIGURED_ERROR };
+
+  const { error } = await supabase.from("growth_channel_voices").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
@@ -449,16 +514,116 @@ export async function upsertSignalConfig(input: SignalConfigInput): Promise<Stor
   const supabase = getSeoSupabase();
   if (!supabase) return { ok: false, error: NOT_CONFIGURED_ERROR };
 
-  const { error } = await supabase.from("growth_signal_configs").upsert(
-    {
-      type: input.type,
-      enabled: input.enabled,
-      targets: input.targets ?? [],
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "type" },
-  );
+  const { data, error } = await supabase
+    .from("growth_signal_configs")
+    .upsert(
+      {
+        type: input.type,
+        enabled: input.enabled,
+        targets: input.targets ?? [],
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "type" },
+    )
+    .select("id")
+    .single();
 
   if (error) return { ok: false, error: error.message };
+  return { ok: true, id: data?.id };
+}
+
+/** Row-shaped listing (with ids) for the admin UI and API, one per type. */
+export async function listSignalConfigRows(): Promise<Array<SignalConfig & { id: string }>> {
+  const supabase = getSeoSupabase();
+  const seedFor = (type: SignalConfigType) =>
+    seedBrainContextBundle.signalConfigs.find((config) => config.type === type) ?? { type, enabled: false, targets: [] };
+
+  if (!supabase) {
+    return SIGNAL_TYPES.map((type) => ({ id: `seed-${type}`, ...seedFor(type) }));
+  }
+
+  const { data, error } = await supabase.from("growth_signal_configs").select("id, type, enabled, targets");
+  if (error || !data) {
+    return SIGNAL_TYPES.map((type) => ({ id: `seed-${type}`, ...seedFor(type) }));
+  }
+
+  const byType = new Map(data.map((row) => [row.type as SignalConfigType, row]));
+  return SIGNAL_TYPES.map((type) => {
+    const row = byType.get(type);
+    if (row) return { id: row.id, type, enabled: row.enabled, targets: (row.targets as string[] | null) ?? [] };
+    return { id: `seed-${type}`, ...seedFor(type) };
+  });
+}
+
+export async function updateSignalConfigById(id: string, input: Partial<SignalConfigInput>): Promise<StoreWriteResult> {
+  const supabase = getSeoSupabase();
+  if (!supabase) return { ok: false, error: NOT_CONFIGURED_ERROR };
+
+  const updates = {
+    ...(input.enabled !== undefined ? { enabled: input.enabled } : {}),
+    ...(input.targets !== undefined ? { targets: input.targets } : {}),
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from("growth_signal_configs").update(updates).eq("id", id);
+  if (error) return { ok: false, error: error.message };
   return { ok: true };
+}
+
+export async function deleteSignalConfigById(id: string): Promise<StoreWriteResult> {
+  const supabase = getSeoSupabase();
+  if (!supabase) return { ok: false, error: NOT_CONFIGURED_ERROR };
+
+  const { error } = await supabase.from("growth_signal_configs").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// Apply a seed-from-website proposal. This is the only place a proposal is
+// persisted; seedBrainFromWebsite() itself never writes.
+// ---------------------------------------------------------------------------
+
+export interface ApplyProposalResult {
+  ok: boolean;
+  created: { personas: number; keywords: number; messagePillars: number; objections: number; competitors: number };
+  errors: string[];
+}
+
+export async function applyProposedBrainBundle(proposal: ProposedBrainBundle): Promise<ApplyProposalResult> {
+  const supabase = getSeoSupabase();
+  if (!supabase) {
+    return {
+      ok: false,
+      created: { personas: 0, keywords: 0, messagePillars: 0, objections: 0, competitors: 0 },
+      errors: [NOT_CONFIGURED_ERROR],
+    };
+  }
+
+  const errors: string[] = [];
+
+  if (proposal.profile) {
+    const profileResult = await updateProfile(proposal.profile);
+    if (!profileResult.ok) errors.push(profileResult.error);
+  }
+
+  async function createAll<Input>(items: Input[], create: (input: Input) => Promise<StoreWriteResult>, label: string): Promise<number> {
+    let count = 0;
+    for (const item of items) {
+      const result = await create(item);
+      if (result.ok) count += 1;
+      else errors.push(`${label}: ${result.error}`);
+    }
+    return count;
+  }
+
+  const created = {
+    personas: await createAll(proposal.personas, createPersona, "persona"),
+    keywords: await createAll(proposal.keywords, createKeyword, "keyword"),
+    messagePillars: await createAll(proposal.messagePillars, createMessagePillar, "message pillar"),
+    objections: await createAll(proposal.objections, createObjection, "objection"),
+    competitors: await createAll(proposal.competitors, createCompetitor, "competitor"),
+  };
+
+  return { ok: errors.length === 0, created, errors };
 }
