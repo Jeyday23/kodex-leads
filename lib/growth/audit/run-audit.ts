@@ -31,7 +31,6 @@ export interface RunAuditSummary {
 const RENDER_BLOCKING_SCRIPT_PENALTY = 8;
 const HEAD_STYLESHEET_PENALTY = 6;
 const NOT_CACHEABLE_PENALTY = 25;
-const BAD_STATUS_PENALTY = 100;
 const FETCH_TIMEOUT_MS = 15_000;
 
 function technicalScore(result: TechnicalAuditResult): number | null {
