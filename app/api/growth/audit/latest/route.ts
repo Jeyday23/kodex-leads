@@ -7,7 +7,7 @@ import { getLatestAudits } from "@/lib/growth/audit/history";
 const querySchema = z.object({ url: z.string().url().optional() });
 
 export async function GET(request: Request) {
-  const auth = await requireAuthorityApi(request, { allowCron: true });
+  const auth = await requireAuthorityApi(request);
   if (!auth.ok) return auth.response;
 
   const params = new URL(request.url).searchParams;

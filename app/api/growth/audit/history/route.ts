@@ -14,7 +14,7 @@ const querySchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const auth = await requireAuthorityApi(request, { allowCron: true });
+  const auth = await requireAuthorityApi(request);
   if (!auth.ok) return auth.response;
 
   const params = new URL(request.url).searchParams;

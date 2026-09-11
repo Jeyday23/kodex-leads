@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   evaluateGeoChecklist,
@@ -206,4 +208,17 @@ test("mapPsiResponse: missing audits map to null values without throwing", () =>
     assert.equal(metric.value, null);
     assert.equal(metric.pass, null);
   }
+});
+
+test("only the run route grants allowCron - latest and history require an admin session", () => {
+  const root = process.cwd();
+  const routes: Record<string, string> = {
+    run: readFileSync(join(root, "app/api/growth/audit/run/route.ts"), "utf8"),
+    latest: readFileSync(join(root, "app/api/growth/audit/latest/route.ts"), "utf8"),
+    history: readFileSync(join(root, "app/api/growth/audit/history/route.ts"), "utf8"),
+  };
+
+  assert.match(routes.run, /allowCron/, "run/route.ts should grant allowCron for scheduled runs");
+  assert.doesNotMatch(routes.latest, /allowCron/, "latest/route.ts is a data read and must require an admin session");
+  assert.doesNotMatch(routes.history, /allowCron/, "history/route.ts is a data read and must require an admin session");
 });
