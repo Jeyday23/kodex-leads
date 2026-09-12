@@ -280,6 +280,8 @@ envVarGroups:
     envVars:
       - key: CRON_SECRET
         sync: false
+      - key: MCP_ACCESS_TOKEN
+        sync: false
 
   - name: kodex-leads-production-integrations
     envVars:
@@ -320,6 +322,32 @@ envVarGroups:
       - key: LEAD_PACKAGE_MAX_PER_RUN
         sync: false
       - key: HUBSPOT_PRIVATE_APP_TOKEN
+        sync: false
+      - key: JSEARCH_API_KEY
+        sync: false
+      - key: ADZUNA_APP_ID
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: PAGESPEED_API_KEY
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
+      - key: REDDIT_USER_AGENT
+        sync: false
+      - key: X_API_KEY
+        sync: false
+      - key: X_API_SECRET
+        sync: false
+      - key: X_ACCESS_TOKEN
+        sync: false
+      - key: X_ACCESS_SECRET
         sync: false
 
   - name: kodex-leads-production-founder-ops

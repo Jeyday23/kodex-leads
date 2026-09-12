@@ -8,7 +8,7 @@ separate Cloudflare Worker in front of each one.
 | Git branch | `staging` | `main` |
 | Render web service | `kodex-leads-staging` | `kodex-leads-production` |
 | Render workers | `kodex-authority-{monitoring,autopilot}-worker-staging` | `kodex-authority-{monitoring,autopilot}-worker-production` |
-| Render cron jobs | 14, all suffixed `-staging` | 14, all suffixed `-production` |
+| Render cron jobs | 17, all suffixed `-staging` | 14, all suffixed `-production` |
 | Env var groups | `kodex-leads-staging-*` | `kodex-leads-production-*` |
 | Cloudflare Worker | `kodex-leads-edge-staging` | `kodex-leads-edge` |
 | Render origin | `https://kodex-leads-it6d.onrender.com` | **not provisioned yet** |
@@ -49,7 +49,7 @@ Fill each group twice — once for `kodex-leads-staging-…`, once for
 | Key | Notes |
 |---|---|
 | `CRON_SECRET` | **Generate independently per environment** (`openssl rand -hex 32`). Never copy staging's value into production. |
-| `AUTOPILOT_CONTROL_SECRET` | Same: distinct value per environment. |
+| `MCP_ACCESS_TOKEN` | Static bearer for the future Growth MCP endpoint. Separate from `CRON_SECRET`; leave unset until WS5/MCP is deployed. |
 
 ### `kodex-leads-<env>-integrations`
 `OPENAI_API_KEY`, `OPENAI_MODEL`, `ANTHROPIC_API_KEY`, `CLAUDE_MODEL`,
@@ -58,6 +58,11 @@ Fill each group twice — once for `kodex-leads-staging-…`, once for
 `HUNTER_API_KEY`, `APOLLO_API_KEY`, `NORTHDATA_API_KEY`,
 `LEAD_ENRICHMENT_MAX_PER_RUN`, `LEAD_PACKAGE_MAX_PER_RUN`,
 `HUBSPOT_PRIVATE_APP_TOKEN`.
+
+Growth Engine modules also read: `JSEARCH_API_KEY`, `ADZUNA_APP_ID`,
+`ADZUNA_APP_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `PAGESPEED_API_KEY`,
+`REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT`, `X_API_KEY`,
+`X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET`.
 
 Use separate API keys or projects per environment where the vendor allows it, so
 staging spend and rate limits cannot exhaust production quota. The two
@@ -90,13 +95,20 @@ dashboard edit alone will not start automation:
 | `SEO_SOURCE_FETCH_ENABLED` | dashboard-controlled (`sync: false`) | `false` |
 | `LEAD_AUTOMATION_ENABLED` | `true` on the lead cron | `false` |
 | `MEDIA_PROVIDER` | `queue-only` | `queue-only` |
+| Growth cron services | site audit, signals and planner run in staging only | not provisioned by this blueprint |
 
-Production cron jobs and workers still deploy and stay on schedule, but each run
+Production Authority cron jobs and workers still deploy and stay on schedule, but each run
 exits early via its autonomy gate and records a skip. To enable production
 autonomy later, change the literal in `render.yaml` in a reviewed commit — and
 only after a manual production run has produced output someone has read.
 `MEDIA_PROVIDER` must stay `queue-only` until Kodex-owned generation credentials
 are in place; anything else spends generation credits.
+
+The Growth cron services added for WS6 are staging-only in `render.yaml`:
+`kodex-growth-site-audit-staging`, `kodex-growth-signals-staging`, and
+`kodex-growth-planner-staging`. Production Growth scheduling should be added
+only after staging output is reviewed and the entrypoints have explicit
+production gates.
 
 ## Cloudflare dashboard / CLI
 
@@ -111,8 +123,8 @@ a secret). CI needs two repository secrets, already documented in
 1. Create the production Supabase project and apply `supabase/migrations/`.
 2. Sync the blueprint in Render; it creates the `-production` services and the
    empty `kodex-leads-production-*` env groups.
-3. Fill every production group. Generate a fresh `CRON_SECRET` and
-   `AUTOPILOT_CONTROL_SECRET` — do not reuse staging's.
+3. Fill every production group. Generate a fresh `CRON_SECRET`. Generate
+   `MCP_ACCESS_TOKEN` only when WS5/MCP is deployed; do not reuse staging's.
 4. Let `kodex-leads-production` build from `main` and confirm `/api/health`.
 5. Copy the production Render URL into both `ORIGIN_BASE_URL` placeholders in
    `wrangler.jsonc` and commit.
@@ -124,8 +136,8 @@ a secret). CI needs two repository secrets, already documented in
 ## Note on service renames
 
 Every service except the web service gained an environment suffix
-(`kodex-authority-autopilot-worker` → `…-worker-staging`, and likewise for all
-14 cron jobs). Render keys services by name, so the next blueprint sync creates
+(`kodex-authority-autopilot-worker` → `…-worker-staging`, and likewise for the
+Authority cron jobs). Render keys services by name, so the next blueprint sync creates
 the suffixed services and marks the old unsuffixed ones for deletion. Confirm
 the plan in Render's sync preview before applying, and expect one gap in the
 staging cron schedule across the cutover.

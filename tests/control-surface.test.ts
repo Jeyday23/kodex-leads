@@ -86,6 +86,41 @@ test("command controls are labeled and no longer use unexplained glyph buttons",
   assert.doesNotMatch(command, />○<\/a>/);
 });
 
+test("Growth Command dashboard is wired into Authority navigation", () => {
+  const layout = read("app/admin/authority/layout.tsx");
+  const dashboard = read("app/admin/authority/growth/page.tsx");
+
+  for (const href of [
+    "/admin/authority/growth",
+    "/admin/authority/brain",
+    "/admin/authority/site-audit",
+    "/admin/authority/signals",
+    "/admin/authority/growth-leads",
+    "/admin/authority/sequences",
+    "/admin/authority/planner",
+    "/admin/authority/channels",
+    "/admin/authority/cmo",
+  ]) {
+    assert.match(layout, new RegExp(href.replace(/\//g, "\\/")));
+  }
+
+  for (const source of [
+    "seo_metrics",
+    "visibility_scores",
+    "growth_site_audits",
+    "growth_signal_events",
+    "growth_outreach_tasks",
+    "growth_channel_drafts",
+    "growth_cmo_actions",
+    "job_failures",
+  ]) {
+    assert.match(dashboard, new RegExp(source));
+  }
+
+  assert.match(dashboard, /Supabase is not configured/);
+  assert.doesNotMatch(dashboard, /@\/lib\/growth\/cmo/);
+});
+
 test("manual autonomy runs a non-publishing preflight before normal lead discovery", () => {
   const route = read("app/api/authority/autopilot/run/route.ts");
   const preflightIndex = route.indexOf("if (parsed.data.preflight)");
@@ -169,6 +204,18 @@ test("each environment has its own dedicated, staggered lead cron", () => {
     assert.match(block, new RegExp(`value:\\s*${enabled}`));
     // Enrichment budgets reach the job through its environment's integrations group.
     assert.match(block, new RegExp(`kodex-leads-${environment}-integrations`));
+  }
+});
+
+test("Growth cron entries are staging-only until production gates exist", () => {
+  const render = read("render.yaml");
+  for (const service of ["growth-site-audit", "growth-signals", "growth-planner"]) {
+    const staging = render
+      .split(/\n(?=\s*- type: cron)/g)
+      .find((candidate) => new RegExp(`name:\\s*kodex-${service}-staging`).test(candidate));
+    assert.ok(staging, `Expected staging cron for ${service}`);
+    assert.match(staging, /branch:\s*staging/);
+    assert.doesNotMatch(render, new RegExp(`name:\\s*kodex-${service}-production`));
   }
 });
 

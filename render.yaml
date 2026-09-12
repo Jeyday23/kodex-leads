@@ -135,6 +135,41 @@ services:
         value: "true"
 
   - type: cron
+    name: kodex-growth-site-audit-staging
+    runtime: node
+    schedule: "15 3 * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-growth-site-audit.ts
+    envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
+
+  - type: cron
+    name: kodex-growth-signals-staging
+    runtime: node
+    schedule: "45 5 * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-growth-signals.ts
+    envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
+      - key: LEAD_AUTOMATION_ENABLED
+        value: "true"
+
+  - type: cron
+    name: kodex-growth-planner-staging
+    runtime: node
+    schedule: "15 6 * * *"
+    branch: staging
+    buildCommand: npm ci
+    startCommand: npx tsx scripts/run-growth-planner.ts
+    envVars:
+      - fromGroup: kodex-leads-staging-core
+      - fromGroup: kodex-leads-staging-integrations
+
+  - type: cron
     name: kodex-authority-search-console-sync-staging
     runtime: node
     schedule: "0 4 * * *"
@@ -505,6 +540,8 @@ envVarGroups:
     envVars:
       - key: CRON_SECRET
         sync: false
+      - key: MCP_ACCESS_TOKEN
+        sync: false
 
   - name: kodex-leads-staging-integrations
     envVars:
@@ -537,6 +574,32 @@ envVarGroups:
       - key: LEAD_PACKAGE_MAX_PER_RUN
         sync: false
       - key: HUBSPOT_PRIVATE_APP_TOKEN
+        sync: false
+      - key: JSEARCH_API_KEY
+        sync: false
+      - key: ADZUNA_APP_ID
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: PAGESPEED_API_KEY
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
+      - key: REDDIT_USER_AGENT
+        sync: false
+      - key: X_API_KEY
+        sync: false
+      - key: X_API_SECRET
+        sync: false
+      - key: X_ACCESS_TOKEN
+        sync: false
+      - key: X_ACCESS_SECRET
         sync: false
 
   - name: kodex-leads-staging-founder-ops
@@ -572,6 +635,8 @@ envVarGroups:
     envVars:
       - key: CRON_SECRET
         sync: false
+      - key: MCP_ACCESS_TOKEN
+        sync: false
 
   - name: kodex-leads-production-integrations
     envVars:
@@ -604,6 +669,32 @@ envVarGroups:
       - key: LEAD_PACKAGE_MAX_PER_RUN
         sync: false
       - key: HUBSPOT_PRIVATE_APP_TOKEN
+        sync: false
+      - key: JSEARCH_API_KEY
+        sync: false
+      - key: ADZUNA_APP_ID
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: PAGESPEED_API_KEY
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
+      - key: REDDIT_USER_AGENT
+        sync: false
+      - key: X_API_KEY
+        sync: false
+      - key: X_API_SECRET
+        sync: false
+      - key: X_ACCESS_TOKEN
+        sync: false
+      - key: X_ACCESS_SECRET
         sync: false
 
   - name: kodex-leads-production-founder-ops

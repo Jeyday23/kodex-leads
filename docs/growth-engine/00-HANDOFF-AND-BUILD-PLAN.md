@@ -3,7 +3,7 @@
 **Date:** 10 September 2026
 **Owner:** Jeremiah Matador (CEO, Kodex Compliance)
 **Architect / supervisor:** Claude (supervisor; workers build, supervisor verifies).
-**Branch:** `growth-engine` (cut from `main` at `f4b52ed`). Nothing is pushed to GitHub until Jeremiah says so.
+**Branch:** `growth-engine` (cut from `main` at `f4b52ed`). Current user context says `origin/growth-engine` has Job 0 plus WS1-WS4; `main` may be behind.
 **Working clone:** `/Users/jeremiahmatador/kodex-growth` (durable; the earlier `/tmp` scratchpad clone was wiped by OS temp cleanup and all work in it was lost).
 
 ---
@@ -36,7 +36,7 @@ Rebuild `Jeyday23/kodex-leads` into an in-house growth engine that does what two
 | Baseline verification (before any Growth work) | `npm run typecheck` clean; `npm test` 139/139 pass; `npm run lint` clean; Node 24.14 / npm 11.11 |
 | Jeremiah's own clone (NOT used by agents; dirty, different branch, has a broken ref) | `/Users/jeremiahmatador/kodex-leads` |
 | Production | Render, `https://kodex-leads-it6d.onrender.com` (`/api/health`). Staging tracks `staging`, production tracks `main`. |
-| Release rule (from Jeremiah) | Branch -> PR into `main` -> CI `verify` + `browser-smoke` must pass -> deploy to staging and test -> squash-merge. Never push directly to `main`. |
+| Release rule (from Jeremiah) | Branch -> PR into `main` -> CI `verify` + `browser-smoke` must pass -> deploy to staging and test -> squash-merge. A direct-main push happened by user request and is recorded as an exception, not the default release path. |
 
 ### What already exists in the repo (do not rebuild; extend)
 
@@ -151,6 +151,8 @@ Replaces Okara's chat and Pancake's "Use in Claude / Codex".
 - `app/admin/authority/growth/page.tsx`: SEO visibility score, AI visibility score, latest audit scores with deltas, leads by signal (7/30 days), sequence stats, planner week strip, and a "Needs your attention" queue aggregating outreach tasks awaiting approval, drafts awaiting decision, CMO proposals, failed jobs.
 - Wire nav in `app/admin/authority/layout.tsx`: Growth, Brain, Site Audit, Signals, Growth Leads, Sequences, Planner, Channels, CMO.
 - Add cron/worker entries to `render.yaml` (staging only; production pinned off), env vars to `.env.example` and `docs/ENVIRONMENT_SETUP.md`, README section, `docs/growth-engine/mcp.md` link.
+
+**Current completion note (2026-09-12):** WS5 and WS6 are implemented in `ws/cmo`. WS5 adds CMO threads/messages/proposal actions, read-only MCP, `/admin/authority/cmo`, migration 028 and focused tests. WS6 adds the server-rendered Growth Command dashboard, nav, staging-only Growth cron entries, env/docs updates and control-surface tests. Production Growth crons remain intentionally unprovisioned.
 
 ---
 
