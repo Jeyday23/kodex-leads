@@ -279,7 +279,7 @@ test("canSendNow allows a send inside the window and under the cap", () => {
 
 // --- Source-reading test: allowCron scope -------------------------------------
 
-test("only signals/run/route.ts carries allowCron in the growth API tree", () => {
+test("only run/discover routes carry allowCron in the growth API tree", () => {
   const root = join(process.cwd(), "app/api/growth");
   const offenders: string[] = [];
 
@@ -290,14 +290,22 @@ test("only signals/run/route.ts carries allowCron in the growth API tree", () =>
         walk(full);
       } else if (entry.name === "route.ts") {
         const source = readFileSync(full, "utf8");
-        if (source.includes("allowCron")) offenders.push(full);
+        if (/allowCron:\s*true/.test(source)) offenders.push(full);
       }
     }
   }
   walk(root);
 
+  // Cron-triggered run/discover endpoints only. Data-read routes must not
+  // accept the cron secret (see audit branch: "remove allowCron from audit
+  // data-read routes").
   assert.deepEqual(
-    offenders.map((path) => relative(process.cwd(), path)),
-    [join("app", "api", "growth", "signals", "run", "route.ts")],
+    offenders.map((path) => relative(process.cwd(), path)).sort(),
+    [
+      join("app", "api", "growth", "audit", "run", "route.ts"),
+      join("app", "api", "growth", "channels", "planner", "run", "route.ts"),
+      join("app", "api", "growth", "channels", "reddit", "discover", "route.ts"),
+      join("app", "api", "growth", "signals", "run", "route.ts"),
+    ],
   );
 });
