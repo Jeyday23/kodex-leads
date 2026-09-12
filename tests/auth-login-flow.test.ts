@@ -18,19 +18,55 @@ const client = read("lib/auth-client.ts");
 const route = read("app/auth/signin/route.ts");
 const middleware = read("proxy.ts");
 
-test("the submit button can never be left permanently disabled", () => {
+/**
+ * LoginForm has three submit handlers sharing one component: password
+ * sign-in, and the two OTP steps (request a code, verify it). Each has its
+ * own try/catch/finally, so every safety property below is checked per
+ * handler rather than once for the whole file.
+ */
+const HANDLER_NAMES = ["handlePasswordSubmit", "handleOtpRequest", "handleOtpVerify"] as const;
+
+/** Extracts one `async function <name>(...) { ... }` body by brace counting. */
+function extractHandler(source: string, name: string): string {
+  const start = source.indexOf(`async function ${name}(`);
+  assert.ok(start > -1, `${name} not found in LoginForm`);
+  const braceStart = source.indexOf("{", start);
+  let depth = 0;
+  for (let i = braceStart; i < source.length; i++) {
+    if (source[i] === "{") depth++;
+    else if (source[i] === "}") {
+      depth--;
+      if (depth === 0) return source.slice(start, i + 1);
+    }
+  }
+  throw new Error(`unbalanced braces in ${name}`);
+}
+
+const handlers = HANDLER_NAMES.map((name) => [name, extractHandler(form, name)] as const);
+
+test("no submit handler can be left permanently disabled", () => {
   // The freeze: setLoading(false) lived only in catch, so a success that
   // redirected back to /auth/login left `loading` true on a reused component.
-  assert.match(form, /\}\s*finally\s*\{[\s\S]*?setLoading\(false\);[\s\S]*?\}/);
+  // That has to hold for every handler, not just the original password one.
+  for (const [name, body] of handlers) {
+    assert.match(
+      body,
+      /\}\s*finally\s*\{[\s\S]*?setLoading\(false\);[\s\S]*?\}/,
+      `${name} must clear loading in a finally block`,
+    );
 
-  const resets = form.match(/setLoading\(false\)/g) ?? [];
-  assert.equal(resets.length, 1, "loading must be cleared in exactly one place, the finally block");
+    const resets = body.match(/setLoading\(false\)/g) ?? [];
+    assert.equal(resets.length, 1, `${name} must clear loading in exactly one place, the finally block`);
 
-  const catchBlock = form.slice(form.indexOf("} catch (err) {"), form.indexOf("} finally {"));
-  assert.doesNotMatch(catchBlock, /setLoading\(false\)/, "the catch-only reset is the bug being fixed");
+    const catchBlock = body.slice(body.indexOf("} catch (err) {"), body.indexOf("} finally {"));
+    assert.doesNotMatch(catchBlock, /setLoading\(false\)/, `${name}: the catch-only reset is the bug being fixed`);
+  }
 
-  // The disabled state must still be driven by `loading` and nothing else.
-  assert.match(form, /disabled=\{loading\}/);
+  // The disabled state on every submit/secondary button is still driven by
+  // `loading` and nothing else: one per handler's submit button, plus the
+  // "use a different email" button in the OTP verify step.
+  const disabledAttrs = form.match(/disabled=\{loading\}/g) ?? [];
+  assert.equal(disabledAttrs.length, 4, "every submit/secondary button should disable on `loading`");
 });
 
 test("the success path cannot navigate before the session is established", () => {
@@ -42,19 +78,28 @@ test("the success path cannot navigate before the session is established", () =>
     "sign-in must not run against the browser client",
   );
   assert.match(client, /await fetch\("\/auth\/signin"/);
+  assert.match(client, /await fetch\("\/auth\/otp\/request"/);
+  assert.match(client, /await fetch\("\/auth\/otp\/verify"/);
   assert.match(client, /method: "POST"/);
   assert.match(client, /credentials: "same-origin"/);
 
   assert.match(route, /createSupabaseServerClient/);
   assert.match(route, /supabase\.auth\.signInWithPassword\(\{ email, password \}\)/);
 
-  // Ordering: await the sign-in, refresh the router cache, then navigate.
-  const signInAt = form.indexOf("await signIn(email, password)");
-  const refreshAt = form.indexOf("router.refresh()");
-  const replaceAt = form.indexOf("router.replace(");
-  assert.ok(signInAt > -1 && refreshAt > -1 && replaceAt > -1);
-  assert.ok(signInAt < refreshAt, "the sign-in must be awaited before the router is touched");
-  assert.ok(refreshAt < replaceAt, "the stale signed-out render must be dropped before navigating");
+  // Ordering within each session-establishing handler: await the sign-in
+  // call, refresh the router cache, then navigate. handleOtpRequest never
+  // establishes a session, so it is not held to this ordering.
+  for (const [name, body] of handlers) {
+    if (name === "handleOtpRequest") continue;
+    const refreshAt = body.indexOf("router.refresh()");
+    const replaceAt = body.indexOf("router.replace(");
+    assert.ok(refreshAt > -1 && replaceAt > -1, `${name} must refresh then navigate`);
+    assert.ok(refreshAt < replaceAt, `${name}: the stale signed-out render must be dropped before navigating`);
+  }
+  const passwordBody = handlers.find(([name]) => name === "handlePasswordSubmit")![1];
+  const otpVerifyBody = handlers.find(([name]) => name === "handleOtpVerify")![1];
+  assert.ok(passwordBody.indexOf("await signIn(email, password)") < passwordBody.indexOf("router.refresh()"));
+  assert.ok(otpVerifyBody.indexOf("await verifyOtp(otpSentTo, code)") < otpVerifyBody.indexOf("router.refresh()"));
 
   // The race is closed by ordering, not by waiting and hoping.
   for (const [name, source] of [["LoginForm", form], ["auth-client", client]] as const) {

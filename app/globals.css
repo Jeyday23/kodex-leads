@@ -131,6 +131,27 @@ input {
   opacity: 0.65;
 }
 
+.auth-mode-toggle {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.auth-mode-toggle button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 700;
+  padding: 6px 4px;
+}
+
+.auth-mode-toggle button[aria-current="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--ink);
+}
+
 .auth-links {
   display: flex;
   flex-wrap: wrap;
