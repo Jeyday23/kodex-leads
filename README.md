@@ -28,6 +28,22 @@ See `docs/KODEX_SEO_SYSTEM_SPEC.md` and the accompanying PDF.
 
 The app reads from Supabase when `NEXT_PUBLIC_SUPABASE_URL` and a Supabase key are present. Without those variables it serves a small seed inventory so metadata, sitemap, robots and quality behavior can still be verified locally.
 
+## Authentication
+
+The private `/admin/authority` workspace supports two sign-in methods on
+`/auth/login`:
+
+- **Password** — `POST /auth/signin`, existing flow.
+- **Email code (OTP)** — `POST /auth/otp/request` emails a one-time code
+  (`shouldCreateUser: false`, so a code can never provision an account), then
+  `POST /auth/otp/verify` exchanges it for a session. Both fail closed when
+  Supabase is unconfigured and resolve the admin role from `profiles`, never
+  from `user_metadata`, exactly like `/auth/signin`.
+
+Supabase only emails the numeric code (rather than a magic link) when the
+project's "Magic Link" email template includes `{{ .Token }}` — set that in
+the Supabase dashboard under Authentication > Email Templates.
+
 ## Automation endpoints
 - `GET /api/seo/cron` requires `Authorization: Bearer $CRON_SECRET` and evaluates pending pages through the quality gate.
 - `POST /api/seo/attribution` normalizes landing-page attribution and can persist it to a lead when a `leadId` is supplied.

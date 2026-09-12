@@ -69,6 +69,62 @@ export async function signIn(email: string, password: string) {
   return record;
 }
 
+/**
+ * Step 1 of passwordless sign-in: requests a one-time emailed code.
+ *
+ * Goes through /auth/otp/request rather than the browser client for the same
+ * reason signIn() does: keeping every credential exchange server-side means
+ * there is exactly one place (lib/request-origin.ts) that guards it against a
+ * cross-site request.
+ */
+export async function requestOtp(email: string) {
+  const response = await fetch("/auth/otp/request", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({ email }),
+  });
+
+  const payload: unknown = await response.json().catch(() => null);
+  const record = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
+
+  if (!response.ok) {
+    throw new SignInError(
+      typeof record.error === "string" ? record.error : "Could not send a sign-in code.",
+      typeof record.reason === "string" ? record.reason : null,
+    );
+  }
+
+  return record;
+}
+
+/**
+ * Step 2 of passwordless sign-in: exchanges the emailed code for a session.
+ *
+ * Same Set-Cookie-before-resolve shape as signIn(): the caller may navigate as
+ * soon as this promise resolves without racing middleware for the cookie.
+ */
+export async function verifyOtp(email: string, token: string) {
+  const response = await fetch("/auth/otp/verify", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({ email, token }),
+  });
+
+  const payload: unknown = await response.json().catch(() => null);
+  const record = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
+
+  if (!response.ok) {
+    throw new SignInError(
+      typeof record.error === "string" ? record.error : "Could not sign in.",
+      typeof record.reason === "string" ? record.reason : null,
+    );
+  }
+
+  return record;
+}
+
 export async function resetPassword(email: string) {
   const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
