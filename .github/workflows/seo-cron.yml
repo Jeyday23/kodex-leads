@@ -2,23 +2,77 @@ name: SEO Automation Cron
 
 on:
   schedule:
-    # Run daily at 2 AM UTC (adjust time zone as needed)
+    # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   seo-automation:
     runs-on: ubuntu-latest
+    env:
+      RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
+      SEO_CRON_TOKEN: ${{ secrets.SEO_CRON_TOKEN }}
     steps:
-      - name: Trigger SEO cron job
+      - name: Validate runtime secrets
+        shell: bash
         run: |
-          curl -X GET \
-            -H "Authorization: Bearer ${{ secrets.SEO_CRON_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            "${{ secrets.RENDER_APP_URL }}/api/seo/cron" \
-            --fail \
+          set -euo pipefail
+          if [ -z "${RENDER_APP_URL:-}" ]; then
+            echo "RENDER_APP_URL is not configured in GitHub Actions secrets"
+            exit 1
+          fi
+          if [ -z "${SEO_CRON_TOKEN:-}" ]; then
+            echo "SEO_CRON_TOKEN is not configured in GitHub Actions secrets"
+            exit 1
+          fi
+
+      - name: Check deployed app health
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="${RENDER_APP_URL%/}"
+          echo "Checking deployed app health..."
+          RESPONSE_FILE="$(mktemp)"
+          HTTP_STATUS="$(curl \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --location \
+            --silent \
             --show-error \
-            --silent
+            --output "$RESPONSE_FILE" \
+            --write-out '%{http_code}' \
+            "$BASE_URL/api/health")"
+          cat "$RESPONSE_FILE"
+          echo
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Health check failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Trigger SEO cron job
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="${RENDER_APP_URL%/}"
+          RESPONSE_FILE="$(mktemp)"
+          HTTP_STATUS="$(curl \
+            --request GET \
+            --connect-timeout 10 \
+            --max-time 120 \
+            --location \
+            --silent \
+            --show-error \
+            --output "$RESPONSE_FILE" \
+            --write-out '%{http_code}' \
+            --header "Authorization: Bearer $SEO_CRON_TOKEN" \
+            --header "Content-Type: application/json" \
+            "$BASE_URL/api/seo/cron")"
+          cat "$RESPONSE_FILE"
+          echo
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "SEO cron request failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
 
       - name: Log success
         if: success()
@@ -26,4 +80,6 @@ jobs:
 
       - name: Log failure
         if: failure()
-        run: echo "SEO cron job failed" && exit 1
+        run: |
+          echo "SEO cron workflow failed. Review the health-check and cron-response steps above."
+          exit 1
