@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { createSupabaseVerifierClient, createSupabaseVerifierFetch, isValidHeaderValue, loadLocalEnvFile } from "../scripts/verify-supabase";
 
 const SB_SECRET = "sb_secret_test_value";
@@ -96,7 +97,6 @@ test("local env loader trims carriage returns from secret keys", () => {
   const originalCwd = process.cwd();
   process.chdir("/tmp");
   try {
-    const fs = require("node:fs") as typeof import("node:fs");
     const path = `.env.local-${Date.now()}`;
     fs.writeFileSync(path, `SUPABASE_SERVICE_ROLE_KEY=${SB_SECRET}\r\n`, "utf8");
     loadLocalEnvFile(path, env);
