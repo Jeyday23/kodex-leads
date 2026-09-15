@@ -119,9 +119,9 @@ export function createSupabaseVerifierFetch(
       return await fetchImpl(input, { ...init, headers, signal: controller.signal });
     } catch (error) {
       if (timedOut) {
-        throw new Error(`Supabase verifier request timed out after ${timeoutMs}ms`);
+        throw new Error(`Supabase verifier request timed out after ${timeoutMs}ms`, { cause: error });
       }
-      throw new Error(`Supabase verifier fetch failed: ${errorName(error)}${errorMessage(error)}`);
+      throw new Error(`Supabase verifier fetch failed: ${errorName(error)}${errorMessage(error)}`, { cause: error });
     } finally {
       clearTimeout(timeout);
       cleanup();
