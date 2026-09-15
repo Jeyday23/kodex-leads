@@ -5,6 +5,11 @@ on:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
+    inputs:
+      diagnose:
+        description: "Print sha256 fingerprint and byte length of SEO_CRON_TOKEN and RENDER_APP_URL (values are never printed)"
+        type: boolean
+        default: false
 
 jobs:
   seo-automation:
@@ -26,6 +31,33 @@ jobs:
             exit 1
           fi
 
+      - name: Fingerprint runtime secrets (diagnostic)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LC_ALL=C
+          for name in SEO_CRON_TOKEN RENDER_APP_URL; do
+            value="${!name}"
+            byte_length="$(printf '%s' "$value" | wc -c | tr -d ' ')"
+            sha256="$(printf '%s' "$value" | sha256sum | cut -d' ' -f1)"
+            stripped_length="$(printf '%s' "$value" | tr -d '[:space:]' | wc -c | tr -d ' ')"
+            nonurlsafe_length="$(printf '%s' "$value" | tr -d 'A-Za-z0-9_-' | wc -c | tr -d ' ')"
+            whitespace=no
+            if [ "$byte_length" -ne "$stripped_length" ]; then
+              whitespace=yes
+            fi
+            nonurlsafe=no
+            if [ "$nonurlsafe_length" -gt 0 ]; then
+              nonurlsafe=yes
+            fi
+            printf '%s: bytes=%s sha256=%s whitespace=%s nonurlsafe=%s\n' \
+              "$name" "$byte_length" "$sha256" "$whitespace" "$nonurlsafe"
+          done
+          header_length="$(printf '%s' "Bearer $SEO_CRON_TOKEN" | wc -c | tr -d ' ')"
+          header_sha256="$(printf '%s' "Bearer $SEO_CRON_TOKEN" | sha256sum | cut -d' ' -f1)"
+          printf 'Authorization header: sha256=%s bytes=%s\n' "$header_sha256" "$header_length"
+
       - name: Check deployed app health
         shell: bash
         run: |
@@ -33,17 +65,19 @@ jobs:
           BASE_URL="${RENDER_APP_URL%/}"
           echo "Checking deployed app health..."
           RESPONSE_FILE="$(mktemp)"
-          HTTP_STATUS="$(curl \
+          OUT="$(curl \
             --connect-timeout 10 \
             --max-time 30 \
             --location \
             --silent \
             --show-error \
             --output "$RESPONSE_FILE" \
-            --write-out '%{http_code}' \
+            --write-out '%{http_code} %{num_redirects} %{url_effective}' \
             "$BASE_URL/api/health")"
+          read -r HTTP_STATUS NUM_REDIRECTS URL_EFFECTIVE <<< "$OUT"
           cat "$RESPONSE_FILE"
           echo
+          echo "redirects=$NUM_REDIRECTS effective_url=$URL_EFFECTIVE"
           if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
             echo "Health check failed with HTTP $HTTP_STATUS"
             exit 1
@@ -55,7 +89,7 @@ jobs:
           set -euo pipefail
           BASE_URL="${RENDER_APP_URL%/}"
           RESPONSE_FILE="$(mktemp)"
-          HTTP_STATUS="$(curl \
+          OUT="$(curl \
             --request GET \
             --connect-timeout 10 \
             --max-time 120 \
@@ -63,12 +97,14 @@ jobs:
             --silent \
             --show-error \
             --output "$RESPONSE_FILE" \
-            --write-out '%{http_code}' \
+            --write-out '%{http_code} %{num_redirects} %{url_effective}' \
             --header "Authorization: Bearer $SEO_CRON_TOKEN" \
             --header "Content-Type: application/json" \
             "$BASE_URL/api/seo/cron")"
+          read -r HTTP_STATUS NUM_REDIRECTS URL_EFFECTIVE <<< "$OUT"
           cat "$RESPONSE_FILE"
           echo
+          echo "redirects=$NUM_REDIRECTS effective_url=$URL_EFFECTIVE"
           if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
             echo "SEO cron request failed with HTTP $HTTP_STATUS"
             exit 1
