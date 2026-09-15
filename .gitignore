@@ -13,3 +13,10 @@ cloudflare/worker-configuration.d.ts
 .env.*.local
 
 *.tsbuildinfo
+
+# local tooling / auth state (never commit)
+tests/e2e/.auth/
+supabase/.branches/
+_render.*.local
+_render.yaml.uncommitted-backup
+/*.pdf
