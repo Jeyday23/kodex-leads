@@ -31,6 +31,8 @@ Go to **Settings** → **Secrets and variables** → **Actions** and create:
 | `SEO_CRON_TOKEN` | Your token from step 1 |
 | `RENDER_APP_URL` | `https://kodex-leads.onrender.com` |
 
+Correction: use `SEO_CRON_TOKEN` for the GitHub Actions secret, not `SEO_CRON_SECRET_TOKEN`; the Render service reads `CRON_SECRET`.
+
 ### 3. Update Render Environment
 
 Add to Render dashboard environment variables:
