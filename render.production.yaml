@@ -63,6 +63,8 @@ services:
         value: "true"
       - key: SEO_SOURCE_FETCH_ENABLED
         value: "true"
+      - key: LEAD_AUTOMATION_ENABLED
+        value: "false"
       - key: MEDIA_PROVIDER
         value: "queue-only"
 

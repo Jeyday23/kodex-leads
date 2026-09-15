@@ -24,6 +24,7 @@ interface DiscoveryLead {
 
 interface DiscoveryResponse {
   status: string;
+  reason?: string;
   result: {
     mode: "live";
     searchedAt: string;
@@ -31,8 +32,9 @@ interface DiscoveryResponse {
     leads: DiscoveryLead[];
     errors: string[];
     nextActions: string[];
-  };
+  } | null;
   errors?: string[];
+  warnings?: string[];
   error?: string;
 }
 
@@ -67,10 +69,18 @@ export function SeoCommandCenter() {
       setError("This account is not authorized. Sign in with a Kodex administrator account to run lead discovery.");
       return;
     }
+    if (body.status === "disabled") {
+      setError(`Autonomous discovery is disabled in this environment (${body.reason ?? "LEAD_AUTOMATION_ENABLED=false"}).`);
+      return;
+    }
     if (!response.ok) {
       const details = Array.isArray(body.errors) && body.errors.length > 0 ? ` ${body.errors.join(" ")}` : "";
       setError(`${body.error ?? "Lead discovery returned no live leads."}${details}`);
       if (body.result) setResult(body.result);
+      return;
+    }
+    if (!body.result) {
+      setError("Lead discovery returned no result payload.");
       return;
     }
     setResult(body.result);

@@ -3,11 +3,23 @@ import { discoverKodexLeads } from "@/lib/seo/lead-discovery";
 import { discoverEuDpaEnforcementLeads } from "@/lib/seo/eu-dpa-enforcement";
 import { discoverEuTenderLeads } from "@/lib/seo/eu-tenders";
 import { createLeadWorkPackages } from "@/lib/seo/lead-work-packages";
+import { leadRunStatus, splitLeadRunMessages } from "@/lib/seo/lead-run-status";
 
 export async function POST(request: Request) {
   // Signed-in administrators, or Render cron jobs presenting CRON_SECRET.
   const auth = await requireAuthorityApi(request, { allowCron: true });
   if (!auth.ok) return auth.response;
+
+  if (process.env.LEAD_AUTOMATION_ENABLED === "false") {
+    return Response.json({
+      status: "disabled",
+      service: "kodex-lead-discovery",
+      reason: "LEAD_AUTOMATION_ENABLED=false",
+      result: null,
+      errors: [],
+      warnings: [],
+    });
+  }
 
   try {
     const [result, euDpa, tenders] = await Promise.all([
@@ -20,16 +32,19 @@ export async function POST(request: Request) {
     const leads = mergeLeads(euDpa.leads, tenders.leads, result.leads);
     const packages = await createLeadWorkPackages(leads);
     const errors = [...result.errors, ...euDpa.errors, ...tenders.errors, ...packages.errors];
-    const status = leads.length === 0 && errors.length > 0 ? 502 : 200;
+    const { fatalErrors, warnings } = splitLeadRunMessages(errors);
+    const status = leadRunStatus(leads.length > 0, errors);
+    const httpStatus = fatalErrors.length > 0 ? 502 : 200;
     return Response.json({
-      status: status === 200 ? "ok" : "error",
+      status,
       result: { ...result, leads },
       euDpaEnforcement: euDpa.leads.length,
       euTenders: tenders.leads.length,
       queuedForApproval: packages.queued.length,
       approvalQueue: "/admin/authority/outreach",
-      errors,
-    }, { status });
+      errors: fatalErrors,
+      warnings,
+    }, { status: httpStatus });
   } catch (error) {
     return Response.json(
       { status: "error", error: error instanceof Error ? error.message : "Lead discovery failed." },

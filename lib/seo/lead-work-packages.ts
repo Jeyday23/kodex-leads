@@ -266,12 +266,21 @@ async function verifyLeadEvidence(lead: DiscoveredLead): Promise<{ verified: boo
 async function persistPackageEvent(eventType: string, payload: Record<string, unknown> | LeadWorkPackage): Promise<string | null> {
   let persistenceError: string | null = null;
   const supabase = getSeoSupabase();
+  let supabaseStored = false;
   if (supabase) {
     const { error } = await supabase.from("seo_audit_events").insert({ event_type: eventType, payload });
     if (error) persistenceError = `Supabase approval queue event: ${error.message}`;
+    else supabaseStored = true;
   }
 
-  await storeAuditEventLocally({ eventType, payload: payload as Record<string, unknown> });
+  try {
+    await storeAuditEventLocally({ eventType, payload: payload as Record<string, unknown> });
+  } catch (error) {
+    if (!supabaseStored) {
+      const detail = error instanceof Error ? error.message : String(error);
+      return persistenceError ? `${persistenceError}; Local approval queue event: ${detail}` : `Local approval queue event: ${detail}`;
+    }
+  }
   return persistenceError;
 }
 

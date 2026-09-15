@@ -134,23 +134,28 @@ export async function discoverKodexLeads(): Promise<LeadDiscoveryResult> {
   const agentReach = await enrichLeadsWithAgentReach(decisionMakerEnrichment.leads);
   errors.push(...agentReach.errors);
 
+  const supabaseConfigured = Boolean(getSeoSupabase());
   const persistError = await persistDiscoveredLeads(agentReach.leads);
   if (persistError) errors.push(persistError);
-  const stored = await storeDiscoveredLeadsLocally(agentReach.leads);
+  const stored = await storeDiscoveredLeads(agentReach.leads, supabaseConfigured, errors);
 
-  await storeAuditEventLocally({
-    eventType: errors.length > 0 && stored.length === 0 ? "lead_discovery_failed" : "lead_discovery_completed",
-    payload: {
-      mode: "live",
-      query,
-      discovered: stored.length,
-      agentReachEnriched: agentReach.enrichedCount,
-      apolloCalls: decisionMakerEnrichment.apolloCalls,
-      errors,
-      sources: [...new Set(stored.map((lead) => lead.source))],
-      triggerCategories: [...new Set(stored.map((lead) => lead.triggerCategory).filter(Boolean))],
-    },
-  });
+  try {
+    await storeAuditEventLocally({
+      eventType: errors.length > 0 && stored.length === 0 ? "lead_discovery_failed" : "lead_discovery_completed",
+      payload: {
+        mode: "live",
+        query,
+        discovered: stored.length,
+        agentReachEnriched: agentReach.enrichedCount,
+        apolloCalls: decisionMakerEnrichment.apolloCalls,
+        errors,
+        sources: [...new Set(stored.map((lead) => lead.source))],
+        triggerCategories: [...new Set(stored.map((lead) => lead.triggerCategory).filter(Boolean))],
+      },
+    });
+  } catch (error) {
+    if (!supabaseConfigured) errors.push(`Local lead discovery audit store: ${error instanceof Error ? error.message : String(error)}`);
+  }
 
   return {
     mode: "live",
@@ -197,6 +202,25 @@ async function persistDiscoveredLeads(leads: Omit<DiscoveredLead, "id" | "create
     outreach_angle: lead.outreachAngle,
   })));
   return error ? `Supabase discovered_leads insert: ${error.message}` : null;
+}
+
+async function storeDiscoveredLeads(
+  leads: Omit<DiscoveredLead, "id" | "createdAt">[],
+  supabaseConfigured: boolean,
+  errors: string[],
+): Promise<DiscoveredLead[]> {
+  if (leads.length === 0) return [];
+  try {
+    return await storeDiscoveredLeadsLocally(leads);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    if (!supabaseConfigured) errors.push(`Local discovered_leads store: ${detail}`);
+    return leads.map((lead) => ({
+      ...lead,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    }));
+  }
 }
 
 async function scrapeRegulatoryEnforcement(): Promise<{ leads: ScrapedLead[]; errors: string[] }> {

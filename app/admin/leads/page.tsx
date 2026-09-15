@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { listAdminLeads } from "@/lib/seo/leads";
+import { listAdminDiscoveredLeads, listAdminLeads } from "@/lib/seo/leads";
 import { displayFramework } from "@/lib/seo/config";
-import { listDiscoveredLeads, type LeadTriggerCategory } from "@/lib/seo/local-store";
+import { type LeadTriggerCategory } from "@/lib/seo/local-store";
 
 export const metadata: Metadata = {
   title: "Lead Inbox",
@@ -20,7 +20,7 @@ const triggerLabels: Record<LeadTriggerCategory, string> = {
 
 export default async function AdminLeadsPage() {
   const leads = await listAdminLeads();
-  const discoveredLeads = await listDiscoveredLeads(80);
+  const discoveredLeads = await listAdminDiscoveredLeads(80);
   const fined = discoveredLeads.filter((lead) => lead.triggerCategory === "enforcement_fine").length;
   const newCompanies = discoveredLeads.filter((lead) => lead.triggerCategory === "new_company").length;
   const buyersFound = discoveredLeads.filter((lead) => Boolean(lead.decisionMakerName || lead.contactEmail)).length;

@@ -10,10 +10,21 @@ test("direct lead discovery requires an authenticated admin or Render cron", () 
   const route = read("app/api/leads/discover/route.ts");
   assert.match(route, /requireAuthorityApi\(request,\s*\{\s*allowCron:\s*true\s*\}\)/);
   assert.match(route, /if \(!auth\.ok\) return auth\.response/);
+  assert.match(route, /LEAD_AUTOMATION_ENABLED/);
+  assert.match(route, /status:\s*"disabled"/);
+  assert.match(route, /result:\s*null/);
   assert.doesNotMatch(route, /x-kodex-control-secret/);
   assert.doesNotMatch(route, /AUTOPILOT_CONTROL_SECRET/);
   assert.match(route, /createLeadWorkPackages/);
   assert.match(route, /discoverEuDpaEnforcementLeads/);
+});
+
+test("admin discovery UI surfaces disabled autonomy instead of going blank", () => {
+  const command = read("app/seo-command-center.tsx");
+  assert.match(command, /body\.status === "disabled"/);
+  assert.match(command, /Autonomous discovery is disabled in this environment/);
+  assert.match(command, /body\.reason/);
+  assert.match(command, /Lead discovery returned no result payload/);
 });
 
 test("every admin surface is private and fails closed", () => {
@@ -148,10 +159,20 @@ test("scheduled lead intelligence owns autonomous lead discovery and packaging",
   assert.match(leadScript, /discoverEuDpaEnforcementLeads/);
   assert.match(leadScript, /createLeadWorkPackages/);
   assert.match(leadScript, /LEAD_AUTOMATION_ENABLED/);
+  assert.match(leadScript, /leadRunStatus/);
+  assert.match(leadScript, /process\.exitCode = 1/);
   assert.doesNotMatch(authorityScript, /discoverKodexLeads/);
   assert.match(authorityScript, /AUTOPILOT_SCHEDULE_ENABLED/);
   assert.match(authorityScript, /status\.databaseConfigured/);
   assert.match(authorityScript, /status\.mode === "off"/);
+});
+
+test("lead run status separates source warnings from persistence failures", () => {
+  const status = read("lib/seo/lead-run-status.ts");
+  assert.match(status, /completed-with-errors/);
+  assert.match(status, /completed-with-warnings/);
+  assert.match(status, /Supabase|supabase/);
+  assert.match(status, /row level security/);
 });
 
 test("persistent monitoring worker uses the shared autonomy gate", () => {
@@ -204,6 +225,18 @@ test("each environment has its own dedicated, staggered lead cron", () => {
     assert.match(block, new RegExp(`value:\\s*${enabled}`));
     // Enrichment budgets reach the job through its environment's integrations group.
     assert.match(block, new RegExp(`kodex-leads-${environment}-integrations`));
+  }
+});
+
+test("production web services keep lead discovery disabled by default", () => {
+  for (const file of ["render.yaml", "render.production.yaml"]) {
+    const render = read(file);
+    const productionWeb = render
+      .split(/\n(?=\s*- type: web)/g)
+      .find((candidate) => /name:\s*kodex-leads-production/.test(candidate));
+    assert.ok(productionWeb, `Expected production web service in ${file}`);
+    assert.match(productionWeb, /LEAD_AUTOMATION_ENABLED/);
+    assert.match(productionWeb, /value:\s*"false"/);
   }
 });
 
@@ -267,4 +300,18 @@ test("cross-run discovered leads are idempotent locally and in Supabase", () => 
   assert.match(migration, /unique \(lead_key\)/);
   assert.match(migration, /kodex_upsert_discovered_lead/);
   assert.match(migration, /before insert on public\.discovered_leads/);
+});
+
+test("admin lead inbox reads discovered leads from Supabase with local fallback rules", () => {
+  const page = read("app/admin/leads/page.tsx");
+  const leads = read("lib/seo/leads.ts");
+  assert.match(page, /listAdminDiscoveredLeads/);
+  assert.doesNotMatch(page, /listDiscoveredLeads/);
+  assert.match(leads, /from\("discovered_leads"\)/);
+  assert.match(leads, /listLocalDiscoveredLeads/);
+  assert.match(leads, /local-test/);
+  assert.match(leads, /perplexity/);
+  assert.match(leads, /arbeitnow_jobs/);
+  assert.match(leads, /leadTriggerCategory/);
+  assert.match(leads, /website:\s*stringValue\(row\.website\) \|\| ""/);
 });
